@@ -2,8 +2,12 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - NPC
+  - CropTile
+  - Interactable
+  - Bed
   layers:
   - Default
   - TransparentFX
@@ -11,11 +15,11 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Interactable
+  - Player
+  - NPC
+  - CloudBoundary
   - 
   - 
   - 
@@ -41,3 +45,20 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Ground
+    uniqueID: 2694674893
+    locked: 0
+  - name: GroundDecor
+    uniqueID: 3394493735
+    locked: 0
+  - name: Objects
+    uniqueID: 3126943941
+    locked: 0
+  - name: Characters
+    uniqueID: 746672965
+    locked: 0
+  - name: UI
+    uniqueID: 2172918867
+    locked: 0
+  m_RenderingLayers:
+  - Default
