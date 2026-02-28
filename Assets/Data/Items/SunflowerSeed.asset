@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 126d858df4203674db4e817b9a229f2c, type: 3}
+  m_Name: SunflowerSeed
+  m_EditorClassIdentifier: 
+  itemName: Sunflower Seed
+  description: 
+  icon: {fileID: 2629959658491428582, guid: 5586197d4a00d2e4dabb4f2a14812263, type: 3}
+  category: 1
+  maxStack: 99
+  buyPrice: 50
+  sellPrice: 15
+  isPlaceable: 0

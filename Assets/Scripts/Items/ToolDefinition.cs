@@ -1,7 +1,7 @@
 using UnityEngine;
 using Sirenix.OdinInspector;
 
-[CreateAssetMenu(fileName = "NewTool", menuName = "Cloudstead/Items/Tool Definition")]
+[CreateAssetMenu(fileName = "NewTool", menuName = "Cloudstead/Tools/Tool Definition")]
 public class ToolDefinition : ItemDefinition
 {
     [FoldoutGroup("Tool Settings")]
@@ -18,10 +18,4 @@ public class ToolDefinition : ItemDefinition
     [FoldoutGroup("Tool Settings")]
     [Min(1)]
     public int tier = 1;
-
-    private void Reset()
-    {
-        category = ItemCategory.Tool;
-        maxStack = 1;
-    }
 }

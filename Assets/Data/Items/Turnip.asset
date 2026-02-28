@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 126d858df4203674db4e817b9a229f2c, type: 3}
+  m_Name: Turnip
+  m_EditorClassIdentifier: 
+  itemName: Turnip
+  description: A freshly harvested turnip.
+  icon: {fileID: -7982100037574052958, guid: 47d6576bfeca7f349bbf2b9e722fcffb, type: 3}
+  category: 0
+  maxStack: 99
+  buyPrice: 0
+  sellPrice: 40
+  isPlaceable: 0

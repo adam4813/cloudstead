@@ -11,7 +11,7 @@ public struct SeasonChangedEvent { public Season NewSeason; }
 public struct StaminaChangedEvent { public float Current; public float Max; }
 public struct InventoryChangedEvent { }
 public struct ItemPickedUpEvent { public ItemDefinition Item; public int Count; }
-public struct CropHarvestedEvent { public CropDefinition Crop; public int Yield; }
+public struct CropHarvestedEvent { public CropDefinition Crop; }
 public struct CropPlantedEvent { public CropDefinition Crop; public Vector3Int Position; }
 public struct CropWateredEvent { public Vector3Int Position; }
 public struct CropGrownEvent { public CropDefinition Crop; public CropStage NewStage; }

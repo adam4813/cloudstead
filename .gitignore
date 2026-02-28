@@ -73,4 +73,8 @@ crashlytics-build.properties
 .idea
 node_modules/
 __pycache__/
-Tools/node_modules/
+/Tools/node_modules/
+
+/Tools/
+GYM_SETUP_GUIDE.md
+
