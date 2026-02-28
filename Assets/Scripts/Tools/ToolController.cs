@@ -3,14 +3,11 @@ using UnityEngine.InputSystem;
 
 public class ToolController : MonoBehaviour
 {
-    [SerializeField] private ToolDefinition[] debugTools;  // Hoe, WateringCan, Scythe
-    [SerializeField] private CropDefinition[] debugCrops;  // Turnip, Potato
+    [SerializeField] private QuickbarUI quickbarUI;
+    [SerializeField] private CropDefinition[] cropRegistry;
 
     private PlayerController playerController;
-    private int activeSlotIndex;
     private bool isUsingTool;
-
-    private int ToolCount => debugTools != null ? debugTools.Length : 0;
 
     private void Awake()
     {
@@ -54,26 +51,33 @@ public class ToolController : MonoBehaviour
 
     private void SelectSlot(int index)
     {
-        activeSlotIndex = index;
-        bool isCrop = index >= ToolCount;
-        string itemName = isCrop ? GetActiveCrop()?.cropName : GetActiveTool()?.itemName;
-        Debug.Log($"[ToolController] Slot {index + 1}: {itemName ?? "empty"}");
+        if (quickbarUI != null)
+            quickbarUI.SelectSlot(index);
     }
 
     private void UseActiveItem(Vector3Int targetTile)
     {
-        if (activeSlotIndex >= ToolCount)
+        if (quickbarUI == null) return;
+        var slotData = quickbarUI.GetActiveSlotData();
+        if (slotData == null || slotData.IsEmpty()) return;
+
+        var item = slotData.item;
+
+        if (item is ToolDefinition tool)
         {
-            // Crop planting mode
-            var crop = GetActiveCrop();
-            if (crop != null)
-                FarmingManager.Instance.PlantSeed(targetTile, crop, 0);
+            UseTool(tool, targetTile);
             return;
         }
 
-        var tool = GetActiveTool();
-        if (tool == null) return;
+        if (item.category == ItemCategory.Seed)
+        {
+            TryPlant(item, targetTile);
+            return;
+        }
+    }
 
+    private void UseTool(ToolDefinition tool, Vector3Int targetTile)
+    {
         switch (tool.toolType)
         {
             case ToolType.Hoe:
@@ -86,6 +90,15 @@ public class ToolController : MonoBehaviour
                 TryHarvest(targetTile);
                 break;
         }
+    }
+
+    private void TryPlant(ItemDefinition seedItem, Vector3Int targetTile)
+    {
+        var crop = FindCropForSeed(seedItem);
+        if (crop == null) return;
+
+        if (FarmingManager.Instance.PlantSeed(targetTile, crop, 0))
+            InventoryManager.Instance.RemoveItem(seedItem, 1);
     }
 
     private void TryHarvest(Vector3Int targetTile)
@@ -108,18 +121,14 @@ public class ToolController : MonoBehaviour
         }
     }
 
-    private ToolDefinition GetActiveTool()
+    private CropDefinition FindCropForSeed(ItemDefinition seed)
     {
-        if (debugTools == null || activeSlotIndex < 0 || activeSlotIndex >= debugTools.Length)
-            return null;
-        return debugTools[activeSlotIndex];
-    }
-
-    private CropDefinition GetActiveCrop()
-    {
-        int cropIndex = activeSlotIndex - ToolCount;
-        if (debugCrops == null || cropIndex < 0 || cropIndex >= debugCrops.Length)
-            return null;
-        return debugCrops[cropIndex];
+        if (cropRegistry == null) return null;
+        foreach (var crop in cropRegistry)
+        {
+            if (crop != null && crop.seedItem == seed)
+                return crop;
+        }
+        return null;
     }
 }

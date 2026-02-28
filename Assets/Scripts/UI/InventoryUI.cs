@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotsContainer;
     [SerializeField] private GameObject panel;
+    [SerializeField] private Button closeButton;
 
     private SlotUI[] slotUIs;
     private bool isOpen;
@@ -14,6 +16,8 @@ public class InventoryUI : MonoBehaviour
         InitializeSlots();
         Close();
         EventBus.Subscribe<InventoryChangedEvent>(OnInventoryChanged);
+        if (closeButton != null)
+            closeButton.onClick.AddListener(Close);
     }
 
     private void OnDestroy()
@@ -27,6 +31,14 @@ public class InventoryUI : MonoBehaviour
 
         int count = InventoryManager.Instance.SlotCount;
         slotUIs = new SlotUI[count];
+
+        // Clear existing slots if any
+        if (slotsContainer != null)        {
+            foreach (Transform child in slotsContainer)
+            {
+                Destroy(child.gameObject);
+            }
+        }
 
         for (int i = 0; i < count; i++)
         {
