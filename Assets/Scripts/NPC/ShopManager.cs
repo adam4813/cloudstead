@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class ShopManager : Singleton<ShopManager>
 {
+    [SerializeField] private ShopUI shopUI;
+
     private NPCDefinition currentMerchant;
 
     public NPCDefinition CurrentMerchant => currentMerchant;
@@ -13,6 +15,7 @@ public class ShopManager : Singleton<ShopManager>
         currentMerchant = merchant;
         GameManager.Instance?.SetState(GameState.Menu);
         Debug.Log($"[ShopManager] Opened shop: {merchant.npcName}");
+        if (shopUI != null) shopUI.Open(merchant);
     }
 
     public bool BuyItem(int shopIndex)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 
@@ -34,6 +35,9 @@ public class DialogueUI : MonoBehaviour
     private void Update()
     {
         if (!DialogueManager.Instance?.IsActive ?? true) return;
+
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            OnAdvance();
 
         if (isTyping)
         {
