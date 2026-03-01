@@ -3,6 +3,7 @@ using UnityEngine;
 public class Bed : MonoBehaviour, IInteractable
 {
     [SerializeField] private HUDController hudController;
+    [SerializeField] private AudioClip sleepJingle;
 
     public bool CanInteract(uint playerId)
     {
@@ -17,6 +18,9 @@ public class Bed : MonoBehaviour, IInteractable
     public void Interact(uint playerId)
     {
         if (TimeManager.Instance == null) return;
+
+        if (sleepJingle != null)
+            AudioSource.PlayClipAtPoint(sleepJingle, transform.position);
 
         Debug.Log("[Bed] Zzz... Goodnight!");
         TimeManager.Instance.Sleep();

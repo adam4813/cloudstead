@@ -4,6 +4,7 @@ public class StaminaController : MonoBehaviour
 {
     [SerializeField] private float maxStamina = 100f;
     [SerializeField] private float lowStaminaThreshold = 20f;
+    [SerializeField] private AudioClip yawnSound;
 
     private float currentStamina;
     private PlayerController playerController;
@@ -43,6 +44,8 @@ public class StaminaController : MonoBehaviour
         {
             yawnTimer = 30f;
             Debug.Log("[Stamina] *yawn* — Time to rest...");
+            if (yawnSound != null)
+                AudioSource.PlayClipAtPoint(yawnSound, transform.position);
         }
     }
 

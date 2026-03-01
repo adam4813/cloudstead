@@ -7,6 +7,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Transform slotsContainer;
     [SerializeField] private GameObject panel;
     [SerializeField] private Button closeButton;
+    [SerializeField] private AudioClip openSound;
+    [SerializeField] private AudioClip closeSound;
 
     private SlotUI[] slotUIs;
     private bool isOpen;
@@ -75,6 +77,8 @@ public class InventoryUI : MonoBehaviour
         isOpen = true;
         if (panel != null) panel.SetActive(true);
         RefreshSlots();
+        if (openSound != null && Camera.main != null)
+            AudioSource.PlayClipAtPoint(openSound, Camera.main.transform.position);
         GameManager.Instance?.SetState(GameState.Menu);
     }
 
@@ -82,6 +86,8 @@ public class InventoryUI : MonoBehaviour
     {
         isOpen = false;
         if (panel != null) panel.SetActive(false);
+        if (closeSound != null && Camera.main != null)
+            AudioSource.PlayClipAtPoint(closeSound, Camera.main.transform.position);
         GameManager.Instance?.SetState(GameState.Playing);
     }
 

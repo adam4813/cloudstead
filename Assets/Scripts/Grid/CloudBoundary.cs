@@ -5,11 +5,18 @@ public class CloudBoundary : MonoBehaviour
 {
     [SerializeField] private CloudGenerator cloudGenerator;
     [SerializeField] private float pushBackForce = 8f;
+    [SerializeField] private AudioClip edgeBumpSound;
+
+    private AudioSource audioSource;
+    private float bumpCooldown;
 
     private void Start()
     {
         if (cloudGenerator == null)
             cloudGenerator = GetComponent<CloudGenerator>();
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         GenerateBoundary();
     }
@@ -96,5 +103,13 @@ public class CloudBoundary : MonoBehaviour
         var playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
         if (playerRb != null)
             playerRb.AddForce(pushDir * pushBackForce);
+
+        // Throttled edge bump sound
+        bumpCooldown -= Time.deltaTime;
+        if (edgeBumpSound != null && bumpCooldown <= 0f)
+        {
+            audioSource.PlayOneShot(edgeBumpSound);
+            bumpCooldown = 0.5f;
+        }
     }
 }

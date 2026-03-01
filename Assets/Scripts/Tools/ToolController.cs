@@ -5,14 +5,21 @@ public class ToolController : MonoBehaviour
 {
     [SerializeField] private QuickbarUI quickbarUI;
     [SerializeField] private CropDefinition[] cropRegistry;
+    [SerializeField] private AudioClip tillSound;
+    [SerializeField] private AudioClip waterSound;
+    [SerializeField] private AudioClip harvestSound;
+    [SerializeField] private AudioClip plantSound;
 
     private PlayerController playerController;
     private TileCursor tileCursor;
+    private AudioSource audioSource;
     private bool isUsingTool;
 
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     private void Start()
@@ -105,13 +112,16 @@ public class ToolController : MonoBehaviour
         {
             case ToolType.Hoe:
                 success = FarmingManager.Instance.TillSoil(targetTile, 0);
+                if (success && tillSound != null) audioSource.PlayOneShot(tillSound);
                 break;
             case ToolType.WateringCan:
                 success = FarmingManager.Instance.WaterPlot(targetTile, 0);
+                if (success && waterSound != null) audioSource.PlayOneShot(waterSound);
                 break;
             case ToolType.Scythe:
                 TryHarvest(targetTile);
                 success = true;
+                if (harvestSound != null) audioSource.PlayOneShot(harvestSound);
                 break;
         }
 
@@ -129,7 +139,10 @@ public class ToolController : MonoBehaviour
         if (crop == null) return;
 
         if (FarmingManager.Instance.PlantSeed(targetTile, crop, 0))
+        {
             InventoryManager.Instance.RemoveItem(seedItem, 1);
+            if (plantSound != null) audioSource.PlayOneShot(plantSound);
+        }
     }
 
     private void TryHarvest(Vector3Int targetTile)
