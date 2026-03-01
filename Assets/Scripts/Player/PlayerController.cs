@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 4f;
+    [Tooltip("Y offset from transform center to sample the player's tile position (negative = lower)")]
+    [SerializeField] private float feetOffsetY = -0.25f;
     private Rigidbody2D rb;
     private Vector2 moveInput;
 
@@ -58,7 +60,29 @@ public class PlayerController : MonoBehaviour
     public Vector3Int GetTargetTile()
     {
         Vector2 facingOffset = GetFacingVector();
-        Vector3 targetWorld = transform.position + (Vector3)facingOffset;
+        Vector3 targetWorld = GetFeetPosition() + (Vector3)facingOffset;
         return targetWorld.WorldToTile();
+    }
+
+    public Vector3Int GetFeetTile()
+    {
+        return GetFeetPosition().WorldToTile();
+    }
+
+    public Vector3 GetFeetPosition()
+    {
+        return transform.position + new Vector3(0f, feetOffsetY, 0f);
+    }
+
+    public void FaceToward(Vector3Int targetTile)
+    {
+        Vector3Int playerTile = GetFeetTile();
+        Vector2 delta = new Vector2(targetTile.x - playerTile.x, targetTile.y - playerTile.y);
+        if (delta.sqrMagnitude < 0.01f) return;
+
+        if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
+            FacingDirection = delta.x > 0 ? Direction.Right : Direction.Left;
+        else
+            FacingDirection = delta.y > 0 ? Direction.Up : Direction.Down;
     }
 }

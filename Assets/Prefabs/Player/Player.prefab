@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 8565023124578752385}
   - component: {fileID: 607124346451061711}
   - component: {fileID: 3706692122621475951}
+  - component: {fileID: 5536184563866091617}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -102,7 +103,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.25}
+  m_Offset: {x: 0, y: -0.5}
   m_Size: {x: 0.8, y: 0.5}
   m_Direction: 0
 --- !u!212 &2468445889682572177
@@ -173,6 +174,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 4
+  feetOffsetY: -0.5
 --- !u!114 &6048322752237217176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -455,6 +457,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxStamina: 100
   lowStaminaThreshold: 20
+--- !u!114 &5536184563866091617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4901904424283389085}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e86f306f6a93cbc4ca8d62721e43d078, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileColor: {r: 0, g: 1, b: 1, a: 0.35}
 --- !u!1 &5735815932759391133
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,3 +516,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   validColor: {r: 1, g: 1, b: 1, a: 0.4}
   invalidColor: {r: 1, g: 0.3, b: 0.3, a: 0.3}
+  debugLogging: 0

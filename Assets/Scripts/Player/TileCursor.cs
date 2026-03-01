@@ -1,16 +1,22 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TileCursor : MonoBehaviour
 {
     [SerializeField] private Color validColor = new Color(1f, 1f, 1f, 0.4f);
     [SerializeField] private Color invalidColor = new Color(1f, 0.3f, 0.3f, 0.3f);
+    [SerializeField] private bool debugLogging = false;
 
     private SpriteRenderer spriteRenderer;
     private PlayerController playerController;
 
+    // The tile currently highlighted (mouse if valid, else facing)
+    public Vector3Int HighlightedTile { get; private set; }
+    // True when the cursor is tracking the mouse tile
+    public bool IsMouseTargeting { get; private set; }
+
     private void Start()
     {
-        // Create a child sprite for the cursor highlight
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null)
             spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
@@ -32,37 +38,67 @@ public class TileCursor : MonoBehaviour
         }
 
         spriteRenderer.enabled = true;
-        Vector3Int targetTile = playerController.GetTargetTile();
-        transform.position = new Vector3(targetTile.x + 0.5f, targetTile.y + 0.5f, 0f);
 
-        bool isValid = TileManager.Instance != null
-            && TileManager.Instance.IsWalkable(targetTile)
-            && IsInteriorTile(targetTile);
+        // Try to target the tile under the mouse cursor
+        Vector3Int mouseTile = GetMouseTile();
+        bool mouseWalkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(mouseTile);
+        bool mouseInRange = IsWithinRange(mouseTile);
 
-        spriteRenderer.color = isValid ? validColor : invalidColor;
+        if (debugLogging)
+        {
+            Vector3Int playerFeetTile = playerController.GetFeetTile();
+            Debug.Log($"[TileCursor] mouseTile={mouseTile} walkable={mouseWalkable} inRange={mouseInRange} playerFeetTile={playerFeetTile} feetPos={playerController.GetFeetPosition()}");
+        }
+
+        if (mouseWalkable && mouseInRange)
+        {
+            HighlightedTile = mouseTile;
+            IsMouseTargeting = true;
+        }
+        else
+        {
+            HighlightedTile = playerController.GetTargetTile();
+            IsMouseTargeting = false;
+        }
+
+        transform.position = new Vector3(HighlightedTile.x + 0.5f, HighlightedTile.y + 0.5f, 0f);
+        spriteRenderer.color = IsValidTargetTile(HighlightedTile) ? validColor : invalidColor;
     }
 
-    private bool IsInteriorTile(Vector3Int pos)
+    private Vector3Int GetMouseTile()
     {
-        var gen = FindFirstObjectByType<CloudGenerator>();
-        if (gen == null) return true;
+        Camera cam = Camera.main;
+        if (cam == null) return Vector3Int.zero;
 
-        // Check all 4 cardinal neighbors are also walkable (not an edge)
-        for (int dx = -1; dx <= 1; dx++)
-        {
-            for (int dy = -1; dy <= 1; dy++)
-            {
-                if (dx == 0 && dy == 0) continue;
-                if (!gen.IsWalkable(new Vector3Int(pos.x + dx, pos.y + dy, 0)))
-                    return false;
-            }
-        }
-        return true;
+        // Use New Input System mouse position
+        Vector2 screenPos = Mouse.current != null
+            ? Mouse.current.position.ReadValue()
+            : Input.mousePosition;
+
+        // For orthographic 2D: pass z = -camera.transform.position.z so world z = 0
+        Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, -cam.transform.position.z);
+        Vector3 worldPos = cam.ScreenToWorldPoint(screenPoint);
+        worldPos.z = 0f;
+
+        return worldPos.WorldToTile();
+    }
+
+    private bool IsWithinRange(Vector3Int tile)
+    {
+        Vector3Int playerTile = playerController.GetFeetTile();
+        int dx = Mathf.Abs(tile.x - playerTile.x);
+        int dy = Mathf.Abs(tile.y - playerTile.y);
+        int range = GameManager.Instance != null ? GameManager.Instance.PlayerInteractionRange : 1;
+        return dx <= range && dy <= range;
+    }
+
+    private bool IsValidTargetTile(Vector3Int pos)
+    {
+        return TileManager.Instance != null && TileManager.Instance.IsWalkable(pos);
     }
 
     private Sprite CreateCursorSprite()
     {
-        // Create a 32x32 border-only texture
         int size = 32;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Point;

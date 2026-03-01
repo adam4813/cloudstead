@@ -21,13 +21,13 @@ public class StaminaController : MonoBehaviour
 
     private void Start()
     {
-        EventBus.Subscribe<DayStartedEvent>(OnDayStarted);
+        EventBus.Subscribe<PlayerSleptEvent>(OnPlayerSlept);
         PublishStaminaChanged();
     }
 
     private void OnDestroy()
     {
-        EventBus.Unsubscribe<DayStartedEvent>(OnDayStarted);
+        EventBus.Unsubscribe<PlayerSleptEvent>(OnPlayerSlept);
     }
 
     private void Update()
@@ -79,7 +79,7 @@ public class StaminaController : MonoBehaviour
             playerController.MoveSpeed = playerController.BaseSpeed;
     }
 
-    private void OnDayStarted(DayStartedEvent evt)
+    private void OnPlayerSlept(PlayerSleptEvent evt)
     {
         FullRestore();
     }

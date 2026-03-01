@@ -7,6 +7,7 @@ public class ToolController : MonoBehaviour
     [SerializeField] private CropDefinition[] cropRegistry;
 
     private PlayerController playerController;
+    private TileCursor tileCursor;
     private bool isUsingTool;
 
     private void Awake()
@@ -14,13 +15,34 @@ public class ToolController : MonoBehaviour
         playerController = GetComponent<PlayerController>();
     }
 
+    private void Start()
+    {
+        tileCursor = FindFirstObjectByType<TileCursor>();
+    }
+
+    // Called by E key (InputAction) — always uses the highlighted tile
     public void OnUseTool(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
         if (GameManager.Instance == null || !GameManager.Instance.IsPlaying) return;
         if (isUsingTool) return;
 
-        Vector3Int targetTile = playerController.GetTargetTile();
+        Vector3Int targetTile = tileCursor != null
+            ? tileCursor.HighlightedTile
+            : playerController.GetTargetTile();
+        UseActiveItem(targetTile);
+    }
+
+    // Called by left mouse click (InputAction) — rotates player to face target tile then uses it
+    public void OnMouseUseTool(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (GameManager.Instance == null || !GameManager.Instance.IsPlaying) return;
+        if (isUsingTool) return;
+        if (tileCursor == null || !tileCursor.IsMouseTargeting) return;
+
+        Vector3Int targetTile = tileCursor.HighlightedTile;
+        playerController.FaceToward(targetTile);
         UseActiveItem(targetTile);
     }
 

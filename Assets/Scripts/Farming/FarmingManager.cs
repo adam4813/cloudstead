@@ -107,9 +107,8 @@ public class FarmingManager : Singleton<FarmingManager>
             var plot = kvp.Value;
             var pos = kvp.Key;
 
-            if (plot.PlantedCrop == null) continue;
-
-            if (plot.IsWatered)
+            // Grow planted, watered crops
+            if (plot.PlantedCrop != null && plot.IsWatered)
             {
                 plot.Grow();
                 if (plot.CurrentStage != CropStage.Mature)
@@ -122,9 +121,12 @@ public class FarmingManager : Singleton<FarmingManager>
                 }
             }
 
-            // Reset watered state for next day
-            plot.ResetWatered();
-            TileManager.Instance.SetTile(pos, tilledSoilTile, TileManager.Instance.SoilTilemap);
+            // All watered plots (planted or empty) dry out overnight
+            if (plot.IsWatered)
+            {
+                plot.ResetWatered();
+                TileManager.Instance.SetTile(pos, tilledSoilTile, TileManager.Instance.SoilTilemap);
+            }
         }
     }
 

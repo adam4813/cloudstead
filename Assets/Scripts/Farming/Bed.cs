@@ -20,6 +20,7 @@ public class Bed : MonoBehaviour, IInteractable
 
         Debug.Log("[Bed] Zzz... Goodnight!");
         TimeManager.Instance.Sleep();
+        EventBus.Publish(new PlayerSleptEvent());
 
         // Update HUD clock after sleep
         if (hudController != null)

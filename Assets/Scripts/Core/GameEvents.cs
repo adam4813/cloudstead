@@ -26,4 +26,5 @@ public struct ItemSoldEvent { public ItemDefinition Item; public int Price; }
 public struct ItemCraftedEvent { public RecipeDefinition Recipe; }
 public struct SceneTransitionStartedEvent { public string TargetScene; }
 public struct SceneTransitionCompletedEvent { public string Scene; }
+public struct PlayerSleptEvent { }
 public struct AirshipLandedEvent { public string CloudName; }
