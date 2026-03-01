@@ -78,17 +78,26 @@ public class ToolController : MonoBehaviour
 
     private void UseTool(ToolDefinition tool, Vector3Int targetTile)
     {
+        bool success = false;
         switch (tool.toolType)
         {
             case ToolType.Hoe:
-                FarmingManager.Instance.TillSoil(targetTile, 0);
+                success = FarmingManager.Instance.TillSoil(targetTile, 0);
                 break;
             case ToolType.WateringCan:
-                FarmingManager.Instance.WaterPlot(targetTile, 0);
+                success = FarmingManager.Instance.WaterPlot(targetTile, 0);
                 break;
             case ToolType.Scythe:
                 TryHarvest(targetTile);
+                success = true;
                 break;
+        }
+
+        if (success)
+        {
+            var stamina = GetComponent<StaminaController>();
+            if (stamina != null)
+                stamina.UseStamina(tool.staminaCost);
         }
     }
 

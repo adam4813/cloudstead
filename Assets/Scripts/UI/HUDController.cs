@@ -11,6 +11,8 @@ public class HUDController : MonoBehaviour
     {
         EventBus.Subscribe<StaminaChangedEvent>(OnStaminaChanged);
         EventBus.Subscribe<GoldChangedEvent>(OnGoldChanged);
+        EventBus.Subscribe<DayStartedEvent>(OnDateStarted
+        );
 
         // Set defaults
         if (clockText != null) clockText.text = "Day 1 — Spring";
@@ -18,8 +20,10 @@ public class HUDController : MonoBehaviour
         if (staminaBarFill != null) staminaBarFill.fillAmount = 1f;
     }
 
+
     private void OnDestroy()
     {
+        EventBus.Unsubscribe<DayStartedEvent>(OnDateStarted);
         EventBus.Unsubscribe<StaminaChangedEvent>(OnStaminaChanged);
         EventBus.Unsubscribe<GoldChangedEvent>(OnGoldChanged);
     }
@@ -40,5 +44,10 @@ public class HUDController : MonoBehaviour
     {
         if (currencyText != null)
             currencyText.text = $"{evt.NewAmount}g";
+    }
+
+    private void OnDateStarted(DayStartedEvent evt)
+    {
+        UpdateClock(evt.Day, evt.Season);
     }
 }

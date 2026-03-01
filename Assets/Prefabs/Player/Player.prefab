@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 3483850165187858691}
   - component: {fileID: 8565023124578752385}
   - component: {fileID: 607124346451061711}
+  - component: {fileID: 3706692122621475951}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -262,7 +263,19 @@ MonoBehaviour:
     m_ActionId: a1c20001-0000-4000-8000-000000000003
     m_ActionName: 'Player/UseTool[/Mouse/leftButton]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: InventoryUI, Game
+        m_MethodName: Toggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: a1c20001-0000-4000-8000-000000000004
     m_ActionName: 'Player/OpenInventory[/Keyboard/tab,/Keyboard/i]'
   - m_PersistentCalls:
@@ -428,6 +441,20 @@ MonoBehaviour:
   idleLeft: {fileID: -2311659948842064771, guid: b6a76e98ba4d13c48b145ec5589654b2, type: 3}
   idleRight: {fileID: -2311659948842064771, guid: b6a76e98ba4d13c48b145ec5589654b2, type: 3}
   frameRate: 8
+--- !u!114 &3706692122621475951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4901904424283389085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a9274e9f52e42c459433f8ba4a285a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxStamina: 100
+  lowStaminaThreshold: 20
 --- !u!1 &5735815932759391133
 GameObject:
   m_ObjectHideFlags: 0
