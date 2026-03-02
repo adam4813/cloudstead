@@ -85,4 +85,25 @@ public class PlayerController : MonoBehaviour
         else
             FacingDirection = delta.y > 0 ? Direction.Up : Direction.Down;
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        TryPlayBoundaryBump(collision);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!IsMoving) return;
+        TryPlayBoundaryBump(collision);
+    }
+
+    private void TryPlayBoundaryBump(Collision2D collision)
+    {
+        var boundary = collision.collider.GetComponentInParent<CloudBoundary>();
+        if (boundary != null)
+        {
+            boundary.PlayBumpSound();
+            boundary.PushBack(rb);
+        }
+    }
 }

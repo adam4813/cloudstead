@@ -3,6 +3,7 @@ using UnityEngine;
 public class InventoryManager : Singleton<InventoryManager>
 {
     [SerializeField] private int slotCount = 24;
+    [SerializeField] private AudioClip itemPickupSound;
 
     private InventorySlot[] slots;
 
@@ -42,6 +43,8 @@ public class InventoryManager : Singleton<InventoryManager>
         {
             EventBus.Publish(new InventoryChangedEvent());
             EventBus.Publish(new ItemPickedUpEvent { Item = item, Count = count - remaining });
+            if (itemPickupSound != null && Camera.main != null)
+                AudioSource.PlayClipAtPoint(itemPickupSound, Camera.main.transform.position);
         }
 
         return remaining == 0;

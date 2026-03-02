@@ -1,11 +1,12 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CompositeCollider2D))]
 public class CloudBoundary : MonoBehaviour
 {
     [SerializeField] private CloudGenerator cloudGenerator;
-    [SerializeField] private float pushBackForce = 8f;
     [SerializeField] private AudioClip edgeBumpSound;
+    [SerializeField] private float pushBackForce = 8f;
 
     private AudioSource audioSource;
     private float bumpCooldown;
@@ -15,8 +16,17 @@ public class CloudBoundary : MonoBehaviour
         if (cloudGenerator == null)
             cloudGenerator = GetComponent<CloudGenerator>();
 
+        // Configure Rigidbody2D as static so composite works properly
+        var rb = GetComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Static;
+
+        var composite = GetComponent<CompositeCollider2D>();
+        composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
+
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.spatialBlend = 0f;
+        audioSource.playOnAwake = false;
 
         GenerateBoundary();
     }
@@ -92,24 +102,26 @@ public class CloudBoundary : MonoBehaviour
         return false;
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    public void PlayBumpSound()
     {
-        if (!collision.gameObject.CompareTag("Player")) return;
-
-        // Gentle push-back toward cloud center
-        Vector3 center = cloudGenerator.GetCenterWorldPosition();
-        Vector2 pushDir = ((Vector2)center - collision.transform.position.ToVector2()).normalized;
-
-        var playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
-        if (playerRb != null)
-            playerRb.AddForce(pushDir * pushBackForce);
-
-        // Throttled edge bump sound
-        bumpCooldown -= Time.deltaTime;
-        if (edgeBumpSound != null && bumpCooldown <= 0f)
+        if (edgeBumpSound != null && audioSource != null && bumpCooldown <= 0f)
         {
-            audioSource.PlayOneShot(edgeBumpSound);
+            audioSource.PlayOneShot(edgeBumpSound, 0.6f);
             bumpCooldown = 0.5f;
         }
+    }
+
+    public void PushBack(Rigidbody2D playerRb)
+    {
+        if (playerRb == null || cloudGenerator == null) return;
+        Vector2 center = cloudGenerator.GetCenterWorldPosition();
+        Vector2 pushDir = (center - playerRb.position).normalized;
+        playerRb.AddForce(pushDir * pushBackForce);
+    }
+
+    private void Update()
+    {
+        if (bumpCooldown > 0f)
+            bumpCooldown -= Time.deltaTime;
     }
 }

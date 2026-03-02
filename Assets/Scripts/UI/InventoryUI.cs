@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
@@ -70,6 +71,15 @@ public class InventoryUI : MonoBehaviour
     {
         if (isOpen) Close();
         else Open();
+    }
+
+    /// <summary>
+    /// Called by PlayerInput UnityEvent. Only toggles on the performed phase
+    /// to prevent multiple firings per key press.
+    /// </summary>
+    public void OnOpenInventory(InputAction.CallbackContext context)
+    {
+        if (context.performed) Toggle();
     }
 
     public void Open()
