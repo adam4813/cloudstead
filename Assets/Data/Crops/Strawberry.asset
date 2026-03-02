@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc33b6f721a55e0488460ad88466d0f2, type: 3}
-  m_Name: Turnip
+  m_Name: Strawberry
   m_EditorClassIdentifier: 
-  cropName: Turnip
-  description: 
-  icon: {fileID: 21300000, guid: 03f78b27d76224041a5407e1a2aca4c5, type: 3}
-  seedItem: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
-  growthDays: 3
-  growSeasons: 0000000001000000
+  cropName: Strawberry
+  description: Sweet red berries that keep producing all spring.
+  icon: {fileID: 21300000, guid: 3806ebc35cee11d42a6ae4f643e459a4, type: 3}
+  seedItem: {fileID: 11400000, guid: 671fb1805175a474ea6154290a118e95, type: 2}
+  growthDays: 8
+  growSeasons: 00000000
   stageSprites:
-  - {fileID: 21300000, guid: 28463ffabcdd7ee4297312845a34d868, type: 3}
+  - {fileID: 21300000, guid: 7f29345eacbb27c44b2eca7ec74ff458, type: 3}
   - {fileID: 21300000, guid: 22bb59fe636db434e993a0053e8a5d7a, type: 3}
   - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
   - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
-  - item: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
+  - item: {fileID: 11400000, guid: 01e803f7ce1833d4e83642c7a18a0c8d, type: 2}
     minYield: 1
-    maxYield: 1
-  regrowDays: -1
+    maxYield: 3
+  regrowDays: 4

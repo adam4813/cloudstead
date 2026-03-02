@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b5be6033dace1644b5e551df9bcdc9c, type: 3}
+  m_Name: CraftTorch
+  m_EditorClassIdentifier: 
+  recipeName: Craft Torch
+  inputItems:
+  - {fileID: 11400000, guid: 258ef8c3d6e691542bfa632f655e24f9, type: 2}
+  - {fileID: 11400000, guid: fbb75b2f0e4717f4f85a9740143a1cd5, type: 2}
+  inputCounts: 0100000001000000
+  outputItem: {fileID: 11400000, guid: 937bc403efd18584ca9c9fbc3ed0bf64, type: 2}
+  outputCount: 2
+  craftTime: 1
+  description: Wrap coal around wood for a torch.

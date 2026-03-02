@@ -19,7 +19,7 @@ MonoBehaviour:
   farewells: []
   isMerchant: 1
   shopInventory:
-  - {fileID: 11400000, guid: d5c3adfaf6f7bbd48aaa5687ff3f5943, type: 2}
-  - {fileID: 11400000, guid: a7ebf0a3e65e71c4ab06d17a2d412015, type: 2}
-  - {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
+  - {fileID: 11400000, guid: f85b81d69accc28439eb57969e334256, type: 2}
+  - {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
+  - {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
   shopPrices: 140000001e00000032000000

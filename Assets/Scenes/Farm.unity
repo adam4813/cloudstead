@@ -5447,9 +5447,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268bac0c3b8d7d3498627793f1773172, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnipSeed: {fileID: 11400000, guid: d5c3adfaf6f7bbd48aaa5687ff3f5943, type: 2}
-  potatoSeed: {fileID: 11400000, guid: a7ebf0a3e65e71c4ab06d17a2d412015, type: 2}
-  sunflowerSeed: {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
+  turnipSeed: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
+  potatoSeed: {fileID: 11400000, guid: f85b81d69accc28439eb57969e334256, type: 2}
+  sunflowerSeed: {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
   hoe: {fileID: 11400000, guid: 18f86701f2c35254d98d2257b48d1fad, type: 2}
   wateringCan: {fileID: 11400000, guid: 6aa8f006936ec3a45b0d06ca757dfbae, type: 2}
   scythe: {fileID: 11400000, guid: 3827470552a6a444ea0342b14b8e5144, type: 2}
@@ -10778,7 +10778,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allRecipes:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: ca494504fc51d464183853a1ed2ca41d, type: 2}
+  - {fileID: 11400000, guid: 22f68db29ac965947a2a949d97c1a902, type: 2}
+  - {fileID: 11400000, guid: 9b5f97926d4aefd44b6d08be1569e4eb, type: 2}
+  - {fileID: 11400000, guid: 1d6b4ff567b658747968ffa11ee39605, type: 2}
+  - {fileID: 11400000, guid: 0357e7693fcc42743915cfe795c57cc2, type: 2}
+  - {fileID: 11400000, guid: 70c034ca9f7a3e8428acad13258fcadc, type: 2}
+  - {fileID: 11400000, guid: 2141b32ecc72d7943a1e546dd6ccb2ce, type: 2}
 --- !u!1 &1276709552
 GameObject:
   m_ObjectHideFlags: 0
