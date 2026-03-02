@@ -35,6 +35,7 @@ public class AirshipController : MonoBehaviour
     private Vector2 thrustInput;
     private PlayerController boardedPlayer;
     private PlayerInput boardedPlayerInput;
+    private Rigidbody2D boardedPlayerRb;
 
     private void Awake()
     {
@@ -61,11 +62,29 @@ public class AirshipController : MonoBehaviour
     {
         boardedPlayer = player;
         boardedPlayerInput = player.GetComponent<PlayerInput>();
+        boardedPlayerRb = player.GetComponent<Rigidbody2D>();
 
-        // Manually wire Airship map callbacks — no second PlayerInput on the airship
-        boardedPlayerInput.actions["Airship/Thrust"].performed += OnThrust;
-        boardedPlayerInput.actions["Airship/Thrust"].canceled += OnThrustCanceled;
-        boardedPlayerInput.actions["Airship/Land"].performed += OnLand;
+        // Wire Airship map callbacks using explicit map/action lookup with null guards
+        var thrustAction = boardedPlayerInput?.actions.FindActionMap("Airship")?.FindAction("Thrust");
+        var landAction   = boardedPlayerInput?.actions.FindActionMap("Airship")?.FindAction("Land");
+
+        if (thrustAction == null || landAction == null)
+        {
+            Debug.LogError("[AirshipController] Could not find Airship/Thrust or Airship/Land actions. Check the Input Action Asset.");
+            return;
+        }
+
+        thrustAction.performed += OnThrust;
+        thrustAction.canceled  += OnThrustCanceled;
+        landAction.performed   += OnLand;
+
+        // Disable the player's own Rigidbody2D simulation —
+        // nested Rigidbody2Ds fight each other in Unity 2D physics.
+        if (boardedPlayerRb != null)
+        {
+            boardedPlayerRb.linearVelocity = Vector2.zero;
+            boardedPlayerRb.bodyType = RigidbodyType2D.Kinematic;
+        }
 
         // Parent player to airship — sprite stays visible at helm
         player.transform.SetParent(transform);
@@ -88,13 +107,24 @@ public class AirshipController : MonoBehaviour
         if (boardedPlayer == null) return;
 
         // Unwire input callbacks
-        boardedPlayerInput.actions["Airship/Thrust"].performed -= OnThrust;
-        boardedPlayerInput.actions["Airship/Thrust"].canceled -= OnThrustCanceled;
-        boardedPlayerInput.actions["Airship/Land"].performed -= OnLand;
+        var thrustAction = boardedPlayerInput?.actions.FindActionMap("Airship")?.FindAction("Thrust");
+        var landAction   = boardedPlayerInput?.actions.FindActionMap("Airship")?.FindAction("Land");
+
+        if (thrustAction != null)
+        {
+            thrustAction.performed -= OnThrust;
+            thrustAction.canceled  -= OnThrustCanceled;
+        }
+        if (landAction != null)
+            landAction.performed -= OnLand;
 
         // Return player to world
         boardedPlayer.transform.SetParent(null);
         boardedPlayer.transform.position = spawnPosition;
+
+        // Restore player's Rigidbody2D
+        if (boardedPlayerRb != null)
+            boardedPlayerRb.bodyType = RigidbodyType2D.Dynamic;
 
         thrustInput = Vector2.zero;
         rb.linearVelocity = Vector2.zero;
@@ -110,6 +140,7 @@ public class AirshipController : MonoBehaviour
 
         boardedPlayer = null;
         boardedPlayerInput = null;
+        boardedPlayerRb = null;
 
         GameManager.Instance.SetState(GameState.Playing);
     }
