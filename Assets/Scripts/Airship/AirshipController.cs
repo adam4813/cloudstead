@@ -155,10 +155,9 @@ public class AirshipController : MonoBehaviour
         }
 
         thrustInput = Vector2.zero;
+        rb.angularVelocity = 0f;
         rb.linearVelocity = Vector2.zero;
-
-        if (moorAtDock)
-            rb.bodyType = RigidbodyType2D.Kinematic; // re-dock
+        rb.bodyType = RigidbodyType2D.Kinematic; // always freeze on disembark
 
         if (landChime != null)
             AudioSource.PlayClipAtPoint(landChime, transform.position);

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cropName: Potato
   description: 
-  icon: {fileID: 21300000, guid: bbed7a8aaa1a28342bd3d076dd1fcf27, type: 3}
-  seedItem: {fileID: 11400000, guid: a7ebf0a3e65e71c4ab06d17a2d412015, type: 2}
+  icon: {fileID: 21300000, guid: 00271aa1b4f812040b9e6cf8b7e7be25, type: 3}
+  seedItem: {fileID: 11400000, guid: f85b81d69accc28439eb57969e334256, type: 2}
   growthDays: 5
   growSeasons: 00000000
   stageSprites:
@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
   - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
-  - item: {fileID: 11400000, guid: adfc2dc4e3690ab42b06b5104604d7b4, type: 2}
+  - item: {fileID: 11400000, guid: 5adc54de247c9fc48af8cbe703d624a9, type: 2}
     minYield: 1
     maxYield: 2
   regrowDays: -1

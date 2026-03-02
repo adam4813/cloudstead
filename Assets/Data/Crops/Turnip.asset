@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cropName: Turnip
   description: 
-  icon: {fileID: 21300000, guid: 47d6576bfeca7f349bbf2b9e722fcffb, type: 3}
-  seedItem: {fileID: 11400000, guid: d5c3adfaf6f7bbd48aaa5687ff3f5943, type: 2}
+  icon: {fileID: 21300000, guid: 03f78b27d76224041a5407e1a2aca4c5, type: 3}
+  seedItem: {fileID: 11400000, guid: 110d536b658b0694f8eb93e267b8966b, type: 2}
   growthDays: 3
   growSeasons: 0000000001000000
   stageSprites:
@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
   - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
-  - item: {fileID: 11400000, guid: c57cc890db7eb9d499a4de8ff3975f44, type: 2}
+  - item: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
     minYield: 1
     maxYield: 1
   regrowDays: -1

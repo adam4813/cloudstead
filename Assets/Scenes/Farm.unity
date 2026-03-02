@@ -485,7 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slotCount: 24
-  itemPickupSound: {fileID: 0}
+  itemPickupSound: {fileID: 8300000, guid: 38350c7cdcd484a4a9ac2672adcee356, type: 3}
 --- !u!4 &584854063
 Transform:
   m_ObjectHideFlags: 0
@@ -10777,7 +10777,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b790d692546cfb44af8c675c6ea81d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  allRecipes: []
+  allRecipes:
+  - {fileID: 0}
 --- !u!1 &1276709552
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cropName: Sunflower
   description: 
-  icon: {fileID: 21300000, guid: c2d695b686df23340b68190c9b8ef1ff, type: 3}
-  seedItem: {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
+  icon: {fileID: 21300000, guid: 15ada362dc9cfe24e835a6dde9fbe0da, type: 3}
+  seedItem: {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
   growthDays: 7
   growSeasons: 01000000
   stageSprites:
@@ -24,10 +24,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
   - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
-  - item: {fileID: 11400000, guid: 2354dc3d9566f4746b2e2a8fac3fcb83, type: 2}
+  - item: {fileID: 11400000, guid: fca48f35ad901024a8e466175b5d7392, type: 2}
     minYield: 1
     maxYield: 1
-  - item: {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
+  - item: {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
     minYield: 0
     maxYield: 2
   regrowDays: -1
