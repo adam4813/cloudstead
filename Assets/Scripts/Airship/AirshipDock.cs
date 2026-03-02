@@ -45,6 +45,11 @@ public class AirshipDock : MonoBehaviour, IInteractable
             : dockedAirship.transform.position;
 
         player.transform.position = destination;
+
+        // Disable camera cloud-clamping immediately so it follows the player
+        // onto the ship. When AirshipController.BoardPlayer fires later it
+        // publishes this event again — camera is already there, no jump.
+        EventBus.Publish(new AirshipBoardedEvent { AirshipTransform = dockedAirship.transform });
     }
 
     public string GetInteractionPrompt() => "Board Airship (E)";
