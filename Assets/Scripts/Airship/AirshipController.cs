@@ -159,6 +159,7 @@ public class AirshipController : MonoBehaviour
         boardedPlayerInput = null;
         boardedPlayerRb = null;
 
+        EventBus.Publish(new AirshipLandedEvent { CloudName = "Farm" });
         GameManager.Instance.SetState(GameState.Playing);
     }
 
