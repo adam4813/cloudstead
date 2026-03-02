@@ -57,6 +57,9 @@ public class AirshipController : MonoBehaviour
         if (thrustInput.x != 0f)
             rb.MoveRotation(rb.rotation - thrustInput.x * turnSpeed * Time.fixedDeltaTime);
 
+        // Kill any angular velocity from collisions — rotation is manual only
+        rb.angularVelocity = 0f;
+
         // W/S: thrust along the ship's forward axis (transform.up in top-down 2D)
         if (thrustInput.y != 0f)
             rb.AddForce(transform.up * thrustInput.y * thrustForce);
