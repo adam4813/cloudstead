@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: AirshipFloorTile
+  m_Name: AirshipSailTile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: f6180ac1a816bf141be22a9d4e13af41, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b42f2fb10b563aa41aa1dbf076deabde, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

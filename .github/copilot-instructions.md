@@ -55,3 +55,4 @@ Only where polymorphism is needed:
 - `Assets/Data/` holds ScriptableObject instances. `Assets/Prefabs/` holds prefabs. `Tools/` (project root) holds generator scripts.
 - Save/load: JSON file persistence via `ISaveable` → `SaveManager`.
 - Git: stage specific files (`git add <file>`), never `git add .`. Conventional commits. Include `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>` trailer.
+- Every Unity asset or script staged for a commit **must include its `.meta` file**. Stage them together: `git add Assets/Path/File.cs Assets/Path/File.cs.meta`. Omitting `.meta` files breaks GUIDs and causes missing-reference errors for other contributors. This applies to `.cs`, `.png`, `.wav`, `.prefab`, `.asset`, `.unity`, `.anim`, `.controller`, `.inputactions`, and any other file Unity tracks in the Project window.
