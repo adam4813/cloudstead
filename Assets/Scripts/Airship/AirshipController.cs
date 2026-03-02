@@ -36,6 +36,7 @@ public class AirshipController : MonoBehaviour
     private PlayerController boardedPlayer;
     private PlayerInput boardedPlayerInput;
     private Rigidbody2D boardedPlayerRb;
+    private Collider2D[] boardedPlayerColliders;
 
     private void Awake()
     {
@@ -49,15 +50,19 @@ public class AirshipController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (rb.bodyType != RigidbodyType2D.Dynamic) return;
+        if (!IsFlying) return;
 
         rb.AddForce(thrustInput.normalized * thrustSpeed);
 
         if (rb.linearVelocity.magnitude > maxSpeed)
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+
+        // Pin player to helm each physics step — avoids nested Rigidbody2D issues
+        if (boardedPlayer != null && helmPosition != null)
+            boardedPlayer.transform.position = helmPosition.position;
     }
 
-    /// <summary>Called by AirshipDock when the player interacts with the dock.</summary>
+    /// <summary>Called by AirshipHelm when the player interacts with the helm.</summary>
     public void BoardPlayer(PlayerController player)
     {
         boardedPlayer = player;
@@ -86,10 +91,16 @@ public class AirshipController : MonoBehaviour
             boardedPlayerRb.bodyType = RigidbodyType2D.Kinematic;
         }
 
-        // Parent player to airship — sprite stays visible at helm
-        player.transform.SetParent(transform);
+        // Disable player colliders — an active collider inside the airship's
+        // composite collider pushes back against the Dynamic Rigidbody2D,
+        // preventing the airship from moving.
+        boardedPlayerColliders = boardedPlayer.GetComponents<Collider2D>();
+        foreach (var col in boardedPlayerColliders)
+            col.enabled = false;
+
+        // Teleport to helm — no SetParent, FixedUpdate pins the position each frame
         if (helmPosition != null)
-            player.transform.position = helmPosition.position;
+            boardedPlayer.transform.position = helmPosition.position;
 
         // Become dynamic (unmoored)
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -122,9 +133,15 @@ public class AirshipController : MonoBehaviour
         boardedPlayer.transform.SetParent(null);
         boardedPlayer.transform.position = spawnPosition;
 
-        // Restore player's Rigidbody2D
+        // Restore player's Rigidbody2D and colliders
         if (boardedPlayerRb != null)
             boardedPlayerRb.bodyType = RigidbodyType2D.Dynamic;
+        if (boardedPlayerColliders != null)
+        {
+            foreach (var col in boardedPlayerColliders)
+                col.enabled = true;
+            boardedPlayerColliders = null;
+        }
 
         thrustInput = Vector2.zero;
         rb.linearVelocity = Vector2.zero;
@@ -146,6 +163,7 @@ public class AirshipController : MonoBehaviour
     }
 
     public bool HasBoardedPlayer => boardedPlayer != null;
+    public bool IsFlying => rb.bodyType == RigidbodyType2D.Dynamic;
 
     private void OnThrust(InputAction.CallbackContext ctx)
     {
