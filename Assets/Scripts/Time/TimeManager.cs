@@ -4,7 +4,7 @@ public class TimeManager : Singleton<TimeManager>
 {
     [SerializeField] private float dayLengthSeconds = 720f;
 
-    private float currentTime; // 0-1 normalized (0=6AM, 0.5=6PM, 1=6AM)
+    private float currentTime; // 0-1 normalized (0=midnight, 0.25=6AM, 0.5=noon, 1=midnight)
     private int currentDay = 1;
     private Season currentSeason = Season.Spring;
     private int currentYear = 1;
@@ -15,6 +15,13 @@ public class TimeManager : Singleton<TimeManager>
     public Season CurrentSeason => currentSeason;
     public int CurrentYear => currentYear;
     public bool IsPaused { get => isPaused; set => isPaused = value; }
+
+    public override void Initialize()
+    {
+        currentTime = 0.25f;
+        EventBus.Publish(new TimeTickEvent { NormalizedTime = 0.25f });
+        EventBus.Publish(new DayStartedEvent { Day = currentDay, Season = currentSeason });
+    }
 
     private void Update()
     {
@@ -67,7 +74,8 @@ public class TimeManager : Singleton<TimeManager>
     public void Sleep()
     {
         GameManager.Instance?.SetState(GameState.Sleeping);
-        currentTime = 0f;
+        currentTime = 0.25f;
+        EventBus.Publish(new TimeTickEvent { NormalizedTime = 0.25f });
         AdvanceDay();
         GameManager.Instance?.SetState(GameState.Playing);
     }
@@ -75,9 +83,9 @@ public class TimeManager : Singleton<TimeManager>
     public void PauseTime() => isPaused = true;
     public void ResumeTime() => isPaused = false;
 
-    /// <summary>Returns hours in 24h format (6 = 6AM start of day).</summary>
+    /// <summary>Returns hours in 24h format (6 = 6AM, 0 = midnight).</summary>
     public float GetCurrentHour()
     {
-        return (currentTime * 24f + 6f) % 24f;
+        return currentTime * 24f;
     }
 }

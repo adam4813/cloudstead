@@ -44,6 +44,14 @@ public class FarmingManager : Singleton<FarmingManager>
         if (!farmPlots.TryGetValue(pos, out var plot)) return false;
         if (plot.CurrentStage != CropStage.Seed || plot.PlantedCrop != null) return false;
 
+        // Enforce seasonal restrictions (cozy: refuse planting, not dying)
+        if (crop.growSeasons != null && crop.growSeasons.Length > 0)
+        {
+            var currentSeason = TimeManager.Instance?.CurrentSeason ?? Season.Spring;
+            bool inSeason = System.Array.IndexOf(crop.growSeasons, currentSeason) >= 0;
+            if (!inSeason) return false;
+        }
+
         plot.Plant(crop);
 
         EventBus.Publish(new CropPlantedEvent { Crop = crop, Position = pos });

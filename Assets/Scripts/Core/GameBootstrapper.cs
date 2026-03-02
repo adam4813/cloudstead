@@ -30,10 +30,9 @@ public class GameBootstrapper : MonoBehaviour
             DialogueManager.Instance.Initialize();
         if (ShopManager.Instance != null)
             ShopManager.Instance.Initialize();
-
         if (SkyWorldManager.Instance != null)
             SkyWorldManager.Instance.Initialize();
-
-        // CraftingManager — initialize when added
+        if (CraftingManager.Instance != null)
+            CraftingManager.Instance.Initialize();
     }
 }

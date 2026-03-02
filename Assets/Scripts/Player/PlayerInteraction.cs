@@ -7,12 +7,16 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private LayerMask interactableMask;
 
     private PlayerController playerController;
+    private StaminaController staminaController;
     private IInteractable currentTarget;
     private uint ownerId = 0;
+
+    [SerializeField] private QuickbarUI quickbarUI;
 
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        staminaController = GetComponent<StaminaController>();
     }
 
     private void Update()
@@ -36,6 +40,24 @@ public class PlayerInteraction : MonoBehaviour
                 Target = (currentTarget as MonoBehaviour)?.gameObject
             });
         }
+        else
+        {
+            TryUseActiveItem();
+        }
+    }
+
+    private void TryUseActiveItem()
+    {
+        if (quickbarUI == null) return;
+
+        var slot = quickbarUI.GetActiveSlotData();
+        if (slot == null || slot.IsEmpty()) return;
+        if (slot.item.staminaRestore <= 0) return;
+        if (slot.item.category == ItemCategory.Seed) return;
+
+        InventoryManager.Instance.RemoveItem(slot.item, 1);
+        staminaController?.RestoreStamina(slot.item.staminaRestore);
+        Debug.Log($"[Eat] Ate {slot.item.itemName}, restored {slot.item.staminaRestore} stamina");
     }
 
     private void FindNearestInteractable()

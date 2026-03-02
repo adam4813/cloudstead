@@ -34,6 +34,11 @@ public class ItemDefinition : ScriptableObject
     [FoldoutGroup("Placement")]
     public bool isPlaceable;
 
+    [FoldoutGroup("Consumable")]
+    [Tooltip("Amount of stamina restored when this item is eaten. 0 = not a consumable.")]
+    [Min(0)]
+    public int staminaRestore;
+
     /// <summary>
     /// Unique identifier for save/load. Falls back to asset name.
     /// </summary>

@@ -46,6 +46,14 @@ public class FarmPlot : MonoBehaviour
         if (PlantedCrop == null) return;
         if (CurrentStage == CropStage.Mature) return;
 
+        // Out of season — pause growth, don't die
+        if (PlantedCrop.growSeasons != null && PlantedCrop.growSeasons.Length > 0)
+        {
+            var currentSeason = TimeManager.Instance?.CurrentSeason ?? Season.Spring;
+            if (System.Array.IndexOf(PlantedCrop.growSeasons, currentSeason) < 0)
+                return;
+        }
+
         GrowthProgress++;
 
         int daysPerStage = Mathf.Max(1, PlantedCrop.growthDays / 3);

@@ -19,9 +19,9 @@ public class HUDController : MonoBehaviour
         EventBus.Subscribe<DayStartedEvent>(OnDateStarted
         );
 
-        // TODO (fix-hud-gold-init): initial gold is never shown because EconomyManager
-        // publishes GoldChangedEvent before HUD subscribes. Read EconomyManager.Instance.PlayerGold
-        // directly here once execution-order/init timing is sorted out.
+        // Show starting gold immediately (EconomyManager.Initialize runs before HUD subscribes)
+        if (EconomyManager.Instance != null)
+            OnGoldChanged(new GoldChangedEvent { NewAmount = EconomyManager.Instance.PlayerGold });
 
         // Set defaults
         if (clockText != null) clockText.text = "Day 1 — Spring";
