@@ -52,16 +52,18 @@ public class DialogueManager : Singleton<DialogueManager>
 
         var node = CurrentNode;
         if (node == null) return;
-        if (node.choiceNextIndices == null || choiceIndex >= node.choiceNextIndices.Length) return;
+        if (node.choiceNextIndices == null || choiceIndex >= node.choiceNextIndices.Length)
+        {
+            // No valid next index for this choice — end dialogue
+            EndDialogue();
+            return;
+        }
 
         int nextIndex = node.choiceNextIndices[choiceIndex];
-        if (nextIndex < 0 || nextIndex >= currentTree.nodes.Length)
+        if (nextIndex < 0 || nextIndex >= currentTree.nodes.Length || nextIndex == currentNodeIndex)
         {
+            // Invalid or self-loop — end dialogue
             EndDialogue();
-
-            // If the choice leads to shop opening
-            if (currentSpeaker != null && currentSpeaker.isMerchant)
-                ShopManager.Instance?.OpenShop(currentSpeaker);
             return;
         }
 
@@ -70,6 +72,8 @@ public class DialogueManager : Singleton<DialogueManager>
 
     public void EndDialogue()
     {
+        if (!isActive) return;
+
         isActive = false;
         currentTree = null;
         currentSpeaker = null;

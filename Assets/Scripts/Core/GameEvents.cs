@@ -28,3 +28,4 @@ public struct SceneTransitionStartedEvent { public string TargetScene; }
 public struct SceneTransitionCompletedEvent { public string Scene; }
 public struct PlayerSleptEvent { }
 public struct AirshipLandedEvent { public string CloudName; }
+public struct ShopGreetingEvent { public NPCDefinition Merchant; public string Greeting; }

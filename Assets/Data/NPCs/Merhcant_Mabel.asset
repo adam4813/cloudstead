@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0255ef0921a6af84b835c1130c050817, type: 3}
+  m_Name: Merhcant_Mabel
+  m_EditorClassIdentifier: 
+  npcName: Mabel
+  portrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  greetings:
+  - '"Welcome to my shop, dear!", "Looking for seeds?"'
+  farewells: []
+  isMerchant: 1
+  shopInventory:
+  - {fileID: 11400000, guid: d5c3adfaf6f7bbd48aaa5687ff3f5943, type: 2}
+  - {fileID: 11400000, guid: a7ebf0a3e65e71c4ab06d17a2d412015, type: 2}
+  - {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
+  shopPrices: 140000001e00000032000000

@@ -18,11 +18,13 @@ public class DialogueUI : MonoBehaviour
     private int displayedCharCount;
     private bool isTyping;
     private float typeTimer;
+    private NPCDefinition pendingShopMerchant;
 
     private void Start()
     {
         EventBus.Subscribe<DialogueStartedEvent>(OnDialogueStarted);
         EventBus.Subscribe<DialogueEndedEvent>(OnDialogueEnded);
+        EventBus.Subscribe<ShopGreetingEvent>(OnShopGreeting);
         Hide();
     }
 
@@ -30,14 +32,40 @@ public class DialogueUI : MonoBehaviour
     {
         EventBus.Unsubscribe<DialogueStartedEvent>(OnDialogueStarted);
         EventBus.Unsubscribe<DialogueEndedEvent>(OnDialogueEnded);
+        EventBus.Unsubscribe<ShopGreetingEvent>(OnShopGreeting);
     }
 
     private void Update()
     {
-        if (!DialogueManager.Instance?.IsActive ?? true) return;
+        bool inDialogue = DialogueManager.Instance?.IsActive ?? false;
+        bool inShopGreeting = pendingShopMerchant != null;
+
+        if (!inDialogue && !inShopGreeting) return;
 
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-            OnAdvance();
+        {
+            if (inShopGreeting)
+            {
+                if (isTyping)
+                {
+                    // Skip typewriter
+                    isTyping = false;
+                    dialogueText.text = fullText;
+                    ShowContinuePrompt();
+                }
+                else
+                {
+                    // Greeting finished, open shop
+                    var merchant = pendingShopMerchant;
+                    pendingShopMerchant = null;
+                    Hide();
+                    ShopManager.Instance?.OpenShop(merchant);
+                }
+                return;
+            }
+            if (inDialogue)
+                OnAdvance();
+        }
 
         if (isTyping)
         {
@@ -69,6 +97,34 @@ public class DialogueUI : MonoBehaviour
     private void OnDialogueEnded(DialogueEndedEvent evt)
     {
         Hide();
+    }
+
+    private void OnShopGreeting(ShopGreetingEvent evt)
+    {
+        pendingShopMerchant = evt.Merchant;
+        Show();
+        ClearChoices();
+
+        if (nameText != null)
+            nameText.text = evt.Merchant.npcName;
+
+        if (portraitImage != null && evt.Merchant.portrait != null)
+        {
+            portraitImage.sprite = evt.Merchant.portrait;
+            portraitImage.gameObject.SetActive(true);
+        }
+
+        // Start typewriter for the greeting
+        fullText = evt.Greeting;
+        displayedCharCount = 0;
+        isTyping = true;
+        typeTimer = 0f;
+        if (dialogueText != null) dialogueText.text = "";
+        if (continuePrompt != null)
+        {
+            continuePrompt.text = "Press E to shop";
+            continuePrompt.gameObject.SetActive(false);
+        }
     }
 
     public void OnAdvance()
@@ -124,11 +180,20 @@ public class DialogueUI : MonoBehaviour
 
     private void ShowContinuePrompt()
     {
+        if (continuePrompt == null) return;
+
+        if (pendingShopMerchant != null)
+        {
+            continuePrompt.text = "Press E to shop";
+            continuePrompt.gameObject.SetActive(true);
+            return;
+        }
+
         var node = DialogueManager.Instance?.CurrentNode;
         bool hasChoices = node?.choiceTexts != null && node.choiceTexts.Length > 0;
 
-        if (continuePrompt != null)
-            continuePrompt.gameObject.SetActive(!hasChoices);
+        continuePrompt.text = "Press E to continue";
+        continuePrompt.gameObject.SetActive(!hasChoices);
     }
 
     private void ClearChoices()

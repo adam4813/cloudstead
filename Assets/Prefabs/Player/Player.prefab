@@ -422,6 +422,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1ac6665007882524ba78ae675c7acd34, type: 2}
   - {fileID: 11400000, guid: 2540e0e7307de774d836e342a1f2e304, type: 2}
   - {fileID: 11400000, guid: 43e17e33e49bae644856aacf63f308d6, type: 2}
+  tillSound: {fileID: 8300000, guid: d63c19268cbc9b547b37b77ec47421a3, type: 3}
+  waterSound: {fileID: 8300000, guid: a1f9f17b1f751ab4d889bdd895328a2f, type: 3}
+  harvestSound: {fileID: 8300000, guid: 3fb9e8831f0d8944094cdcba8a61139d, type: 3}
+  plantSound: {fileID: 8300000, guid: b68948229e56ebe42862ade463b9a7e3, type: 3}
 --- !u!114 &607124346451061711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,6 +461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxStamina: 100
   lowStaminaThreshold: 20
+  yawnSound: {fileID: 8300000, guid: c503a497dfa4e5044ae4a06d524fc896, type: 3}
 --- !u!114 &5536184563866091617
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -25,30 +25,38 @@ public class GameStateController : MonoBehaviour
         switch (evt.Current)
         {
             case GameState.Playing:
-                playerInput.SwitchCurrentActionMap("Player");
+                SwitchMapIfNeeded("Player");
                 Time.timeScale = 1f;
                 break;
 
             case GameState.Menu:
             case GameState.Dialogue:
-                playerInput.SwitchCurrentActionMap("UI");
+                // Don't switch action maps — stay on Player map so
+                // OpenInventory (Tab) and Interact (E) remain available.
+                // Individual scripts check GameState to ignore input.
                 Time.timeScale = 1f;
                 break;
 
             case GameState.Paused:
-                playerInput.SwitchCurrentActionMap("UI");
+                SwitchMapIfNeeded("UI");
                 Time.timeScale = 0f;
                 break;
 
             case GameState.Sleeping:
                 playerInput.enabled = false;
-                playerInput.enabled = true; // Re-enable will reset
+                playerInput.enabled = true;
                 break;
 
             case GameState.Airship:
-                playerInput.SwitchCurrentActionMap("Airship");
+                SwitchMapIfNeeded("Airship");
                 Time.timeScale = 1f;
                 break;
         }
+    }
+
+    private void SwitchMapIfNeeded(string mapName)
+    {
+        if (playerInput.currentActionMap?.name != mapName)
+            playerInput.SwitchCurrentActionMap(mapName);
     }
 }

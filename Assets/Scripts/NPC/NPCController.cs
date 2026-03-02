@@ -57,15 +57,7 @@ public class NPCController : MonoBehaviour, IInteractable
                 spriteRenderer.flipX = dir.x < 0;
         }
 
-        if (definition.isMerchant && greetingDialogue != null)
-        {
-            DialogueManager.Instance?.StartDialogue(greetingDialogue, definition);
-        }
-        else if (definition.isMerchant)
-        {
-            ShopManager.Instance?.OpenShop(definition);
-        }
-        else if (greetingDialogue != null)
+        if (greetingDialogue != null)
         {
             DialogueManager.Instance?.StartDialogue(greetingDialogue, definition);
         }

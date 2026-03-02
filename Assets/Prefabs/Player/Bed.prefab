@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hudController: {fileID: 0}
+  sleepJingle: {fileID: 8300000, guid: 6502a3664dd52ee4c9b5f793093c9edd, type: 3}
 --- !u!61 &7188313617412373585
 BoxCollider2D:
   m_ObjectHideFlags: 0

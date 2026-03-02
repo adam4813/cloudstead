@@ -14,7 +14,6 @@ public class ShopManager : Singleton<ShopManager>
 
         currentMerchant = merchant;
         GameManager.Instance?.SetState(GameState.Menu);
-        Debug.Log($"[ShopManager] Opened shop: {merchant.npcName}");
         if (shopUI != null) shopUI.Open(merchant);
     }
 
