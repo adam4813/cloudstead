@@ -20,9 +20,10 @@ using UnityEngine.InputSystem;
 public class AirshipController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float thrustSpeed = 8f;
+    [SerializeField] private float thrustForce = 8f;
     [SerializeField] private float maxSpeed = 12f;
-    [SerializeField] private float linearDrag = 2f;
+    [SerializeField] private float linearDrag = 1.5f;
+    [SerializeField] private float turnSpeed = 90f; // degrees per second
 
     [Header("Boarding")]
     [SerializeField] private Transform helmPosition;
@@ -43,8 +44,8 @@ public class AirshipController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.linearDamping = linearDrag;
-        rb.angularDamping = 10f;
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rb.angularDamping = 0f;
+        rb.constraints = RigidbodyConstraints2D.None; // rotation needed for steering
         rb.bodyType = RigidbodyType2D.Kinematic; // docked by default
     }
 
@@ -52,8 +53,15 @@ public class AirshipController : MonoBehaviour
     {
         if (!IsFlying) return;
 
-        rb.AddForce(thrustInput.normalized * thrustSpeed);
+        // A/D: rotate the ship directly (responsive steering, no torque physics)
+        if (thrustInput.x != 0f)
+            rb.MoveRotation(rb.rotation - thrustInput.x * turnSpeed * Time.fixedDeltaTime);
 
+        // W/S: thrust along the ship's forward axis (transform.up in top-down 2D)
+        if (thrustInput.y != 0f)
+            rb.AddForce(transform.up * thrustInput.y * thrustForce);
+
+        // Clamp speed — coasting handled by linearDamping
         if (rb.linearVelocity.magnitude > maxSpeed)
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
 
