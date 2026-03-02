@@ -14,16 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cropName: Sunflower
   description: 
-  icon: {fileID: -256329436847572505, guid: c2d695b686df23340b68190c9b8ef1ff, type: 3}
+  icon: {fileID: 21300000, guid: c2d695b686df23340b68190c9b8ef1ff, type: 3}
   seedItem: {fileID: 11400000, guid: e4a845a7f1032fa4fb889701b1f69f98, type: 2}
   growthDays: 7
   growSeasons: 01000000
   stageSprites:
-  - {fileID: 2629959658491428582, guid: 5586197d4a00d2e4dabb4f2a14812263, type: 3}
-  - {fileID: 5611609619239453673, guid: 22bb59fe636db434e993a0053e8a5d7a, type: 3}
-  - {fileID: -2561705340510821538, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
-  - {fileID: 1254865053515524231, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
-  - {fileID: -2561705340510821538, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
+  - {fileID: 21300000, guid: 5586197d4a00d2e4dabb4f2a14812263, type: 3}
+  - {fileID: 21300000, guid: 22bb59fe636db434e993a0053e8a5d7a, type: 3}
+  - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
+  - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
   - item: {fileID: 11400000, guid: 2354dc3d9566f4746b2e2a8fac3fcb83, type: 2}
     minYield: 1

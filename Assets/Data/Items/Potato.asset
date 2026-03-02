@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Potato
   description: A hearty cloud-grown potato.
-  icon: {fileID: -5661783315169486296, guid: bbed7a8aaa1a28342bd3d076dd1fcf27, type: 3}
+  icon: {fileID: 21300000, guid: bbed7a8aaa1a28342bd3d076dd1fcf27, type: 3}
   category: 0
   maxStack: 99
   buyPrice: 0

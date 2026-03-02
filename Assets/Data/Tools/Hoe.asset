@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Hoe
   description: 
-  icon: {fileID: -9125950811934666922, guid: a1f6e6647281c214a9c07ba813ae7fe7, type: 3}
+  icon: {fileID: 21300000, guid: a1f6e6647281c214a9c07ba813ae7fe7, type: 3}
   category: 0
   maxStack: 1
   buyPrice: 0

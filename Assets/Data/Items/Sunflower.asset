@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Sunflower
   description: A bright sunflower from the clouds.
-  icon: {fileID: -256329436847572505, guid: c2d695b686df23340b68190c9b8ef1ff, type: 3}
+  icon: {fileID: 21300000, guid: c2d695b686df23340b68190c9b8ef1ff, type: 3}
   category: 0
   maxStack: 99
   buyPrice: 0
