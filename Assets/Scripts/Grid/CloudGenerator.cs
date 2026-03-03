@@ -86,7 +86,6 @@ public class CloudGenerator : MonoBehaviour
 
         SmoothEdges();
         PaintTilemap();
-        SpawnObstacles();
     }
 
     private void SmoothEdges()
@@ -183,23 +182,17 @@ public class CloudGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnObstacles()
+    /// <summary>Returns all valid obstacle spawn positions in seeded-shuffled order for ResourceNodeManager to consume.</summary>
+    public List<Vector3> GetShuffledCandidateTiles()
     {
-        if (nodeConfigs == null || nodeConfigs.Length == 0)
-        {
-            Debug.Log("[CloudGenerator] SpawnObstacles: no nodeConfigs assigned — skipping.");
-            return;
-        }
-
         var rng = new System.Random(seed);
-
+        var origin = TileOrigin;
         float centerX = cloudWidth / 2f;
         float centerY = cloudHeight / 2f;
         float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * obstacleSafeZoneRadius;
 
         var candidates = new List<Vector2Int>();
         for (int x = 0; x < cloudWidth; x++)
-        {
             for (int y = 0; y < cloudHeight; y++)
             {
                 if (!walkabilityGrid[x, y]) continue;
@@ -207,36 +200,17 @@ public class CloudGenerator : MonoBehaviour
                 if (dist <= safeRadius) continue;
                 candidates.Add(new Vector2Int(x, y));
             }
-        }
 
-        int totalRequested = 0;
-        foreach (var c in nodeConfigs) totalRequested += c.maxCount;
-        Debug.Log($"[CloudGenerator] SpawnObstacles: {candidates.Count} candidate tiles (safeRadius={safeRadius:F1}), requesting {totalRequested} total nodes.");
-
-        // Fisher-Yates shuffle
         for (int i = candidates.Count - 1; i > 0; i--)
         {
             int j = rng.Next(i + 1);
             (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
         }
 
-        Transform parent = obstacleParent != null ? obstacleParent : transform;
-        int ox = TileOrigin.x;
-        int oy = TileOrigin.y;
-        int index = 0;
-
-        foreach (var config in nodeConfigs)
-        {
-            if (config.prefab == null) continue;
-            int spawned = 0;
-            while (spawned < config.maxCount && index < candidates.Count)
-            {
-                var pos = candidates[index++];
-                var go = Instantiate(config.prefab, new Vector3(ox + pos.x + 0.5f, oy + pos.y + 0.5f, 0f), Quaternion.identity, parent);
-                go.name = $"{(config.definition != null ? config.definition.nodeName : config.prefab.name)}_{spawned}";
-                spawned++;
-            }
-        }
+        var result = new List<Vector3>(candidates.Count);
+        foreach (var c in candidates)
+            result.Add(new Vector3(origin.x + c.x + 0.5f, origin.y + c.y + 0.5f, 0f));
+        return result;
     }
 
     public int GetMaxCount(ResourceNodeDefinition def)

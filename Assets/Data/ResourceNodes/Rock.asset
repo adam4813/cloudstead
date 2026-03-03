@@ -18,8 +18,10 @@ MonoBehaviour:
   dropCountMax: 1
   maxHits: 5
   hitSprites: []
-  hitSound: {fileID: 0}
-  depletedSound: {fileID: 0}
-  destroyOnDepletion: 1
-  respawnDaysMin: 3
-  respawnDaysMax: 7
+  hitSound: {fileID: 8300000, guid: b45c906557e8a7e4f8563bbdbf83aeac, type: 3}
+  depletedSound: {fileID: 8300000, guid: eb52108085e6dc94b8209ddf6189f842, type: 3}
+  spawnsNaturally: 1
+  spawnIntervalMin: 3
+  spawnIntervalMax: 7
+  spawnCountMin: 1
+  spawnCountMax: 2

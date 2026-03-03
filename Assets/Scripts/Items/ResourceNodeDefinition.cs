@@ -16,7 +16,9 @@ public class ResourceNodeDefinition : ScriptableObject
     [FoldoutGroup("Audio")] public AudioClip hitSound;
     [FoldoutGroup("Audio")] public AudioClip depletedSound;
 
-    [FoldoutGroup("Respawn")] public bool destroyOnDepletion = true;
-    [FoldoutGroup("Respawn")] [ShowIf("@!destroyOnDepletion")] [MinValue(1)] public int respawnDaysMin = 3;
-    [FoldoutGroup("Respawn")] [ShowIf("@!destroyOnDepletion")] [MinValue(1)] public int respawnDaysMax = 7;
+    [FoldoutGroup("Respawn")] public bool spawnsNaturally = true;
+    [FoldoutGroup("Respawn")] [ShowIf("spawnsNaturally")] [MinValue(1)] public int spawnIntervalMin = 3;
+    [FoldoutGroup("Respawn")] [ShowIf("spawnsNaturally")] [MinValue(1)] public int spawnIntervalMax = 7;
+    [FoldoutGroup("Respawn")] [ShowIf("spawnsNaturally")] [MinValue(1)] public int spawnCountMin = 1;
+    [FoldoutGroup("Respawn")] [ShowIf("spawnsNaturally")] [MinValue(1)] public int spawnCountMax = 2;
 }

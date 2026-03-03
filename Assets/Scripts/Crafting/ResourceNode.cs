@@ -77,9 +77,6 @@ public class ResourceNode : MonoBehaviour, IInteractable
 
         EventBus.Publish(new ResourceNodeDepletedEvent { Definition = definition });
 
-        if (!definition.destroyOnDepletion)
-            ResourceNodeManager.Instance?.QueueRespawn(definition, TimeManager.Instance?.CurrentDay ?? 0);
-
         Destroy(gameObject);
     }
 }
