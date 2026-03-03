@@ -812,7 +812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 4055922959586029614}
   recipeName: {fileID: 1348458398060374235}
-  ingredients: {fileID: 0}
+  ingredients: {fileID: 320021168039041187}
   craftButton: {fileID: 4112951108823818953}
 --- !u!114 &7876560479970370347
 MonoBehaviour:

@@ -9,7 +9,7 @@ public class CraftingStation : MonoBehaviour, IInteractable
 
     private void Start()
     {
-        _craftingUI = FindFirstObjectByType<CraftingUI>();
+        _craftingUI = FindFirstObjectByType<CraftingUI>(FindObjectsInactive.Include);
     }
 
     public bool CanInteract(uint playerId) => true;
@@ -19,7 +19,7 @@ public class CraftingStation : MonoBehaviour, IInteractable
     public void Interact(uint playerId)
     {
         if (_craftingUI == null)
-            _craftingUI = FindFirstObjectByType<CraftingUI>();
+            _craftingUI = FindFirstObjectByType<CraftingUI>(FindObjectsInactive.Include);
 
         if (openSound != null)
             AudioSource.PlayClipAtPoint(openSound, transform.position);

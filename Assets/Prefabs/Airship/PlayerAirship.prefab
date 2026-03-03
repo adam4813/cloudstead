@@ -999,7 +999,7 @@ MonoBehaviour:
   thrustForce: 8
   maxSpeed: 12
   linearDrag: 2
-  turnSpeed: 90
+  turnSpeed: 30
   helmPosition: {fileID: 6499428374448147727}
   engineHumSource: {fileID: 1169127041466099352}
   landChime: {fileID: 0}

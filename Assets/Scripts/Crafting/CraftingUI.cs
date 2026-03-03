@@ -8,6 +8,7 @@ public class CraftingUI : MonoBehaviour
     [SerializeField] private GameObject recipeEntryPrefab;
     [SerializeField] private AudioClip craftSound;
     [SerializeField] private AudioClip failSound;
+    [SerializeField] private Button closeButton;
 
     private RecipeDefinition _selectedRecipe;
     private bool _isOpen;
@@ -16,6 +17,8 @@ public class CraftingUI : MonoBehaviour
     {
         EventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
         if (panel != null) panel.SetActive(false);
+        if (closeButton != null)
+            closeButton.onClick.AddListener(Close);
     }
 
     private void OnDestroy()
