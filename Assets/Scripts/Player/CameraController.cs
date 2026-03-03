@@ -77,15 +77,18 @@ public class CameraController : MonoBehaviour
         float halfHeight = cam.orthographicSize;
         float halfWidth = halfHeight * cam.aspect;
 
-        float minX = halfWidth;
-        float maxX = cloudGenerator.Width - halfWidth;
-        float minY = halfHeight;
-        float maxY = cloudGenerator.Height - halfHeight;
+        float ox = cloudGenerator.TileOrigin.x;
+        float oy = cloudGenerator.TileOrigin.y;
 
-        if (minX > maxX) pos.x = cloudGenerator.Width / 2f;
+        float minX = ox + halfWidth;
+        float maxX = ox + cloudGenerator.Width - halfWidth;
+        float minY = oy + halfHeight;
+        float maxY = oy + cloudGenerator.Height - halfHeight;
+
+        if (minX > maxX) pos.x = ox + cloudGenerator.Width / 2f;
         else pos.x = Mathf.Clamp(pos.x, minX, maxX);
 
-        if (minY > maxY) pos.y = cloudGenerator.Height / 2f;
+        if (minY > maxY) pos.y = oy + cloudGenerator.Height / 2f;
         else pos.y = Mathf.Clamp(pos.y, minY, maxY);
 
         pos.z = zOffset;

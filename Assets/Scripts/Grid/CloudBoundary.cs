@@ -36,9 +36,8 @@ public class CloudBoundary : MonoBehaviour
         if (cloudGenerator == null || cloudGenerator.WalkabilityGrid == null)
             return;
 
-        // Add box colliders on non-walkable tiles adjacent to walkable ones.
-        // This creates a boundary that exactly follows the cloud edge.
-        // No outer rectangle — the airship needs to approach the cloud from outside.
+        var origin = cloudGenerator.TileOrigin;
+
         for (int x = 0; x < cloudGenerator.Width; x++)
         {
             for (int y = 0; y < cloudGenerator.Height; y++)
@@ -47,7 +46,7 @@ public class CloudBoundary : MonoBehaviour
                 if (!HasWalkableNeighbor(x, y)) continue;
 
                 var col = gameObject.AddComponent<BoxCollider2D>();
-                col.offset = new Vector2(x + 0.5f, y + 0.5f);
+                col.offset = new Vector2(origin.x + x + 0.5f, origin.y + y + 0.5f);
                 col.size = Vector2.one;
                 col.compositeOperation = Collider2D.CompositeOperation.Merge;
             }

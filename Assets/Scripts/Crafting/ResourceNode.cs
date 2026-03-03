@@ -1,16 +1,10 @@
-using System.Collections;
+
 using UnityEngine;
 
 public class ResourceNode : MonoBehaviour, IInteractable
 {
-    [SerializeField] private ItemDefinition dropItem;
-    [SerializeField] private int dropCount = 1;
-    [SerializeField] private int maxHits = 3;
-    [SerializeField] private float respawnTime = 120f;
-    [SerializeField] private AudioClip hitSound;
-    [SerializeField] private AudioClip depletedSound;
+    [SerializeField] private ResourceNodeDefinition definition;
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Sprite[] hitSprites;
 
     private int _currentHits;
     private bool _isDepleted;
@@ -24,26 +18,46 @@ public class ResourceNode : MonoBehaviour, IInteractable
             _originalSprite = spriteRenderer.sprite;
     }
 
-    public bool CanInteract(uint playerId) => !_isDepleted;
+    private void Start()
+    {
+        if (definition != null)
+            ResourceNodeManager.Instance?.RegisterNode(definition);
+    }
 
-    public string GetInteractionPrompt() => $"Gather {dropItem?.itemName ?? "resource"}";
+    private void OnDestroy()
+    {
+        if (definition != null)
+            ResourceNodeManager.Instance?.UnregisterNode(definition);
+    }
+
+    /// <summary>Called by ResourceNodeManager when dynamically spawning a respawned node.</summary>
+    public void Initialize(ResourceNodeDefinition def)
+    {
+        definition = def;
+        if (spriteRenderer != null)
+            _originalSprite = spriteRenderer.sprite;
+    }
+
+    public bool CanInteract(uint playerId) => !_isDepleted && definition != null;
+
+    public string GetInteractionPrompt() => $"Gather {definition?.nodeName ?? "resource"}";
 
     public void Interact(uint playerId)
     {
-        if (_isDepleted) return;
+        if (_isDepleted || definition == null) return;
 
         _currentHits++;
 
-        if (hitSprites != null && hitSprites.Length > 0 && spriteRenderer != null)
+        if (definition.hitSprites != null && definition.hitSprites.Length > 0 && spriteRenderer != null)
         {
-            int spriteIndex = Mathf.Min(_currentHits - 1, hitSprites.Length - 1);
-            spriteRenderer.sprite = hitSprites[spriteIndex];
+            int spriteIndex = Mathf.Min(_currentHits - 1, definition.hitSprites.Length - 1);
+            spriteRenderer.sprite = definition.hitSprites[spriteIndex];
         }
 
-        if (hitSound != null)
-            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        if (definition.hitSound != null)
+            AudioSource.PlayClipAtPoint(definition.hitSound, transform.position);
 
-        if (_currentHits >= maxHits)
+        if (_currentHits >= definition.maxHits)
             Deplete();
     }
 
@@ -54,27 +68,18 @@ public class ResourceNode : MonoBehaviour, IInteractable
         if (_col != null)
             _col.enabled = false;
 
-        if (depletedSound != null)
-            AudioSource.PlayClipAtPoint(depletedSound, transform.position);
+        if (definition.depletedSound != null)
+            AudioSource.PlayClipAtPoint(definition.depletedSound, transform.position);
 
-        if (dropItem != null && dropCount > 0)
-            InventoryManager.Instance?.AddItem(dropItem, dropCount);
+        InventoryManager.Instance?.AddItem(
+            definition.dropItem,
+            Random.Range(definition.dropCountMin, definition.dropCountMax + 1));
 
-        if (respawnTime > 0f)
-            StartCoroutine(RespawnRoutine());
-    }
+        EventBus.Publish(new ResourceNodeDepletedEvent { Definition = definition });
 
-    private IEnumerator RespawnRoutine()
-    {
-        yield return new WaitForSeconds(respawnTime);
+        if (!definition.destroyOnDepletion)
+            ResourceNodeManager.Instance?.QueueRespawn(definition, TimeManager.Instance?.CurrentDay ?? 0);
 
-        _currentHits = 0;
-        _isDepleted = false;
-
-        if (_col != null)
-            _col.enabled = true;
-
-        if (spriteRenderer != null)
-            spriteRenderer.sprite = _originalSprite;
+        Destroy(gameObject);
     }
 }

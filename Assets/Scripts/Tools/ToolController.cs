@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class ToolController : MonoBehaviour
 {
     [SerializeField] private QuickbarUI quickbarUI;
+    [SerializeField] private LayerMask interactableMask;
     [SerializeField] private CropDefinition[] cropRegistry;
     [SerializeField] private AudioClip tillSound;
     [SerializeField] private AudioClip waterSound;
@@ -94,6 +95,7 @@ public class ToolController : MonoBehaviour
 
         if (item is ToolDefinition tool)
         {
+            if (HasInteractableAtTile(targetTile)) return;
             UseTool(tool, targetTile);
             return;
         }
@@ -103,6 +105,15 @@ public class ToolController : MonoBehaviour
             TryPlant(item, targetTile);
             return;
         }
+    }
+
+    private bool HasInteractableAtTile(Vector3Int tile)
+    {
+        Vector2 center = new Vector2(tile.x + 0.5f, tile.y + 0.5f);
+        var hits = Physics2D.OverlapCircleAll(center, 0.4f, interactableMask);
+        foreach (var hit in hits)
+            if (hit.GetComponent<IInteractable>() != null) return true;
+        return false;
     }
 
     private void UseTool(ToolDefinition tool, Vector3Int targetTile)

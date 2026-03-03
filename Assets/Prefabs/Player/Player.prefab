@@ -187,10 +187,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d2314c20b6567c40a90c32a3f1572e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionRadius: 1.5
   interactableMask:
     serializedVersion: 2
     m_Bits: 128
+  pickupHoldDuration: 2
+  quickbarUI: {fileID: 0}
 --- !u!114 &3483850165187858691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -418,6 +419,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   quickbarUI: {fileID: 0}
+  interactableMask:
+    serializedVersion: 2
+    m_Bits: 128
   cropRegistry:
   - {fileID: 11400000, guid: 1ac6665007882524ba78ae675c7acd34, type: 2}
   - {fileID: 11400000, guid: 2540e0e7307de774d836e342a1f2e304, type: 2}
