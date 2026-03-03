@@ -26,6 +26,25 @@ public class TileCursor : MonoBehaviour
         spriteRenderer.sortingOrder = 10;
 
         playerController = FindFirstObjectByType<PlayerController>();
+
+        EventBus.Subscribe<InteriorEnteredEvent>(OnInteriorEntered);
+        EventBus.Subscribe<InteriorExitedEvent>(OnInteriorExited);
+    }
+
+    private void OnDestroy()
+    {
+        EventBus.Unsubscribe<InteriorEnteredEvent>(OnInteriorEntered);
+        EventBus.Unsubscribe<InteriorExitedEvent>(OnInteriorExited);
+    }
+
+    private void OnInteriorEntered(InteriorEnteredEvent evt)
+    {
+        spriteRenderer.sortingLayerName = InteriorManager.ToInteriorLayer("GroundDecor");
+    }
+
+    private void OnInteriorExited(InteriorExitedEvent evt)
+    {
+        spriteRenderer.sortingLayerName = "GroundDecor";
     }
 
     private void Update()

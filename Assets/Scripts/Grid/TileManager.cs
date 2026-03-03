@@ -20,6 +20,13 @@ public class TileManager : Singleton<TileManager>
 
     public bool IsWalkable(Vector3Int pos)
     {
+        // When inside an interior, check the interior floor tilemap instead
+        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
+        {
+            var interior = InteriorManager.Instance.CurrentInterior;
+            return interior != null && interior.HasFloorTile(pos);
+        }
+
         if (cloudGenerator != null)
             return cloudGenerator.IsWalkable(pos);
 

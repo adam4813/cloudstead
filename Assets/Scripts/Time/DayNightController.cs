@@ -7,6 +7,8 @@ public class DayNightController : MonoBehaviour
     [SerializeField] private Gradient dayNightGradient;
     [SerializeField] private AnimationCurve intensityCurve;
 
+    private bool _isInsideInterior;
+
     private void Start()
     {
         if (globalLight == null)
@@ -19,8 +21,33 @@ public class DayNightController : MonoBehaviour
             SetDefaultIntensityCurve();
     }
 
+    private void OnEnable()
+    {
+        EventBus.Subscribe<InteriorEnteredEvent>(OnInteriorEntered);
+        EventBus.Subscribe<InteriorExitedEvent>(OnInteriorExited);
+    }
+
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<InteriorEnteredEvent>(OnInteriorEntered);
+        EventBus.Unsubscribe<InteriorExitedEvent>(OnInteriorExited);
+    }
+
+    private void OnInteriorEntered(InteriorEnteredEvent evt)
+    {
+        _isInsideInterior = true;
+        if (globalLight != null) globalLight.enabled = false;
+    }
+
+    private void OnInteriorExited(InteriorExitedEvent evt)
+    {
+        _isInsideInterior = false;
+        if (globalLight != null) globalLight.enabled = true;
+    }
+
     private void Update()
     {
+        if (_isInsideInterior) return;
         if (TimeManager.Instance == null || globalLight == null) return;
 
         float t = TimeManager.Instance.CurrentTime;

@@ -20,7 +20,7 @@ TagManager:
   - Player
   - NPC
   - CloudBoundary
-  - 
+  - InteriorSpace
   - 
   - 
   - 
@@ -56,6 +56,18 @@ TagManager:
     locked: 0
   - name: Characters
     uniqueID: 746672965
+    locked: 0
+  - name: InteriorGround
+    uniqueID: 697174471
+    locked: 0
+  - name: InteriorGroundDecor
+    uniqueID: 4207338983
+    locked: 0
+  - name: InteriorObjects
+    uniqueID: 862434523
+    locked: 0
+  - name: InteriorCharacters
+    uniqueID: 282159363
     locked: 0
   - name: UI
     uniqueID: 2172918867

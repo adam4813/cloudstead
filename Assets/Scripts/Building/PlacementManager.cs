@@ -25,7 +25,9 @@ public class PlacementManager : Singleton<PlacementManager>
         GameObject ghostGO = new GameObject("PlacementGhost");
         SpriteRenderer sr = ghostGO.AddComponent<SpriteRenderer>();
         sr.sprite = item.icon;
-        sr.sortingLayerName = "Objects";
+        sr.sortingLayerName = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior
+            ? InteriorManager.ToInteriorLayer("Objects")
+            : "Objects";
         sr.sortingOrder = 10;
         if (_ghostMaterial != null) sr.material = _ghostMaterial;
 
@@ -48,6 +50,14 @@ public class PlacementManager : Singleton<PlacementManager>
 
         PlacedItem placedItem = CreatePlacedItemGO(_currentItem);
         placedItem.OnPlaced(gridPos);
+
+        // Parent to interior objects container when placing inside a building
+        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
+        {
+            var container = InteriorManager.Instance.CurrentInterior.ObjectsContainer;
+            if (container != null)
+                placedItem.transform.SetParent(container, true);
+        }
 
         EventBus.Publish(new ItemPlacedEvent { Item = _currentItem, GridPosition = gridPos });
 
@@ -109,9 +119,15 @@ public class PlacementManager : Singleton<PlacementManager>
 
     private PlacedItem CreatePlacedItemGO(ItemDefinition item)
     {
+        string sortingLayer = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior
+            ? InteriorManager.ToInteriorLayer("Objects")
+            : "Objects";
+
         if (item.placeablePrefab != null)
         {
             GameObject prefabGO = Instantiate(item.placeablePrefab);
+            var sr2 = prefabGO.GetComponent<SpriteRenderer>();
+            if (sr2 != null) sr2.sortingLayerName = sortingLayer;
             PlacedItem existing = prefabGO.GetComponent<PlacedItem>();
             if (existing != null)
             {
@@ -119,7 +135,7 @@ public class PlacementManager : Singleton<PlacementManager>
                 return existing;
             }
             PlacedItem added = prefabGO.AddComponent<PlacedItem>();
-            added.Initialize(item, prefabGO.GetComponent<SpriteRenderer>());
+            added.Initialize(item, sr2);
             return added;
         }
 
@@ -127,7 +143,7 @@ public class PlacementManager : Singleton<PlacementManager>
         go.layer = LayerMask.NameToLayer("Interactable");
 
         SpriteRenderer spriteRenderer = go.AddComponent<SpriteRenderer>();
-        spriteRenderer.sortingLayerName = "Objects";
+        spriteRenderer.sortingLayerName = sortingLayer;
         spriteRenderer.sortingOrder = 1;
 
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();

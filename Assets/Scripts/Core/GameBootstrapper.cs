@@ -38,5 +38,7 @@ public class GameBootstrapper : MonoBehaviour
             ResourceNodeManager.Instance.Initialize();
         if (PlacementManager.Instance != null)
             PlacementManager.Instance.Initialize();
+        if (InteriorManager.Instance != null)
+            InteriorManager.Instance.Initialize();
     }
 }

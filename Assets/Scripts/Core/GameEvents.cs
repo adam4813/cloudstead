@@ -33,3 +33,5 @@ public struct ShopGreetingEvent { public NPCDefinition Merchant; public string G
 public struct ItemPlacedEvent { public ItemDefinition Item; public Vector3Int GridPosition; }
 public struct ItemRemovedFromWorldEvent { public ItemDefinition Item; public Vector3Int GridPosition; }
 public struct ResourceNodeDepletedEvent { public ResourceNodeDefinition Definition; }
+public struct InteriorEnteredEvent { public string BuildingId; }
+public struct InteriorExitedEvent { public string BuildingId; }

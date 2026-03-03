@@ -27,6 +27,10 @@ public class CameraController : MonoBehaviour
     private Transform currentTarget;
     private float targetZoom;
 
+    private bool _hasOverrideBounds;
+    private Vector3 _overrideMin;
+    private Vector3 _overrideMax;
+
     private void Awake()
     {
         currentTarget = target;
@@ -72,6 +76,14 @@ public class CameraController : MonoBehaviour
 
     private Vector3 ClampToCloudBounds(Vector3 pos)
     {
+        if (_hasOverrideBounds)
+        {
+            pos.x = Mathf.Clamp(pos.x, _overrideMin.x, _overrideMax.x);
+            pos.y = Mathf.Clamp(pos.y, _overrideMin.y, _overrideMax.y);
+            pos.z = zOffset;
+            return pos;
+        }
+
         if (cam == null || cloudGenerator == null) return pos;
 
         float halfHeight = cam.orthographicSize;
@@ -93,6 +105,26 @@ public class CameraController : MonoBehaviour
 
         pos.z = zOffset;
         return pos;
+    }
+
+    public void SetOverrideBounds(Vector3 min, Vector3 max)
+    {
+        _overrideMin = min;
+        _overrideMax = max;
+        _hasOverrideBounds = true;
+        clampToCloud = true;
+    }
+
+    public void ClearOverrideBounds()
+    {
+        _hasOverrideBounds = false;
+    }
+
+    /// <summary>Instantly moves the camera to the target, skipping smooth lerp.</summary>
+    public void SnapToTarget()
+    {
+        if (currentTarget == null) return;
+        transform.position = new Vector3(currentTarget.position.x, currentTarget.position.y, zOffset);
     }
 
     private void OnAirshipBoarded(AirshipBoardedEvent evt)
