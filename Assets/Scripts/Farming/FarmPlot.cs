@@ -91,6 +91,19 @@ public class FarmPlot : MonoBehaviour
         SoilState = SoilState.Tilled;
     }
 
+    public void Restore(CropDefinition crop, int progress, CropStage stage, SoilState soil, bool watered)
+    {
+        SoilState = soil;
+        IsWatered = watered;
+        if (crop != null)
+        {
+            PlantedCrop = crop;
+            CurrentStage = stage;
+            GrowthProgress = progress;
+            UpdateCropSprite();
+        }
+    }
+
     private void UpdateCropSprite()
     {
         if (cropRenderer == null || PlantedCrop == null) return;

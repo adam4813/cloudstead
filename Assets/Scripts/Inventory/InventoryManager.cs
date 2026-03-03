@@ -1,6 +1,7 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-public class InventoryManager : Singleton<InventoryManager>
+public class InventoryManager : Singleton<InventoryManager>, ISaveable
 {
     [SerializeField] private int slotCount = 24;
     [SerializeField] private AudioClip itemPickupSound;
@@ -9,11 +10,16 @@ public class InventoryManager : Singleton<InventoryManager>
 
     public int SlotCount => slotCount;
 
+    private Dictionary<string, ItemDefinition> itemLookup;
+
     public override void Initialize()
     {
         slots = new InventorySlot[slotCount];
         for (int i = 0; i < slotCount; i++)
             slots[i] = new InventorySlot();
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     public bool AddItem(ItemDefinition item, int count = 1)
@@ -104,5 +110,72 @@ public class InventoryManager : Singleton<InventoryManager>
                 total += slots[i].count;
         }
         return total;
+    }
+
+    public string SaveState()
+    {
+        var data = new InventorySaveData
+        {
+            slots = new SlotSaveData[slotCount]
+        };
+        for (int i = 0; i < slotCount; i++)
+        {
+            data.slots[i] = new SlotSaveData
+            {
+                itemId = slots[i].item != null ? slots[i].item.ItemId : "",
+                count = slots[i].count
+            };
+        }
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<InventorySaveData>(json);
+        if (data?.slots == null) return;
+
+        BuildItemLookup();
+
+        for (int i = 0; i < slotCount && i < data.slots.Length; i++)
+        {
+            var slotData = data.slots[i];
+            if (string.IsNullOrEmpty(slotData.itemId) || slotData.count <= 0)
+            {
+                slots[i].Clear();
+            }
+            else if (itemLookup.TryGetValue(slotData.itemId, out var item))
+            {
+                slots[i].Set(item, slotData.count);
+            }
+            else
+            {
+                Debug.LogWarning($"[InventoryManager] Item '{slotData.itemId}' not found during load");
+                slots[i].Clear();
+            }
+        }
+
+        EventBus.Publish(new InventoryChangedEvent());
+    }
+
+    private void BuildItemLookup()
+    {
+        if (itemLookup != null) return;
+        itemLookup = new Dictionary<string, ItemDefinition>();
+        var allItems = Resources.LoadAll<ItemDefinition>("");
+        foreach (var item in allItems)
+            itemLookup[item.ItemId] = item;
+    }
+
+    [System.Serializable]
+    private class InventorySaveData
+    {
+        public SlotSaveData[] slots;
+    }
+
+    [System.Serializable]
+    private class SlotSaveData
+    {
+        public string itemId;
+        public int count;
     }
 }

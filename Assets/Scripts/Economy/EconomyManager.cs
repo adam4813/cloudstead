@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EconomyManager : Singleton<EconomyManager>
+public class EconomyManager : Singleton<EconomyManager>, ISaveable
 {
     [SerializeField] private int startingGold = 500;
 
@@ -12,6 +12,9 @@ public class EconomyManager : Singleton<EconomyManager>
     {
         playerGold = startingGold;
         PublishGoldChanged();
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     public void AddGold(int amount)
@@ -34,5 +37,25 @@ public class EconomyManager : Singleton<EconomyManager>
     private void PublishGoldChanged()
     {
         EventBus.Publish(new GoldChangedEvent { NewAmount = playerGold });
+    }
+
+    public string SaveState()
+    {
+        return JsonUtility.ToJson(new EconomySaveData { playerGold = playerGold });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<EconomySaveData>(json);
+        if (data == null) return;
+
+        playerGold = data.playerGold;
+        PublishGoldChanged();
+    }
+
+    [System.Serializable]
+    private class EconomySaveData
+    {
+        public int playerGold;
     }
 }

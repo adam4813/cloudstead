@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TimeManager : Singleton<TimeManager>
+public class TimeManager : Singleton<TimeManager>, ISaveable
 {
     [SerializeField] private float dayLengthSeconds = 720f;
 
@@ -21,6 +21,9 @@ public class TimeManager : Singleton<TimeManager>
         currentTime = 0.25f;
         EventBus.Publish(new TimeTickEvent { NormalizedTime = 0.25f });
         EventBus.Publish(new DayStartedEvent { Day = currentDay, Season = currentSeason });
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     private void Update()
@@ -87,5 +90,40 @@ public class TimeManager : Singleton<TimeManager>
     public float GetCurrentHour()
     {
         return currentTime * 24f;
+    }
+
+    public string SaveState()
+    {
+        var data = new TimeSaveData
+        {
+            currentTime = currentTime,
+            currentDay = currentDay,
+            currentSeason = (int)currentSeason,
+            currentYear = currentYear
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<TimeSaveData>(json);
+        if (data == null) return;
+
+        currentTime = data.currentTime;
+        currentDay = data.currentDay;
+        currentSeason = (Season)data.currentSeason;
+        currentYear = data.currentYear;
+
+        EventBus.Publish(new TimeTickEvent { NormalizedTime = currentTime });
+        EventBus.Publish(new DayStartedEvent { Day = currentDay, Season = currentSeason });
+    }
+
+    [System.Serializable]
+    private class TimeSaveData
+    {
+        public float currentTime;
+        public int currentDay;
+        public int currentSeason;
+        public int currentYear;
     }
 }

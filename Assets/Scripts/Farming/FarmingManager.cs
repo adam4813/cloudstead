@@ -2,17 +2,21 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
-public class FarmingManager : Singleton<FarmingManager>
+public class FarmingManager : Singleton<FarmingManager>, ISaveable
 {
     [SerializeField] private TileBase tilledSoilTile;
     [SerializeField] private TileBase wateredSoilTile;
     [SerializeField] private GameObject cropPrefab;
 
     private Dictionary<Vector3Int, FarmPlot> farmPlots = new();
+    private Dictionary<string, CropDefinition> cropLookup;
 
     public override void Initialize()
     {
         EventBus.Subscribe<DayStartedEvent>(OnDayStarted);
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     protected override void OnDestroy()
@@ -164,5 +168,95 @@ public class FarmingManager : Singleton<FarmingManager>
             }
         }
         return true;
+    }
+
+    public string SaveState()
+    {
+        var plotList = new List<FarmPlotSaveData>();
+        foreach (var kvp in farmPlots)
+        {
+            var pos = kvp.Key;
+            var plot = kvp.Value;
+            plotList.Add(new FarmPlotSaveData
+            {
+                posX = pos.x,
+                posY = pos.y,
+                posZ = pos.z,
+                cropName = plot.PlantedCrop != null ? plot.PlantedCrop.cropName : "",
+                growthProgress = plot.GrowthProgress,
+                soilState = (int)plot.SoilState,
+                cropStage = (int)plot.CurrentStage,
+                isWatered = plot.IsWatered
+            });
+        }
+        return JsonUtility.ToJson(new FarmingSaveData { plots = plotList.ToArray() });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<FarmingSaveData>(json);
+        if (data?.plots == null) return;
+
+        foreach (var kvp in farmPlots)
+        {
+            if (kvp.Value != null)
+                Destroy(kvp.Value.gameObject);
+        }
+        farmPlots.Clear();
+
+        BuildCropLookup();
+
+        foreach (var plotData in data.plots)
+        {
+            var pos = new Vector3Int(plotData.posX, plotData.posY, plotData.posZ);
+
+            if (TileManager.Instance != null)
+            {
+                var tile = plotData.isWatered ? wateredSoilTile : tilledSoilTile;
+                TileManager.Instance.SetTile(pos, tile, TileManager.Instance.SoilTilemap);
+            }
+
+            var plotGO = new GameObject($"FarmPlot_{pos.x}_{pos.y}");
+            plotGO.transform.position = pos.TileToWorld();
+            var plot = plotGO.AddComponent<FarmPlot>();
+            plot.Initialize(pos, 0);
+
+            CropDefinition crop = null;
+            if (!string.IsNullOrEmpty(plotData.cropName))
+                cropLookup.TryGetValue(plotData.cropName, out crop);
+
+            plot.Restore(crop, plotData.growthProgress, (CropStage)plotData.cropStage,
+                (SoilState)plotData.soilState, plotData.isWatered);
+
+            farmPlots[pos] = plot;
+        }
+    }
+
+    private void BuildCropLookup()
+    {
+        if (cropLookup != null) return;
+        cropLookup = new Dictionary<string, CropDefinition>();
+        var allCrops = Resources.LoadAll<CropDefinition>("");
+        foreach (var crop in allCrops)
+            cropLookup[crop.cropName] = crop;
+    }
+
+    [System.Serializable]
+    private class FarmingSaveData
+    {
+        public FarmPlotSaveData[] plots;
+    }
+
+    [System.Serializable]
+    private class FarmPlotSaveData
+    {
+        public int posX;
+        public int posY;
+        public int posZ;
+        public string cropName;
+        public int growthProgress;
+        public int soilState;
+        public int cropStage;
+        public bool isWatered;
     }
 }

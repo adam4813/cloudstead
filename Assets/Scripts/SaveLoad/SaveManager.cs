@@ -2,8 +2,21 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
+[System.Serializable]
+public struct SaveSlotMetadata
+{
+    public bool exists;
+    public int day;
+    public string season;
+    public int year;
+}
+
 public class SaveManager : Singleton<SaveManager>
 {
+    [SerializeField] private string activeSlotName = "slot1";
+
+    public string ActiveSlot => activeSlotName;
+
     private readonly List<ISaveable> saveables = new();
 
     public void Register(ISaveable saveable)
@@ -70,6 +83,46 @@ public class SaveManager : Singleton<SaveManager>
         return File.Exists(GetSavePath(slotName));
     }
 
+    public void SetActiveSlot(string slotName)
+    {
+        activeSlotName = slotName;
+    }
+
+    public string[] GetAllSlotNames()
+    {
+        return new[] { "slot1", "slot2", "slot3" };
+    }
+
+    public SaveSlotMetadata GetSlotMetadata(string slotName)
+    {
+        string path = GetSavePath(slotName);
+        if (!File.Exists(path))
+            return new SaveSlotMetadata { exists = false };
+
+        try
+        {
+            string json = File.ReadAllText(path);
+            var wrapper = JsonUtility.FromJson<SaveWrapper>(json);
+            if (wrapper != null && wrapper.TryGet("TimeManager", out string timeJson))
+            {
+                var timeData = JsonUtility.FromJson<TimeMetadata>(timeJson);
+                return new SaveSlotMetadata
+                {
+                    exists = true,
+                    day = timeData.currentDay,
+                    season = ((Season)timeData.currentSeason).ToString(),
+                    year = timeData.currentYear
+                };
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[SaveManager] Failed to read metadata for {slotName}: {e.Message}");
+        }
+
+        return new SaveSlotMetadata { exists = true, day = 0, season = "Unknown", year = 0 };
+    }
+
     private string GetSavePath(string slotName)
     {
         return Path.Combine(Application.persistentDataPath, "saves", $"{slotName}.json");
@@ -109,5 +162,14 @@ public class SaveManager : Singleton<SaveManager>
             value = null;
             return false;
         }
+    }
+
+    [System.Serializable]
+    private class TimeMetadata
+    {
+        public float currentTime;
+        public int currentDay;
+        public int currentSeason;
+        public int currentYear;
     }
 }

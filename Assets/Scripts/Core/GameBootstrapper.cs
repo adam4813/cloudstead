@@ -24,6 +24,8 @@ public class GameBootstrapper : MonoBehaviour
             TileManager.Instance.Initialize();
         if (SaveManager.Instance != null)
             SaveManager.Instance.Initialize();
+        if (SceneTransitionManager.Instance != null)
+            SceneTransitionManager.Instance.Initialize();
         if (EconomyManager.Instance != null)
             EconomyManager.Instance.Initialize();
         if (DialogueManager.Instance != null)
