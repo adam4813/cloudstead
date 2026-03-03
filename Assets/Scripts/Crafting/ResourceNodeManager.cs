@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ResourceNodeManager : Singleton<ResourceNodeManager>
+public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
 {
     private readonly List<CloudGenerator> _clouds = new();
     private readonly Dictionary<ResourceNodeDefinition, int> _activeCounts = new();
@@ -14,10 +14,12 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>
         _rng = new System.Random(Random.Range(0, int.MaxValue));
         _totalDays = 0;
         EventBus.Subscribe<DayStartedEvent>(OnDayStarted);
+        SaveManager.Instance?.Register(this);
     }
 
     protected override void OnDestroy()
     {
+        SaveManager.Instance?.Unregister(this);
         EventBus.Unsubscribe<DayStartedEvent>(OnDayStarted);
         base.OnDestroy();
     }
@@ -165,4 +167,139 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>
             Debug.Log($"[ResourceNodeManager] Natural spawn: {spawned}x {def.nodeName} on day {_totalDays}.");
         }
     }
+
+    #region ISaveable
+
+    public string SaveState()
+    {
+        var existing = FindObjectsByType<ResourceNode>(FindObjectsSortMode.None);
+        var nodeEntries = new List<NodeSaveEntry>();
+        foreach (var node in existing)
+        {
+            if (node == null || node.Definition == null) continue;
+            var pos = node.transform.position;
+            nodeEntries.Add(new NodeSaveEntry
+            {
+                definitionName = node.Definition.nodeName,
+                posX = pos.x,
+                posY = pos.y,
+                currentHits = node.CurrentHits
+            });
+        }
+
+        var spawnEntries = new List<SpawnDayEntry>();
+        foreach (var kvp in _lastSpawnDay)
+        {
+            if (kvp.Key == null) continue;
+            spawnEntries.Add(new SpawnDayEntry
+            {
+                definitionName = kvp.Key.nodeName,
+                day = kvp.Value
+            });
+        }
+
+        var data = new NodeManagerSaveData
+        {
+            totalDays = _totalDays,
+            nodes = nodeEntries.ToArray(),
+            lastSpawnDays = spawnEntries.ToArray()
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<NodeManagerSaveData>(json);
+        _totalDays = data.totalDays;
+
+        // Rebuild _lastSpawnDay
+        if (data.lastSpawnDays != null)
+        {
+            foreach (var entry in data.lastSpawnDays)
+            {
+                var def = FindDefinitionByName(entry.definitionName);
+                if (def != null)
+                    _lastSpawnDay[def] = entry.day;
+            }
+        }
+
+        // Destroy all existing resource nodes
+        var existing = FindObjectsByType<ResourceNode>(FindObjectsSortMode.None);
+        foreach (var node in existing)
+            Destroy(node.gameObject);
+
+        // Clear active counts — they'll be re-registered by new nodes in Start()
+        _activeCounts.Clear();
+
+        // Recreate nodes from saved data
+        if (data.nodes != null)
+        {
+            foreach (var entry in data.nodes)
+            {
+                var def = FindDefinitionByName(entry.definitionName);
+                if (def == null) continue;
+
+                GameObject prefab = null;
+                Transform parent = null;
+                foreach (var cloud in _clouds)
+                {
+                    prefab = cloud.GetPrefab(def);
+                    if (prefab != null)
+                    {
+                        parent = cloud.ObstacleParent != null ? cloud.ObstacleParent : cloud.transform;
+                        break;
+                    }
+                }
+                if (prefab == null) continue;
+
+                var pos = new Vector3(entry.posX, entry.posY, 0f);
+                var go = Instantiate(prefab, pos, Quaternion.identity, parent);
+                var node = go.GetComponent<ResourceNode>();
+                if (node != null)
+                {
+                    node.Initialize(def);
+                    node.Restore(entry.currentHits);
+                }
+            }
+        }
+    }
+
+    private ResourceNodeDefinition FindDefinitionByName(string defName)
+    {
+        foreach (var cloud in _clouds)
+        {
+            if (cloud?.NodeConfigs == null) continue;
+            foreach (var cfg in cloud.NodeConfigs)
+            {
+                if (cfg.definition != null && cfg.definition.nodeName == defName)
+                    return cfg.definition;
+            }
+        }
+        return null;
+    }
+
+    [System.Serializable]
+    private class NodeManagerSaveData
+    {
+        public int totalDays;
+        public NodeSaveEntry[] nodes;
+        public SpawnDayEntry[] lastSpawnDays;
+    }
+
+    [System.Serializable]
+    private class NodeSaveEntry
+    {
+        public string definitionName;
+        public float posX, posY;
+        public int currentHits;
+    }
+
+    [System.Serializable]
+    private class SpawnDayEntry
+    {
+        public string definitionName;
+        public int day;
+    }
+
+    #endregion
 }

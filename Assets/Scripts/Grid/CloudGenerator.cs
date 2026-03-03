@@ -10,7 +10,7 @@ public class ResourceNodeSpawnConfig
     [Range(0, 20)] public int maxCount;
 }
 
-public class CloudGenerator : MonoBehaviour
+public class CloudGenerator : MonoBehaviour, ISaveable
 {
     [SerializeField] private int cloudWidth = 30;
     [SerializeField] private int cloudHeight = 30;
@@ -46,10 +46,12 @@ public class CloudGenerator : MonoBehaviour
 
         Generate();
         ResourceNodeManager.Instance?.RegisterCloud(this);
+        SaveManager.Instance?.Register(this);
     }
 
     private void OnDestroy()
     {
+        SaveManager.Instance?.Unregister(this);
         ResourceNodeManager.Instance?.UnregisterCloud(this);
     }
 
@@ -266,4 +268,26 @@ public class CloudGenerator : MonoBehaviour
     {
         return transform.position + new Vector3(0.5f, 0.5f, 0f);
     }
+
+    #region ISaveable
+
+    public string SaveState()
+    {
+        return JsonUtility.ToJson(new CloudSaveData { seed = seed });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<CloudSaveData>(json);
+        seed = data.seed;
+        Generate();
+    }
+
+    [System.Serializable]
+    private class CloudSaveData
+    {
+        public int seed;
+    }
+
+    #endregion
 }

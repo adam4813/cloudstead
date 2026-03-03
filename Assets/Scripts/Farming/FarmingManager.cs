@@ -9,7 +9,6 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     [SerializeField] private GameObject cropPrefab;
 
     private Dictionary<Vector3Int, FarmPlot> farmPlots = new();
-    private Dictionary<string, CropDefinition> cropLookup;
 
     public override void Initialize()
     {
@@ -204,7 +203,8 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         }
         farmPlots.Clear();
 
-        BuildCropLookup();
+        var db = GameBootstrapper.Database;
+        if (db == null) { Debug.LogError("[FarmingManager] GameDatabase not assigned"); return; }
 
         foreach (var plotData in data.plots)
         {
@@ -223,22 +223,13 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
             CropDefinition crop = null;
             if (!string.IsNullOrEmpty(plotData.cropName))
-                cropLookup.TryGetValue(plotData.cropName, out crop);
+                crop = db.GetCrop(plotData.cropName);
 
             plot.Restore(crop, plotData.growthProgress, (CropStage)plotData.cropStage,
                 (SoilState)plotData.soilState, plotData.isWatered);
 
             farmPlots[pos] = plot;
         }
-    }
-
-    private void BuildCropLookup()
-    {
-        if (cropLookup != null) return;
-        cropLookup = new Dictionary<string, CropDefinition>();
-        var allCrops = Resources.LoadAll<CropDefinition>("");
-        foreach (var crop in allCrops)
-            cropLookup[crop.cropName] = crop;
     }
 
     [System.Serializable]

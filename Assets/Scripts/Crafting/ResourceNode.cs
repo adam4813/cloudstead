@@ -11,6 +11,9 @@ public class ResourceNode : MonoBehaviour, IInteractable
     private Collider2D _col;
     private Sprite _originalSprite;
 
+    public ResourceNodeDefinition Definition => definition;
+    public int CurrentHits => _currentHits;
+
     private void Awake()
     {
         _col = GetComponent<Collider2D>();
@@ -59,6 +62,19 @@ public class ResourceNode : MonoBehaviour, IInteractable
 
         if (_currentHits >= definition.maxHits)
             Deplete();
+    }
+
+    public void Restore(int hits)
+    {
+        _currentHits = hits;
+        _isDepleted = false;
+        if (_col != null) _col.enabled = true;
+        if (definition != null && definition.hitSprites != null && definition.hitSprites.Length > 0
+            && spriteRenderer != null && hits > 0)
+        {
+            int spriteIndex = Mathf.Min(hits - 1, definition.hitSprites.Length - 1);
+            spriteRenderer.sprite = definition.hitSprites[spriteIndex];
+        }
     }
 
     private void Deplete()

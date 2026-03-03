@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class InventoryManager : Singleton<InventoryManager>, ISaveable
 {
@@ -9,8 +8,6 @@ public class InventoryManager : Singleton<InventoryManager>, ISaveable
     private InventorySlot[] slots;
 
     public int SlotCount => slotCount;
-
-    private Dictionary<string, ItemDefinition> itemLookup;
 
     public override void Initialize()
     {
@@ -134,7 +131,8 @@ public class InventoryManager : Singleton<InventoryManager>, ISaveable
         var data = JsonUtility.FromJson<InventorySaveData>(json);
         if (data?.slots == null) return;
 
-        BuildItemLookup();
+        var db = GameBootstrapper.Database;
+        if (db == null) { Debug.LogError("[InventoryManager] GameDatabase not assigned"); return; }
 
         for (int i = 0; i < slotCount && i < data.slots.Length; i++)
         {
@@ -143,27 +141,22 @@ public class InventoryManager : Singleton<InventoryManager>, ISaveable
             {
                 slots[i].Clear();
             }
-            else if (itemLookup.TryGetValue(slotData.itemId, out var item))
-            {
-                slots[i].Set(item, slotData.count);
-            }
             else
             {
-                Debug.LogWarning($"[InventoryManager] Item '{slotData.itemId}' not found during load");
-                slots[i].Clear();
+                var item = db.GetItem(slotData.itemId);
+                if (item != null)
+                {
+                    slots[i].Set(item, slotData.count);
+                }
+                else
+                {
+                    Debug.LogWarning($"[InventoryManager] Item '{slotData.itemId}' not found during load");
+                    slots[i].Clear();
+                }
             }
         }
 
         EventBus.Publish(new InventoryChangedEvent());
-    }
-
-    private void BuildItemLookup()
-    {
-        if (itemLookup != null) return;
-        itemLookup = new Dictionary<string, ItemDefinition>();
-        var allItems = Resources.LoadAll<ItemDefinition>("");
-        foreach (var item in allItems)
-            itemLookup[item.ItemId] = item;
     }
 
     [System.Serializable]

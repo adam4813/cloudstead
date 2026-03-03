@@ -3,8 +3,16 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class GameBootstrapper : MonoBehaviour
 {
+    [SerializeField] private GameDatabase gameDatabase;
+
+    public static GameDatabase Database { get; private set; }
+
     private void Start()
     {
+        Database = gameDatabase;
+        if (Database == null)
+            Debug.LogError("[GameBootstrapper] GameDatabase not assigned!");
+
         InitializeManagers();
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
