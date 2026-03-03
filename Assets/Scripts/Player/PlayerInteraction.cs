@@ -3,20 +3,33 @@ using UnityEngine.InputSystem;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    [SerializeField] private float interactionRadius = 1.5f;
     [SerializeField] private LayerMask interactableMask;
+
+    [SerializeField] private float pickupHoldDuration = 2f;
 
     private PlayerController playerController;
     private StaminaController staminaController;
     private IInteractable currentTarget;
     private uint ownerId = 0;
 
+    private bool _isHoldingInteract;
+    private float _holdTimer;
+
+    public float HoldProgress => _isHoldingInteract ? Mathf.Clamp01(_holdTimer / pickupHoldDuration) : 0f;
+
     [SerializeField] private QuickbarUI quickbarUI;
+
+    private TileCursor _tileCursor;
 
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
         staminaController = GetComponent<StaminaController>();
+    }
+
+    private void Start()
+    {
+        _tileCursor = FindFirstObjectByType<TileCursor>();
     }
 
     private void Update()
@@ -25,14 +38,48 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         FindNearestInteractable();
+
+        if (_isHoldingInteract)
+        {
+            if (currentTarget is PlacedItem placedTarget && placedTarget.CanInteract(ownerId))
+            {
+                _holdTimer += Time.deltaTime;
+                if (_holdTimer >= pickupHoldDuration)
+                {
+                    _isHoldingInteract = false;
+                    _holdTimer = 0f;
+                    placedTarget.Interact(ownerId);
+                }
+            }
+            else
+            {
+                _isHoldingInteract = false;
+                _holdTimer = 0f;
+            }
+        }
     }
 
     public void OnInteract(InputAction.CallbackContext context)
     {
-        if (!context.performed) return;
         if (GameManager.Instance == null || !GameManager.Instance.IsPlaying) return;
 
-        if (currentTarget != null && currentTarget.CanInteract(ownerId))
+        if (context.started && currentTarget is PlacedItem)
+        {
+            _isHoldingInteract = true;
+            _holdTimer = 0f;
+            return;
+        }
+
+        if (context.canceled)
+        {
+            _isHoldingInteract = false;
+            _holdTimer = 0f;
+            return;
+        }
+
+        if (!context.performed) return;
+
+        if (currentTarget != null && currentTarget is not PlacedItem && currentTarget.CanInteract(ownerId))
         {
             currentTarget.Interact(ownerId);
             EventBus.Publish(new InteractionEvent
@@ -40,7 +87,7 @@ public class PlayerInteraction : MonoBehaviour
                 Target = (currentTarget as MonoBehaviour)?.gameObject
             });
         }
-        else
+        else if (currentTarget == null)
         {
             TryUseActiveItem();
         }
@@ -62,8 +109,13 @@ public class PlayerInteraction : MonoBehaviour
 
     private void FindNearestInteractable()
     {
-        Vector2 origin = (Vector2)transform.position + playerController.GetFacingVector() * 0.5f;
-        var hits = Physics2D.OverlapCircleAll(origin, interactionRadius, interactableMask);
+        if (_tileCursor == null) return;
+
+        Vector2 tileCenter = new Vector2(
+            _tileCursor.HighlightedTile.x + 0.5f,
+            _tileCursor.HighlightedTile.y + 0.5f);
+
+        var hits = Physics2D.OverlapCircleAll(tileCenter, 0.4f, interactableMask);
 
         IInteractable nearest = null;
         float nearestDist = float.MaxValue;

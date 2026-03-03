@@ -19,5 +19,6 @@ MonoBehaviour:
   maxStack: 99
   buyPrice: 0
   sellPrice: 10
-  isPlaceable: 0
+  isPlaceable: 1
+  placeablePrefab: {fileID: 0}
   staminaRestore: 0

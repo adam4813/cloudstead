@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,6 +12,13 @@ public class CloudGenerator : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private TileBase cloudTile;
     [SerializeField] private TileBase edgeTile;
+
+    [Header("Obstacles")]
+    [SerializeField] private GameObject[] treePrefabs;
+    [SerializeField] private GameObject[] rockPrefabs;
+    [SerializeField] [Range(0, 20)] private int treeCount = 5;
+    [SerializeField] [Range(0, 10)] private int rockCount = 3;
+    [SerializeField] private Transform obstacleParent;
 
     private bool[,] walkabilityGrid;
 
@@ -29,6 +37,7 @@ public class CloudGenerator : MonoBehaviour
 
     public void Generate()
     {
+        ClearObstacles();
         walkabilityGrid = new bool[cloudWidth, cloudHeight];
 
         int centerX = cloudWidth / 2;
@@ -59,6 +68,7 @@ public class CloudGenerator : MonoBehaviour
 
         SmoothEdges();
         PaintTilemap();
+        SpawnObstacles();
     }
 
     private void SmoothEdges()
@@ -132,6 +142,85 @@ public class CloudGenerator : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private void ClearObstacles()
+    {
+        if (obstacleParent != null)
+        {
+            for (int i = obstacleParent.childCount - 1; i >= 0; i--)
+                DestroyImmediate(obstacleParent.GetChild(i).gameObject);
+        }
+        else
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child.name.StartsWith("Tree") || child.name.StartsWith("Rock"))
+                    DestroyImmediate(child.gameObject);
+            }
+        }
+    }
+
+    private void SpawnObstacles()
+    {
+        bool hasTrees = treePrefabs != null && treePrefabs.Length > 0;
+        bool hasRocks = rockPrefabs != null && rockPrefabs.Length > 0;
+        if (!hasTrees && !hasRocks) return;
+
+        var rng = new System.Random(seed);
+
+        float centerX = cloudWidth / 2f;
+        float centerY = cloudHeight / 2f;
+        float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * 0.25f;
+
+        var candidates = new List<Vector2Int>();
+        for (int x = 0; x < cloudWidth; x++)
+        {
+            for (int y = 0; y < cloudHeight; y++)
+            {
+                if (!walkabilityGrid[x, y]) continue;
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
+                if (dist <= safeRadius) continue;
+                candidates.Add(new Vector2Int(x, y));
+            }
+        }
+
+        // Fisher-Yates shuffle
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+        }
+
+        Transform parent = obstacleParent != null ? obstacleParent : transform;
+        int index = 0;
+
+        if (hasTrees)
+        {
+            int spawned = 0;
+            while (spawned < treeCount && index < candidates.Count)
+            {
+                var pos = candidates[index++];
+                var prefab = treePrefabs[rng.Next(treePrefabs.Length)];
+                var go = Instantiate(prefab, new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0f), Quaternion.identity, parent);
+                go.name = $"Tree_{spawned}";
+                spawned++;
+            }
+        }
+
+        if (hasRocks)
+        {
+            int spawned = 0;
+            while (spawned < rockCount && index < candidates.Count)
+            {
+                var pos = candidates[index++];
+                var prefab = rockPrefabs[rng.Next(rockPrefabs.Length)];
+                var go = Instantiate(prefab, new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0f), Quaternion.identity, parent);
+                go.name = $"Rock_{spawned}";
+                spawned++;
+            }
+        }
     }
 
     public bool IsWalkable(Vector3Int tilePos)

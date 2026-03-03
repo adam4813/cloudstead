@@ -181,6 +181,7 @@ Transform:
   - {fileID: 763424167}
   - {fileID: 1173886933}
   - {fileID: 1259256228}
+  - {fileID: 1312966011}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &84835001
@@ -10631,6 +10632,11 @@ MonoBehaviour:
   groundTilemap: {fileID: 1276709558}
   cloudTile: {fileID: 11400000, guid: 1f268afe4bac2164b9b5cd67f1ea0ef2, type: 2}
   edgeTile: {fileID: 11400000, guid: c09da1042b615b942a7926f40d52d24b, type: 2}
+  treePrefabs: []
+  rockPrefabs: []
+  treeCount: 5
+  rockCount: 3
+  obstacleParent: {fileID: 0}
 --- !u!114 &1182386497
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10908,6 +10914,51 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1312966010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1312966011}
+  - component: {fileID: 1312966012}
+  m_Layer: 0
+  m_Name: PlacementManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1312966011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312966010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 61090871}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1312966012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312966010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7d95ecc9977ec9428877c8dbaede1f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _ghostMaterial: {fileID: 2100000, guid: 5fc29328740a2164fb57ebcc10555af5, type: 2}
 --- !u!1 &1416351804
 GameObject:
   m_ObjectHideFlags: 0
@@ -21407,6 +21458,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodResourceNode
       objectReference: {fileID: 0}
+    - target: {fileID: 7623729189770032266, guid: ae40af5252a73a24d9bdb694f702d088, type: 3}
+      propertyPath: dropCount
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -21426,7 +21481,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4841130047191557295, guid: fe6ca873291efc644a47ffad4dd1444e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 15
+      value: 14.5
       objectReference: {fileID: 0}
     - target: {fileID: 4841130047191557295, guid: fe6ca873291efc644a47ffad4dd1444e, type: 3}
       propertyPath: m_LocalPosition.z
@@ -21483,7 +21538,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1666163660199140014, guid: 19e1684720f55694f86e56d43c966fd2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 12
+      value: 12.5
       objectReference: {fileID: 0}
     - target: {fileID: 1666163660199140014, guid: 19e1684720f55694f86e56d43c966fd2, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24758,11 +24813,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1802073189301586064, guid: a4fa41abb0abb704aa102d71d0989520, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.5
+      value: 12.5
       objectReference: {fileID: 0}
     - target: {fileID: 1802073189301586064, guid: a4fa41abb0abb704aa102d71d0989520, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 15
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 1802073189301586064, guid: a4fa41abb0abb704aa102d71d0989520, type: 3}
       propertyPath: m_LocalPosition.z

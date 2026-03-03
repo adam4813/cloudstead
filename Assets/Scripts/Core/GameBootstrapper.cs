@@ -34,5 +34,7 @@ public class GameBootstrapper : MonoBehaviour
             SkyWorldManager.Instance.Initialize();
         if (CraftingManager.Instance != null)
             CraftingManager.Instance.Initialize();
+        if (PlacementManager.Instance != null)
+            PlacementManager.Instance.Initialize();
     }
 }

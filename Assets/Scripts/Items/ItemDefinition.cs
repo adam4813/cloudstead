@@ -34,6 +34,10 @@ public class ItemDefinition : ScriptableObject
     [FoldoutGroup("Placement")]
     public bool isPlaceable;
 
+    [FoldoutGroup("Placement")]
+    [Tooltip("Optional prefab to spawn when placed. If null, creates a default PlacedItem with the item icon.")]
+    public GameObject placeablePrefab;
+
     [FoldoutGroup("Consumable")]
     [Tooltip("Amount of stamina restored when this item is eaten. 0 = not a consumable.")]
     [Min(0)]

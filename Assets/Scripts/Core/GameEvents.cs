@@ -30,3 +30,5 @@ public struct PlayerSleptEvent { }
 public struct AirshipBoardedEvent { public Transform AirshipTransform; }
 public struct AirshipLandedEvent { public string CloudName; }
 public struct ShopGreetingEvent { public NPCDefinition Merchant; public string Greeting; }
+public struct ItemPlacedEvent { public ItemDefinition Item; public Vector3Int GridPosition; }
+public struct ItemRemovedFromWorldEvent { public ItemDefinition Item; public Vector3Int GridPosition; }

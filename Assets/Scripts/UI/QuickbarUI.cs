@@ -25,6 +25,17 @@ public class QuickbarUI : MonoBehaviour
         if (index < 0 || index >= quickbarSlots.Length) return;
         activeSlot = index;
         UpdateHighlight();
+        NotifyPlacementManager();
+    }
+
+    private void NotifyPlacementManager()
+    {
+        if (PlacementManager.Instance == null) return;
+        var slot = GetActiveSlotData();
+        if (slot != null && !slot.IsEmpty() && slot.item != null && slot.item.isPlaceable)
+            PlacementManager.Instance.EnterPlacementMode(slot.item);
+        else
+            PlacementManager.Instance.ExitPlacementMode();
     }
 
     public InventorySlot GetActiveSlotData()
