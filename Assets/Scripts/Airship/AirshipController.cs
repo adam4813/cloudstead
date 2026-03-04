@@ -30,8 +30,19 @@ public class AirshipController : MonoBehaviour, ISaveable
     [SerializeField] private float turnSpeed = 90f; // degrees per second
 
     [Header("Boarding")]
-    [SerializeField] private Transform helmPosition;
+    [SerializeField] private Transform helmPosition; // default from prefab
     [SerializeField] private Transform disembarkOffset;
+
+    private Transform _helmOverride;
+
+    /// <summary>Active helm: player-placed override if set, otherwise the prefab default.</summary>
+    private Transform ActiveHelm => _helmOverride != null ? _helmOverride : helmPosition;
+
+    /// <summary>
+    /// Called by AirshipHelm to register a player-placed helm as the active position.
+    /// Pass null to revert to the default prefab helm.
+    /// </summary>
+    public void SetHelmPosition(Transform pos) => _helmOverride = pos;
 
     [Header("Audio")]
     [SerializeField] private AudioSource engineHumSource;
@@ -74,8 +85,8 @@ public class AirshipController : MonoBehaviour, ISaveable
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
 
         // Pin player to helm each physics step — avoids nested Rigidbody2D issues
-        if (boardedPlayer != null && helmPosition != null)
-            boardedPlayer.transform.position = helmPosition.position;
+        if (boardedPlayer != null && ActiveHelm != null)
+            boardedPlayer.transform.position = ActiveHelm.position;
     }
 
     /// <summary>Called by AirshipHelm when the player interacts with the helm.</summary>
@@ -115,8 +126,8 @@ public class AirshipController : MonoBehaviour, ISaveable
             col.enabled = false;
 
         // Teleport to helm — no SetParent, FixedUpdate pins the position each frame
-        if (helmPosition != null)
-            boardedPlayer.transform.position = helmPosition.position;
+        if (ActiveHelm != null)
+            boardedPlayer.transform.position = ActiveHelm.position;
 
         // Become dynamic (unmoored)
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -172,6 +183,10 @@ public class AirshipController : MonoBehaviour, ISaveable
 
         boardedPlayer.CurrentAirship = null;
         boardedPlayer.CurrentCloud = landingCloud;
+
+        // Revert placement context from airship to default
+        PlacementManager.Instance?.SetContext(null);
+
         boardedPlayer = null;
         boardedPlayerInput = null;
         boardedPlayerRb = null;

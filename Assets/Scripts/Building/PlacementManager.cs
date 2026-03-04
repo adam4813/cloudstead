@@ -12,6 +12,12 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     private PlacementGhost _activeGhost;
     private readonly List<PlacedItem> _trackedItems = new();
 
+    private IPlacementContext _context;
+    private static readonly CloudPlacementContext _defaultContext = new();
+
+    /// <summary>The active placement context. Falls back to CloudPlacementContext.</summary>
+    public IPlacementContext Context => _context ?? _defaultContext;
+
     public override void Initialize()
     {
         SaveManager.Instance?.Register(this);
@@ -30,6 +36,14 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         _trackedItems.RemoveAll(p => p == null);
     }
 
+    /// <summary>Sets the active placement context. Pass null to revert to the default cloud context.</summary>
+    public void SetContext(IPlacementContext context)
+    {
+        if (IsPlacing)
+            ExitPlacementMode();
+        _context = context;
+    }
+
     /// <summary>
     /// Enters placement mode for the given item, showing a ghost preview.
     /// </summary>
@@ -45,13 +59,12 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         GameObject ghostGO = new GameObject("PlacementGhost");
         SpriteRenderer sr = ghostGO.AddComponent<SpriteRenderer>();
         sr.sprite = item.icon;
-        sr.sortingLayerName = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior
-            ? InteriorManager.ToInteriorLayer("Objects")
-            : "Objects";
+        sr.sortingLayerName = Context.SortingLayer;
         sr.sortingOrder = 10;
         if (_ghostMaterial != null) sr.material = _ghostMaterial;
 
         _activeGhost = ghostGO.AddComponent<PlacementGhost>();
+        _activeGhost.SetContext(Context);
         _activeGhost.UpdateValidity(true);
     }
 
@@ -66,25 +79,36 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
             return;
         }
 
-        InventoryManager.Instance.RemoveItem(_currentItem, 1);
-
-        PlacedItem placedItem = CreatePlacedItemGO(_currentItem);
-        placedItem.OnPlaced(gridPos);
-
-        // Parent to interior objects container when placing inside a building
-        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
-        {
-            var container = InteriorManager.Instance.CurrentInterior.ObjectsContainer;
-            if (container != null)
-                placedItem.transform.SetParent(container, true);
-        }
-
-        _trackedItems.Add(placedItem);
-
-        EventBus.Publish(new ItemPlacedEvent { Item = _currentItem, GridPosition = gridPos });
+        PlaceItemAt(_currentItem, gridPos);
 
         if (InventoryManager.Instance.GetItemCount(_currentItem) == 0)
             ExitPlacementMode();
+    }
+
+    /// <summary>
+    /// Creates a placed item at the given grid position using the active context for
+    /// sorting, parenting, and positioning. Removes the item from inventory, tracks
+    /// the result for save/restore. Can be called directly by external systems
+    /// (e.g., AirshipBuildMode) that handle their own ghost/input.
+    /// </summary>
+    public PlacedItem PlaceItemAt(ItemDefinition item, Vector3Int gridPos)
+    {
+        InventoryManager.Instance.RemoveItem(item, 1);
+
+        PlacedItem placedItem = CreatePlacedItemGO(item, Context.SortingLayer);
+        placedItem.OnPlaced(gridPos);
+
+        Transform parent = Context.GetParent();
+        if (parent != null)
+            placedItem.transform.SetParent(parent, false);
+
+        // Override world position using context (e.g., tilemap cell center on airships)
+        placedItem.transform.position = Context.CellToWorldPosition(gridPos);
+
+        _trackedItems.Add(placedItem);
+
+        EventBus.Publish(new ItemPlacedEvent { Item = item, GridPosition = gridPos });
+        return placedItem;
     }
 
     /// <summary>
@@ -124,11 +148,8 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         {
             if (_activeGhost != null && Camera.main != null)
             {
-                Vector2 screenPos = Mouse.current.position.ReadValue();
-                Vector3 worldPos = Camera.main.ScreenToWorldPoint(
-                    new Vector3(screenPos.x, screenPos.y, -Camera.main.transform.position.z));
-                worldPos.z = 0f;
-                Vector3Int gridPos = new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
+                Vector3 worldPos = GetMouseWorldPos();
+                Vector3Int gridPos = Context.WorldToCell(worldPos);
                 ConfirmPlacement(gridPos);
             }
         }
@@ -139,12 +160,13 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         }
     }
 
-    private PlacedItem CreatePlacedItemGO(ItemDefinition item)
+    private Vector3 GetMouseWorldPos()
     {
-        string sortingLayer = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior
-            ? InteriorManager.ToInteriorLayer("Objects")
-            : "Objects";
-        return CreatePlacedItemGO(item, sortingLayer);
+        Vector2 screenPos = Mouse.current.position.ReadValue();
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+            new Vector3(screenPos.x, screenPos.y, -Camera.main.transform.position.z));
+        worldPos.z = 0f;
+        return worldPos;
     }
 
     #region ISaveable
@@ -251,7 +273,25 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
             placed.OnPlaced(gridPos);
 
             if (parent != null)
-                placed.transform.SetParent(parent, true);
+            {
+                if (ctx.StartsWith("airship:"))
+                {
+                    // Airship can be rotated/moved — use its tilemap for correct positioning
+                    string id = ctx.Substring("airship:".Length);
+                    var tilemap = airships.TryGetValue(id, out var ship)
+                        ? ship.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>()
+                        : null;
+
+                    placed.transform.SetParent(parent, false);
+                    placed.transform.position = tilemap != null
+                        ? tilemap.GetCellCenterWorld(gridPos)
+                        : parent.TransformPoint(new Vector3(gridPos.x + 0.5f, gridPos.y + 0.5f, 0f));
+                }
+                else
+                {
+                    placed.transform.SetParent(parent, true);
+                }
+            }
 
             _trackedItems.Add(placed);
         }

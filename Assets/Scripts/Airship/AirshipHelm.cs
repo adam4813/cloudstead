@@ -17,6 +17,17 @@ public class AirshipHelm : MonoBehaviour, IInteractable
 
         if (airship == null)
             airship = GetComponentInParent<AirshipController>();
+
+        // Player-placed helms override the default prefab helm position
+        if (airship != null && GetComponent<PlacedItem>() != null)
+            airship.SetHelmPosition(transform);
+    }
+
+    private void OnDestroy()
+    {
+        // Revert to default helm when the placed helm is removed
+        if (airship != null && GetComponent<PlacedItem>() != null)
+            airship.SetHelmPosition(null);
     }
 
     // ── IInteractable ────────────────────────────────────────────────────────

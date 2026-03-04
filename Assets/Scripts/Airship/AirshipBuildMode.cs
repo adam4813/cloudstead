@@ -5,9 +5,14 @@ using UnityEngine.Tilemaps;
 using Sirenix.OdinInspector;
 
 /// <summary>
-/// Allows the player to place ship parts (tiles) and ship items on a docked airship.
-/// Toggle with B while aboard a docked airship. Left-click places, right-click removes.
-/// Implements ISaveable to persist tile modifications across sessions.
+/// Tile-only editor for airship structural parts (hull, wings, railings, etc.).
+/// Entered via dock interaction (AirshipDock), not inventory. Ship parts are
+/// purchased with gold and placed directly onto the airship's tilemaps.
+///
+/// Item placement on the airship deck (helm, lantern, etc.) is handled by
+/// PlacementManager with an AirshipPlacementContext — same UX as everywhere else.
+///
+/// Implements ISaveable to persist player-placed tiles across sessions.
 /// </summary>
 public class AirshipBuildMode : MonoBehaviour, ISaveable
 {
@@ -15,6 +20,10 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
     [SerializeField] [Required] private Tilemap floorTilemap;
     [SerializeField] private Tilemap decorationTilemap;
     [SerializeField] private Tilemap wallsTilemap;
+
+    [Header("Ship Parts")]
+    [Tooltip("Available structural parts the player can purchase and place.")]
+    [SerializeField] private ShipPartDefinition[] availableParts;
 
     [Header("Ghost")]
     [SerializeField] private Color validColor = new Color(0f, 1f, 0f, 0.5f);
@@ -24,12 +33,19 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
     private bool isActive;
     private GameObject ghostGO;
     private SpriteRenderer ghostSR;
-    private ItemDefinition currentItem;
+    private int selectedPartIndex = -1;
     private bool ghostValid;
 
     private readonly List<AirshipTileSave> placedTiles = new();
 
     public bool IsActive => isActive;
+    public ShipPartDefinition[] AvailableParts => availableParts;
+    public int SelectedPartIndex => selectedPartIndex;
+
+    private ShipPartDefinition SelectedPart =>
+        selectedPartIndex >= 0 && selectedPartIndex < availableParts.Length
+            ? availableParts[selectedPartIndex]
+            : null;
 
     private void Awake()
     {
@@ -48,96 +64,98 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
 
     private void Update()
     {
-        if (Keyboard.current == null) return;
-
-        // Toggle build mode with B
-        if (Keyboard.current.bKey.wasPressedThisFrame)
-        {
-            if (isActive)
-                ExitBuildMode();
-            else
-                TryEnterBuildMode();
-            return;
-        }
-
         if (!isActive) return;
 
-        UpdateCurrentItem();
-        UpdateGhost();
+        HandlePartSelection();
+        UpdateTileGhost();
         HandleInput();
     }
 
-    private void TryEnterBuildMode()
+    /// <summary>Called by AirshipDock when the player interacts with the dock while aboard.</summary>
+    public void EnterEditMode()
     {
-        if (airship == null) return;
-        if (airship.IsFlying) return;
-
-        // Player must be associated with this airship
-        var player = FindFirstObjectByType<PlayerController>();
-        if (player == null || player.CurrentAirship != airship) return;
+        if (airship == null || airship.IsFlying) return;
 
         isActive = true;
+        selectedPartIndex = availableParts != null && availableParts.Length > 0 ? 0 : -1;
+
+        if (SelectedPart != null)
+            CreateTileGhost();
+
+        PlacementManager.Instance?.ExitPlacementMode();
+
         GameManager.Instance.SetState(GameState.Building);
         EventBus.Publish(new AirshipBuildModeEnteredEvent { AirshipId = airship.AirshipId });
+        Debug.Log($"[AirshipBuildMode] Entered edit mode. {availableParts?.Length ?? 0} parts available.");
     }
 
-    private void ExitBuildMode()
+    public void ExitEditMode()
     {
         isActive = false;
-        DestroyGhost();
-        currentItem = null;
+        DestroyTileGhost();
+        selectedPartIndex = -1;
+
         GameManager.Instance.SetState(GameState.Playing);
         EventBus.Publish(new AirshipBuildModeExitedEvent { AirshipId = airship.AirshipId });
     }
 
-    private void UpdateCurrentItem()
-    {
-        var quickbar = Object.FindFirstObjectByType<QuickbarUI>();
-        if (quickbar == null) { SetCurrentItem(null); return; }
+    #region Part Selection
 
-        InventorySlot slot = quickbar.GetActiveSlotData();
-        if (slot == null || slot.IsEmpty() || slot.item == null)
+    private void HandlePartSelection()
+    {
+        if (Keyboard.current == null || availableParts == null || availableParts.Length == 0) return;
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            SetCurrentItem(null);
+            ExitEditMode();
             return;
         }
 
-        var item = slot.item;
-        bool isAirshipItem = item.airshipTile != null
-            || (item.isPlaceable && item.requiresBuildMode)
-            || item.isPlaceable;
-
-        SetCurrentItem(isAirshipItem ? item : null);
-    }
-
-    private void SetCurrentItem(ItemDefinition item)
-    {
-        if (currentItem == item) return;
-        currentItem = item;
-
-        if (currentItem == null)
+        for (int i = 0; i < Mathf.Min(availableParts.Length, 9); i++)
         {
-            DestroyGhost();
-            return;
+            if (Keyboard.current[Key.Digit1 + i].wasPressedThisFrame)
+            {
+                SelectPart(i);
+                return;
+            }
         }
 
-        CreateGhost();
+        if (Mouse.current != null)
+        {
+            float scroll = Mouse.current.scroll.ReadValue().y;
+            if (scroll > 0f)
+                SelectPart((selectedPartIndex + 1) % availableParts.Length);
+            else if (scroll < 0f)
+                SelectPart((selectedPartIndex - 1 + availableParts.Length) % availableParts.Length);
+        }
     }
 
-    private void CreateGhost()
+    private void SelectPart(int index)
     {
-        DestroyGhost();
-        if (currentItem == null) return;
+        if (index < 0 || index >= availableParts.Length) return;
+        selectedPartIndex = index;
+        CreateTileGhost();
+    }
 
-        ghostGO = new GameObject("AirshipBuildGhost");
+    #endregion
+
+    #region Ghost Preview
+
+    private void CreateTileGhost()
+    {
+        DestroyTileGhost();
+        var part = SelectedPart;
+        if (part == null) return;
+
+        ghostGO = new GameObject("AirshipTileGhost");
         ghostSR = ghostGO.AddComponent<SpriteRenderer>();
-        ghostSR.sprite = currentItem.icon;
+        ghostSR.sprite = part.icon;
         ghostSR.sortingLayerName = "Objects";
         ghostSR.sortingOrder = 100;
         ghostSR.color = validColor;
     }
 
-    private void DestroyGhost()
+    private void DestroyTileGhost()
     {
         if (ghostGO != null)
         {
@@ -148,162 +166,84 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
         ghostValid = false;
     }
 
-    private void UpdateGhost()
+    private void UpdateTileGhost()
     {
         if (ghostGO == null || Mouse.current == null || Camera.main == null) return;
 
+        var part = SelectedPart;
+        if (part == null) { ghostValid = false; return; }
+
         Vector3 worldPos = GetMouseWorldPos();
-        Tilemap targetMap = GetTargetTilemap(currentItem);
+        Tilemap targetMap = GetTargetTilemap(part.layer);
         if (targetMap == null) { ghostValid = false; return; }
 
         Vector3Int cellPos = targetMap.WorldToCell(worldPos);
-        Vector3 snapped = targetMap.GetCellCenterWorld(cellPos);
-        ghostGO.transform.position = snapped;
+        ghostGO.transform.position = targetMap.GetCellCenterWorld(cellPos);
 
-        ghostValid = IsPlacementValid(currentItem, targetMap, cellPos);
+        ghostValid = IsTilePlacementValid(targetMap, cellPos);
         ghostSR.color = ghostValid ? validColor : invalidColor;
     }
+
+    #endregion
+
+    #region Input
 
     private void HandleInput()
     {
         if (Mouse.current == null) return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame && currentItem != null)
-        {
-            TryPlace();
-        }
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+            TryPlaceTile();
         else if (Mouse.current.rightButton.wasPressedThisFrame)
-        {
-            TryRemove();
-        }
+            TryRemoveTile(GetMouseWorldPos());
     }
 
-    private void TryPlace()
+    #endregion
+
+    #region Tile Placement & Removal
+
+    private void TryPlaceTile()
     {
-        if (!ghostValid || currentItem == null) return;
+        var part = SelectedPart;
+        if (!ghostValid || part == null) return;
+
+        if (part.goldCost > 0 && EconomyManager.Instance.GetGold() < part.goldCost)
+        {
+            Debug.Log($"[AirshipBuildMode] Not enough gold. Need {part.goldCost}, have {EconomyManager.Instance.GetGold()}.");
+            return;
+        }
 
         Vector3 worldPos = GetMouseWorldPos();
-
-        if (currentItem.airshipTile != null)
-        {
-            PlaceTile(worldPos);
-        }
-        else if (currentItem.isPlaceable)
-        {
-            PlaceItem(worldPos);
-        }
-    }
-
-    private void PlaceTile(Vector3 worldPos)
-    {
-        Tilemap map = GetTargetTilemap(currentItem);
+        Tilemap map = GetTargetTilemap(part.layer);
         if (map == null) return;
 
         Vector3Int cellPos = map.WorldToCell(worldPos);
-
-        // Don't overwrite existing tiles on the same layer
         if (map.GetTile(cellPos) != null) return;
+        if (!IsTilePlacementValid(map, cellPos)) return;
 
-        if (!IsPlacementValid(currentItem, map, cellPos)) return;
+        if (part.goldCost > 0)
+            EconomyManager.Instance.SpendGold(part.goldCost);
 
-        InventoryManager.Instance.RemoveItem(currentItem, 1);
-        map.SetTile(cellPos, currentItem.airshipTile);
-
+        map.SetTile(cellPos, part.tile);
         placedTiles.Add(new AirshipTileSave
         {
             x = cellPos.x,
             y = cellPos.y,
-            itemId = currentItem.ItemId,
-            layer = currentItem.airshipLayer
+            partName = part.partName,
+            layer = part.layer
         });
 
         SyncColliders();
-
         EventBus.Publish(new AirshipTilePlacedEvent
         {
             AirshipId = airship.AirshipId,
             GridPosition = cellPos,
-            Layer = currentItem.airshipLayer
+            Layer = part.layer
         });
-
-        // If no more of this item, clear selection
-        if (InventoryManager.Instance.GetItemCount(currentItem) == 0)
-        {
-            currentItem = null;
-            DestroyGhost();
-        }
-    }
-
-    private void PlaceItem(Vector3 worldPos)
-    {
-        Tilemap map = floorTilemap;
-        if (map == null) return;
-
-        Vector3Int cellPos = map.WorldToCell(worldPos);
-
-        // Items must be placed on existing floor tiles
-        if (map.GetTile(cellPos) == null) return;
-        if (PlacedItem.IsOccupied(cellPos)) return;
-
-        InventoryManager.Instance.RemoveItem(currentItem, 1);
-
-        // Create placed item directly, parented to the airship
-        GameObject go = new GameObject($"PlacedItem_{currentItem.itemName}");
-        go.layer = LayerMask.NameToLayer("Interactable");
-
-        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = currentItem.icon;
-        sr.sortingLayerName = "Objects";
-        sr.sortingOrder = 1;
-
-        BoxCollider2D col = go.AddComponent<BoxCollider2D>();
-        col.isTrigger = true;
-        col.size = new Vector2(0.8f, 0.8f);
-
-        PlacedItem placed = go.AddComponent<PlacedItem>();
-        placed.Initialize(currentItem, sr);
-        placed.OnPlaced(cellPos);
-        go.transform.SetParent(transform, true);
-
-        EventBus.Publish(new ItemPlacedEvent { Item = currentItem, GridPosition = cellPos });
-
-        if (InventoryManager.Instance.GetItemCount(currentItem) == 0)
-        {
-            currentItem = null;
-            DestroyGhost();
-        }
-    }
-
-    private void TryRemove()
-    {
-        Vector3 worldPos = GetMouseWorldPos();
-
-        // First check for placed items at cursor
-        if (TryPickUpItem(worldPos)) return;
-
-        // Then check for removable tiles
-        TryRemoveTile(worldPos);
-    }
-
-    private bool TryPickUpItem(Vector3 worldPos)
-    {
-        Collider2D hit = Physics2D.OverlapPoint(worldPos, LayerMask.GetMask("Interactable"));
-        if (hit == null) return false;
-
-        PlacedItem placed = hit.GetComponent<PlacedItem>();
-        if (placed == null || placed.SourceItem == null) return false;
-
-        // Only pick up items parented to this airship
-        if (placed.transform.parent != transform) return false;
-
-        InventoryManager.Instance.AddItem(placed.SourceItem, 1);
-        placed.OnRemoved(); // handles event, occupancy cleanup, and Destroy
-        return true;
     }
 
     private void TryRemoveTile(Vector3 worldPos)
     {
-        // Check each layer from top to bottom: Walls → Decoration → Floor
         if (TryRemoveTileFromMap(wallsTilemap, AirshipTilemapLayer.Walls, worldPos)) return;
         if (TryRemoveTileFromMap(decorationTilemap, AirshipTilemapLayer.Decoration, worldPos)) return;
         TryRemoveTileFromMap(floorTilemap, AirshipTilemapLayer.Floor, worldPos);
@@ -314,58 +254,39 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
         if (map == null) return false;
 
         Vector3Int cellPos = map.WorldToCell(worldPos);
-        TileBase tile = map.GetTile(cellPos);
-        if (tile == null) return false;
+        if (map.GetTile(cellPos) == null) return false;
 
-        // Find the matching placed-tile entry
         int idx = placedTiles.FindIndex(t => t.x == cellPos.x && t.y == cellPos.y && t.layer == layer);
-        if (idx < 0) return false; // only remove player-placed tiles
+        if (idx < 0) return false;
 
-        string itemId = placedTiles[idx].itemId;
+        var removed = placedTiles[idx];
         placedTiles.RemoveAt(idx);
-
         map.SetTile(cellPos, null);
         SyncColliders();
 
-        // Return item to inventory
-        var db = GameBootstrapper.Database;
-        if (db != null)
-        {
-            var itemDef = db.GetItem(itemId);
-            if (itemDef != null)
-                InventoryManager.Instance.AddItem(itemDef, 1);
-        }
+        // Refund gold
+        var part = FindPartByName(removed.partName);
+        if (part != null && part.goldCost > 0)
+            EconomyManager.Instance.AddGold(part.goldCost);
 
         return true;
     }
 
-    private bool IsPlacementValid(ItemDefinition item, Tilemap targetMap, Vector3Int cellPos)
-    {
-        if (item.airshipTile != null)
-        {
-            // Ship parts: must be adjacent to an existing floor tile (or on the floor tilemap itself)
-            if (targetMap.GetTile(cellPos) != null) return false; // occupied
+    #endregion
 
-            return HasAdjacentFloorTile(cellPos);
-        }
-        else
-        {
-            // Placed items: must be on an existing floor tile and not occupied
-            if (floorTilemap == null) return false;
-            if (floorTilemap.GetTile(cellPos) == null) return false;
-            if (PlacedItem.IsOccupied(cellPos)) return false;
-            return true;
-        }
+    #region Validation
+
+    private bool IsTilePlacementValid(Tilemap targetMap, Vector3Int cellPos)
+    {
+        if (targetMap.GetTile(cellPos) != null) return false;
+        return HasAdjacentFloorTile(cellPos);
     }
 
     private bool HasAdjacentFloorTile(Vector3Int cellPos)
     {
         if (floorTilemap == null) return false;
-
-        // Allow placement on top of an existing floor tile (for decoration/wall layers)
         if (floorTilemap.GetTile(cellPos) != null) return true;
 
-        // Check 4-directional neighbors on the floor tilemap
         Vector3Int[] offsets = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
         foreach (var offset in offsets)
         {
@@ -374,24 +295,28 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
         return false;
     }
 
-    private Tilemap GetTargetTilemap(ItemDefinition item)
+    private Tilemap GetTargetTilemap(AirshipTilemapLayer layer)
     {
-        if (item == null) return null;
-
-        if (item.airshipTile != null)
+        return layer switch
         {
-            return item.airshipLayer switch
-            {
-                AirshipTilemapLayer.Floor => floorTilemap,
-                AirshipTilemapLayer.Decoration => decorationTilemap,
-                AirshipTilemapLayer.Walls => wallsTilemap,
-                _ => floorTilemap
-            };
-        }
-
-        // For placeable items, use the floor tilemap for grid snapping
-        return floorTilemap;
+            AirshipTilemapLayer.Floor => floorTilemap,
+            AirshipTilemapLayer.Decoration => decorationTilemap,
+            AirshipTilemapLayer.Walls => wallsTilemap,
+            _ => floorTilemap
+        };
     }
+
+    private ShipPartDefinition FindPartByName(string partName)
+    {
+        if (availableParts == null) return null;
+        foreach (var p in availableParts)
+            if (p.partName == partName) return p;
+        return null;
+    }
+
+    #endregion
+
+    #region Utilities
 
     private void SyncColliders()
     {
@@ -410,16 +335,15 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
         return worldPos;
     }
 
+    #endregion
+
     #region ISaveable
 
     public string SaveKey => $"AirshipBuildMode:{airship?.AirshipId ?? "unknown"}";
 
     public string SaveState()
     {
-        return JsonUtility.ToJson(new AirshipBuildSaveData
-        {
-            tiles = placedTiles.ToArray()
-        });
+        return JsonUtility.ToJson(new AirshipBuildSaveData { tiles = placedTiles.ToArray() });
     }
 
     public void RestoreState(string json)
@@ -428,34 +352,19 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
         if (data?.tiles == null) return;
 
         placedTiles.Clear();
-        var db = GameBootstrapper.Database;
-        if (db == null)
-        {
-            Debug.LogWarning("[AirshipBuildMode] RestoreState: GameDatabase not available");
-            return;
-        }
-
         foreach (var entry in data.tiles)
         {
-            var itemDef = db.GetItem(entry.itemId);
-            if (itemDef == null || itemDef.airshipTile == null)
+            var part = FindPartByName(entry.partName);
+            if (part == null || part.tile == null)
             {
-                Debug.LogWarning($"[AirshipBuildMode] RestoreState: item '{entry.itemId}' not found or has no airshipTile");
+                Debug.LogWarning($"[AirshipBuildMode] RestoreState: part '{entry.partName}' not found");
                 continue;
             }
 
-            Tilemap map = entry.layer switch
-            {
-                AirshipTilemapLayer.Floor => floorTilemap,
-                AirshipTilemapLayer.Decoration => decorationTilemap,
-                AirshipTilemapLayer.Walls => wallsTilemap,
-                _ => floorTilemap
-            };
-
+            Tilemap map = GetTargetTilemap(entry.layer);
             if (map == null) continue;
 
-            Vector3Int cellPos = new Vector3Int(entry.x, entry.y, 0);
-            map.SetTile(cellPos, itemDef.airshipTile);
+            map.SetTile(new Vector3Int(entry.x, entry.y, 0), part.tile);
             placedTiles.Add(entry);
         }
 
@@ -474,7 +383,7 @@ public class AirshipBuildMode : MonoBehaviour, ISaveable
     {
         public int x;
         public int y;
-        public string itemId;
+        public string partName;
         public AirshipTilemapLayer layer;
     }
 

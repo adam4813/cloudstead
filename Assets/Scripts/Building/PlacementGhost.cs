@@ -9,16 +9,18 @@ public class PlacementGhost : MonoBehaviour
 
     public bool IsValid { get; private set; }
 
+    private IPlacementContext _context;
+
     private void Awake()
     {
         if (_ghostRenderer == null)
             _ghostRenderer = GetComponent<SpriteRenderer>();
     }
 
-    public void UpdatePosition(Vector3 worldPos)
+    /// <summary>Sets the placement context used for positioning and validation.</summary>
+    public void SetContext(IPlacementContext context)
     {
-        Vector3Int gridPos = new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
-        transform.position = new Vector3(gridPos.x + 0.5f, gridPos.y + 0.5f, 0f);
+        _context = context;
     }
 
     public void UpdateValidity(bool valid)
@@ -37,11 +39,21 @@ public class PlacementGhost : MonoBehaviour
             new Vector3(screenPos.x, screenPos.y, -Camera.main.transform.position.z));
         worldPos.z = 0f;
 
-        Vector3Int gridPos = new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
-        transform.position = new Vector3(gridPos.x + 0.5f, gridPos.y + 0.5f, 0f);
+        if (_context != null)
+        {
+            Vector3Int cellPos = _context.WorldToCell(worldPos);
+            transform.position = _context.CellToWorldPosition(cellPos);
+            UpdateValidity(_context.IsValidPosition(cellPos));
+        }
+        else
+        {
+            // Fallback: grid snap without validation
+            Vector3Int gridPos = new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
+            transform.position = new Vector3(gridPos.x + 0.5f, gridPos.y + 0.5f, 0f);
 
-        bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(gridPos);
-        bool free = !PlacedItem.IsOccupied(gridPos);
-        UpdateValidity(walkable && free);
+            bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(gridPos);
+            bool free = !PlacedItem.IsOccupied(gridPos);
+            UpdateValidity(walkable && free);
+        }
     }
 }

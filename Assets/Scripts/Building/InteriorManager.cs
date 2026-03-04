@@ -78,6 +78,8 @@ public class InteriorManager : Singleton<InteriorManager>
         interior.SetVisible(true);
         _currentInterior = interior;
 
+        PlacementManager.Instance?.SetContext(new InteriorPlacementContext(interior));
+
         if (_player != null)
         {
             if (positionOverride.HasValue)
@@ -101,6 +103,8 @@ public class InteriorManager : Singleton<InteriorManager>
         if (_currentInterior == null) return;
 
         var exitingFrom = _currentInterior;
+
+        PlacementManager.Instance?.SetContext(null);
 
         if (_player != null)
         {

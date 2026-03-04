@@ -32,7 +32,9 @@ public class QuickbarUI : MonoBehaviour
     {
         if (PlacementManager.Instance == null) return;
         var slot = GetActiveSlotData();
-        if (slot != null && !slot.IsEmpty() && slot.item != null && slot.item.isPlaceable)
+        // Tile-based items (airshipTile) are handled by AirshipBuildMode, not PlacementManager
+        if (slot != null && !slot.IsEmpty() && slot.item != null
+            && slot.item.isPlaceable && slot.item.airshipTile == null)
             PlacementManager.Instance.EnterPlacementMode(slot.item);
         else
             PlacementManager.Instance.ExitPlacementMode();

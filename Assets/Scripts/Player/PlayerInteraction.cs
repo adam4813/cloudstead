@@ -12,10 +12,10 @@ public class PlayerInteraction : MonoBehaviour
     private IInteractable currentTarget;
     private uint ownerId = 0;
 
-    private bool _isHoldingInteract;
+    private bool _isHoldingPickup;
     private float _holdTimer;
 
-    public float HoldProgress => _isHoldingInteract ? Mathf.Clamp01(_holdTimer / pickupHoldDuration) : 0f;
+    public float HoldProgress => _isHoldingPickup ? Mathf.Clamp01(_holdTimer / pickupHoldDuration) : 0f;
 
     [SerializeField] private QuickbarUI quickbarUI;
 
@@ -38,47 +38,41 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         FindNearestInteractable();
+        HandlePickupHold();
+    }
 
-        if (_isHoldingInteract)
+    /// <summary>Hold left-click on a PlacedItem to pick it up.</summary>
+    private void HandlePickupHold()
+    {
+        if (Mouse.current == null) return;
+
+        if (Mouse.current.leftButton.isPressed && currentTarget is PlacedItem placedTarget && placedTarget.CanInteract(ownerId))
         {
-            if (currentTarget is PlacedItem placedTarget && placedTarget.CanInteract(ownerId))
+            _holdTimer += Time.deltaTime;
+            if (_holdTimer >= pickupHoldDuration)
             {
-                _holdTimer += Time.deltaTime;
-                if (_holdTimer >= pickupHoldDuration)
-                {
-                    _isHoldingInteract = false;
-                    _holdTimer = 0f;
-                    placedTarget.Interact(ownerId);
-                }
+                _holdTimer = 0f;
+                _isHoldingPickup = false;
+                placedTarget.Interact(ownerId);
             }
             else
             {
-                _isHoldingInteract = false;
-                _holdTimer = 0f;
+                _isHoldingPickup = true;
             }
+        }
+        else
+        {
+            _isHoldingPickup = false;
+            _holdTimer = 0f;
         }
     }
 
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (GameManager.Instance == null || !GameManager.Instance.IsPlaying) return;
-
-        if (context.started && currentTarget is PlacedItem)
-        {
-            _isHoldingInteract = true;
-            _holdTimer = 0f;
-            return;
-        }
-
-        if (context.canceled)
-        {
-            _isHoldingInteract = false;
-            _holdTimer = 0f;
-            return;
-        }
-
         if (!context.performed) return;
 
+        // PlacedItems are picked up via hold-left-click, not E
         if (currentTarget != null && currentTarget is not PlacedItem && currentTarget.CanInteract(ownerId))
         {
             currentTarget.Interact(ownerId);
@@ -87,7 +81,7 @@ public class PlayerInteraction : MonoBehaviour
                 Target = (currentTarget as MonoBehaviour)?.gameObject
             });
         }
-        else if (currentTarget == null)
+        else if (currentTarget == null || currentTarget is PlacedItem)
         {
             TryUseActiveItem();
         }
