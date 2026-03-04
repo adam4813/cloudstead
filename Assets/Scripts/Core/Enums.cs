@@ -6,3 +6,13 @@ public enum SoilState { Untilled, Tilled, Watered }
 public enum CropStage { Seed, Sprout, Growing, Mature }
 public enum Direction { Up, Down, Left, Right }
 public enum AirshipTilemapLayer { Floor, Decoration, Walls }
+
+[System.Flags]
+public enum PlacementZone
+{
+    None     = 0,
+    Exterior = 1 << 0,
+    Interior = 1 << 1,
+    Airship  = 1 << 2,
+    All      = Exterior | Interior | Airship
+}

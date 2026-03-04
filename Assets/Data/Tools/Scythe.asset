@@ -20,6 +20,13 @@ MonoBehaviour:
   buyPrice: 0
   sellPrice: 0
   isPlaceable: 0
+  placeablePrefab: {fileID: 0}
+  allowedZones: 7
+  tileRequirements:
+  - {fileID: 11400000, guid: 240f10e80091dfc4d9b931d707738119, type: 2}
+  airshipTile: {fileID: 0}
+  airshipLayer: 0
+  staminaRestore: 0
   toolType: 4
   staminaCost: 1
   useTime: 0.2

@@ -51,6 +51,14 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     {
         if (item == null || !item.isPlaceable) return;
 
+        // Validate placement zone
+        PlacementZone currentZone = GetCurrentZone();
+        if ((item.allowedZones & currentZone) == 0)
+        {
+            Debug.Log($"[PlacementManager] {item.itemName} cannot be placed in {currentZone}.");
+            return;
+        }
+
         ExitPlacementMode();
 
         IsPlacing = true;
@@ -170,6 +178,20 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
             new Vector3(screenPos.x, screenPos.y, -Camera.main.transform.position.z));
         worldPos.z = 0f;
         return worldPos;
+    }
+
+    /// <summary>Determines the current placement zone based on player context.</summary>
+    public static PlacementZone GetCurrentZone()
+    {
+        var player = Object.FindFirstObjectByType<PlayerController>();
+        if (player != null)
+        {
+            if (player.CurrentAirship != null)
+                return PlacementZone.Airship;
+            if (player.CurrentInterior != null)
+                return PlacementZone.Interior;
+        }
+        return PlacementZone.Exterior;
     }
 
     #region ISaveable

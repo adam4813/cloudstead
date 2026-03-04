@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 
@@ -39,8 +40,12 @@ public class ItemDefinition : ScriptableObject
     public GameObject placeablePrefab;
 
     [FoldoutGroup("Placement")]
-    [Tooltip("If true, this item can only be placed while in build/edit mode on the airship")]
-    public bool requiresBuildMode;
+    [Tooltip("Zones where this item can be placed")]
+    public PlacementZone allowedZones = PlacementZone.All;
+
+    [FoldoutGroup("Usage Rules")]
+    [Tooltip("Tile conditions that must ALL pass for this item to be used/placed/planted at a tile")]
+    public List<TileConditionTag> tileRequirements = new();
 
     [FoldoutGroup("Airship")]
     [Tooltip("If set, this item places a tile on the airship's tilemap instead of spawning a PlacedItem")]

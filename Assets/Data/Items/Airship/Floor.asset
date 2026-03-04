@@ -21,7 +21,9 @@ MonoBehaviour:
   sellPrice: 0
   isPlaceable: 0
   placeablePrefab: {fileID: 0}
-  requiresBuildMode: 0
+  allowedZones: 4
+  tileRequirements:
+  - {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
   airshipTile: {fileID: 11400000, guid: cf5f089b13dc1374f96b136246fefe1d, type: 2}
   airshipLayer: 0
   staminaRestore: 0

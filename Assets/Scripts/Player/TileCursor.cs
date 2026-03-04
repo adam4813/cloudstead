@@ -123,36 +123,10 @@ public class TileCursor : MonoBehaviour
 
         var item = slot.item;
 
-        if (item is ToolDefinition tool)
-        {
-            switch (tool.toolType)
-            {
-                case ToolType.Hoe:
-                    // Can till walkable non-edge tiles that aren't already tilled
-                    return !TileManager.Instance.IsEdgeTile(pos)
-                           && !FarmingManager.Instance.HasPlotAt(pos);
-                case ToolType.WateringCan:
-                    // Can water tilled/planted plots
-                    return FarmingManager.Instance.HasPlotAt(pos);
-                case ToolType.Scythe:
-                    // Can harvest mature crops
-                    var plot = FarmingManager.Instance.GetPlotAt(pos);
-                    return plot != null && plot.PlantedCrop != null
-                           && plot.CurrentStage == CropStage.Mature;
-                default:
-                    return true;
-            }
-        }
-
-        if (item.category == ItemCategory.Seed)
-        {
-            // Can plant on tilled empty plots
-            var seedPlot = FarmingManager.Instance.GetPlotAt(pos);
-            return seedPlot != null && seedPlot.PlantedCrop == null;
-        }
-
-        if (item.isPlaceable)
-            return true;
+        // Data-driven: check tile requirements from the SO
+        if (item.tileRequirements != null && item.tileRequirements.Count > 0)
+            return TileConditionRegistry.Instance != null
+                && TileConditionRegistry.Instance.CheckAll(pos, item.tileRequirements);
 
         return true;
     }

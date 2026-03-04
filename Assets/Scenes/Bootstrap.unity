@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 463014360}
   - component: {fileID: 463014359}
+  - component: {fileID: 463014361}
   m_Layer: 0
   m_Name: GameBootstrapper
   m_TagString: Untagged
@@ -148,6 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2678962f42ceddc4794be8fc581bf4f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameDatabase: {fileID: 11400000, guid: f77045ca44341164c829541fe908d6d5, type: 2}
 --- !u!4 &463014360
 Transform:
   m_ObjectHideFlags: 0
@@ -163,6 +165,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &463014361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 463014358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea19878c69a7a1b4fad4888de2d25d05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkable: {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
+  nonEdge: {fileID: 11400000, guid: f7f0f6d1dff7f6c4789b87a85c5bacb0, type: 2}
+  hasFarmPlot: {fileID: 11400000, guid: 1c0e746cea08b2048935507dba99f6e1, type: 2}
+  noFarmPlot: {fileID: 11400000, guid: 1340a80460950b24bb9531ffd5860321, type: 2}
+  emptyFarmPlot: {fileID: 11400000, guid: 31e38b80ee7e8ff4abdfcfc15b5eec9d, type: 2}
+  hasMatureCrop: {fileID: 11400000, guid: 240f10e80091dfc4d9b931d707738119, type: 2}
 --- !u!1 &1232881759
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,7 +317,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  playerInteractionRange: 1
+  settings:
+    pauseTimeInMenus: 1
+    dayLengthSeconds: 720
+    playerInteractionRange: 1
 --- !u!4 &1493705695
 Transform:
   m_ObjectHideFlags: 0

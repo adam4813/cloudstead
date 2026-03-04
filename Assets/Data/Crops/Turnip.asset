@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa88275eef5d148469f6ac51af5140ea, type: 3}
   - {fileID: 21300000, guid: 6f2c888d30bb90d409adbe78f53bfb5b, type: 3}
   harvestOutputs:
-  - item: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
+  - item: {fileID: 11400000, guid: 110d536b658b0694f8eb93e267b8966b, type: 2}
     minYield: 1
     maxYield: 1
   regrowDays: -1
