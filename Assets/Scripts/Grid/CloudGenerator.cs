@@ -29,6 +29,10 @@ public class CloudGenerator : MonoBehaviour, ISaveable
     [SerializeField] [Range(0f, 0.5f)] private float obstacleSafeZoneRadius = 0.08f;
     [SerializeField] private Transform obstacleParent;
 
+    [Header("Placed Objects")]
+    [Tooltip("Container whose children with PlacedItem components are auto-registered on start")]
+    [SerializeField] private Transform placeableObjectsContainer;
+
     private bool[,] walkabilityGrid;
 
     /// <summary>Bottom-left tile coordinate. GO's position is the cloud centre.</summary>
@@ -49,6 +53,7 @@ public class CloudGenerator : MonoBehaviour, ISaveable
 
         Generate();
         ResourceNodeManager.Instance?.RegisterCloud(this);
+        PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
         SaveManager.Instance?.Register(this);
     }
 

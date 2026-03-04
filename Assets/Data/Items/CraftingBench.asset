@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 126d858df4203674db4e817b9a229f2c, type: 3}
-  m_Name: StoneBrick
+  m_Name: CraftingBench
   m_EditorClassIdentifier: 
-  itemName: Stone Brick
-  description: Hewn and squared for construction.
-  icon: {fileID: 21300000, guid: 81cd98cbdadd48a489e46383de74bb0d, type: 3}
-  category: 2
-  maxStack: 99
+  itemName: Crafting Bench
+  description: 
+  icon: {fileID: 21300000, guid: 5ed20d52688714a4fb2f8d0ba72568fb, type: 3}
+  category: 0
+  maxStack: 1
   buyPrice: 0
-  sellPrice: 10
+  sellPrice: 0
   isPlaceable: 1
-  placeablePrefab: {fileID: 0}
-  allowedZones: 3
+  placeablePrefab: {fileID: 5529542955952520638, guid: 19e1684720f55694f86e56d43c966fd2, type: 3}
+  allowedZones: 7
   tileRequirements:
   - {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
   - {fileID: 11400000, guid: 23e631cc044050148a727dc4b9d476e5, type: 2}

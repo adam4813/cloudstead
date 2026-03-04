@@ -18,6 +18,32 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     /// <summary>The active placement context. Falls back to CloudPlacementContext.</summary>
     public IPlacementContext Context => _context ?? _defaultContext;
 
+    /// <summary>
+    /// Scans all children of the given container for PlacedItem components,
+    /// registers them in the occupied-positions map, and tracks them for save/restore.
+    /// Call from CloudGenerator/BuildingInterior Start() for scene-placed objects.
+    /// Skipped when loading a save — RestoreState handles reconstruction.
+    /// </summary>
+    public void RegisterExistingItems(Transform container)
+    {
+        if (container == null) return;
+        if (SaveManager.Instance != null && SaveManager.Instance.IsLoadPending) return;
+
+        foreach (Transform child in container)
+        {
+            var placed = child.GetComponent<PlacedItem>();
+            if (placed == null) continue;
+
+            Vector3Int gridPos = new Vector3Int(
+                Mathf.FloorToInt(child.position.x),
+                Mathf.FloorToInt(child.position.y), 0);
+
+            placed.OnPlaced(gridPos);
+            if (!_trackedItems.Contains(placed))
+                _trackedItems.Add(placed);
+        }
+    }
+
     public override void Initialize()
     {
         SaveManager.Instance?.Register(this);
@@ -102,7 +128,20 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     public PlacedItem PlaceItemAt(ItemDefinition item, Vector3Int gridPos)
     {
         InventoryManager.Instance.RemoveItem(item, 1);
+        return SpawnPlacedItem(item, gridPos);
+    }
 
+    /// <summary>
+    /// Places an item at the given grid position without removing it from inventory.
+    /// Used for initial world setup and scripted placements.
+    /// </summary>
+    public PlacedItem SpawnItemAt(ItemDefinition item, Vector3Int gridPos)
+    {
+        return SpawnPlacedItem(item, gridPos);
+    }
+
+    private PlacedItem SpawnPlacedItem(ItemDefinition item, Vector3Int gridPos)
+    {
         PlacedItem placedItem = CreatePlacedItemGO(item, Context.SortingLayer);
         placedItem.OnPlaced(gridPos);
 
@@ -110,7 +149,6 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         if (parent != null)
             placedItem.transform.SetParent(parent, false);
 
-        // Override world position using context (e.g., tilemap cell center on airships)
         placedItem.transform.position = Context.CellToWorldPosition(gridPos);
 
         _trackedItems.Add(placedItem);

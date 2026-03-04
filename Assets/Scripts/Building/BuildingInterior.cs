@@ -30,11 +30,20 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] private Transform objectsContainer;
     public Transform ObjectsContainer => objectsContainer;
 
+    [FoldoutGroup("Objects")]
+    [Tooltip("Container whose children with PlacedItem components are auto-registered on start")]
+    [SerializeField] private Transform placeableObjectsContainer;
+
     [FoldoutGroup("Lighting")]
     [SerializeField] private Light2D interiorAmbientLight;
     public Light2D InteriorAmbientLight => interiorAmbientLight;
 
     private void Awake() => SetVisible(false);
+
+    private void Start()
+    {
+        PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
+    }
 
     public void SetVisible(bool visible)
     {

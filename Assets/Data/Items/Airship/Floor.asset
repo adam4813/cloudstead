@@ -23,7 +23,7 @@ MonoBehaviour:
   placeablePrefab: {fileID: 0}
   allowedZones: 4
   tileRequirements:
-  - {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
+  - {fileID: 11400000, guid: 23e631cc044050148a727dc4b9d476e5, type: 2}
   airshipTile: {fileID: 11400000, guid: cf5f089b13dc1374f96b136246fefe1d, type: 2}
   airshipLayer: 0
   staminaRestore: 0

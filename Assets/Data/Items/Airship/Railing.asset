@@ -24,6 +24,7 @@ MonoBehaviour:
   allowedZones: 4
   tileRequirements:
   - {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
+  - {fileID: 11400000, guid: 23e631cc044050148a727dc4b9d476e5, type: 2}
   airshipTile: {fileID: 11400000, guid: f7fb9d398716b3f4a89d4b9b9b1fea46, type: 2}
   airshipLayer: 0
   staminaRestore: 0

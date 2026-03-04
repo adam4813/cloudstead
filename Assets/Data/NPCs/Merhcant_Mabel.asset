@@ -23,7 +23,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
   - {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
   - {fileID: 11400000, guid: 8fe9aa53c6f619546a69bb709bf830fb, type: 2}
-  shopPrices: 140000001e0000003200000001000000
+  - {fileID: 11400000, guid: aae7fe93d83dab542aa2a0913413e174, type: 2}
+  shopPrices: 140000001e000000320000000100000001000000
   acceptsGifts: 1
   likedGifts: []
   likedGiftResponses: []

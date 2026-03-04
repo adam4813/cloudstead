@@ -22,6 +22,12 @@ public class TileConditionRegistry : Singleton<TileConditionRegistry>
     [Required] [SerializeField] private TileConditionTag emptyFarmPlot;
     [FoldoutGroup("Built-in Conditions")]
     [Required] [SerializeField] private TileConditionTag hasMatureCrop;
+    [FoldoutGroup("Built-in Conditions")]
+    [Required] [SerializeField] private TileConditionTag unoccupied;
+
+    [FoldoutGroup("Settings")]
+    [Tooltip("Physics layers to check for blocking objects (resource nodes, NPCs, etc.)")]
+    [SerializeField] private LayerMask blockingLayers;
 
     private readonly Dictionary<TileConditionTag, Func<Vector3Int, bool>> _checks = new();
 
@@ -84,6 +90,13 @@ public class TileConditionRegistry : Singleton<TileConditionRegistry>
             var plot = FarmingManager.Instance.GetPlotAt(pos);
             return plot != null && plot.PlantedCrop != null
                    && plot.CurrentStage == CropStage.Mature;
+        });
+
+        RegisterCondition(unoccupied, pos =>
+        {
+            if (PlacedItem.IsOccupied(pos)) return false;
+            Vector2 center = new Vector2(pos.x + 0.5f, pos.y + 0.5f);
+            return Physics2D.OverlapCircle(center, 0.3f, blockingLayers) == null;
         });
     }
 }

@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8260955854389133901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2409718459715477509}
+  - component: {fileID: 6054623503665887512}
+  - component: {fileID: 6464140224152270002}
+  - component: {fileID: 2970533294941172200}
+  m_Layer: 0
+  m_Name: GameBootstrapper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2409718459715477509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8260955854389133901}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6054623503665887512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8260955854389133901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2678962f42ceddc4794be8fc581bf4f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameDatabase: {fileID: 11400000, guid: f77045ca44341164c829541fe908d6d5, type: 2}
+--- !u!114 &6464140224152270002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8260955854389133901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea19878c69a7a1b4fad4888de2d25d05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkable: {fileID: 11400000, guid: e779830e26b9afd4f9e092c7ddc846b3, type: 2}
+  nonEdge: {fileID: 11400000, guid: f7f0f6d1dff7f6c4789b87a85c5bacb0, type: 2}
+  hasFarmPlot: {fileID: 11400000, guid: 1c0e746cea08b2048935507dba99f6e1, type: 2}
+  noFarmPlot: {fileID: 11400000, guid: 1340a80460950b24bb9531ffd5860321, type: 2}
+  emptyFarmPlot: {fileID: 11400000, guid: 31e38b80ee7e8ff4abdfcfc15b5eec9d, type: 2}
+  hasMatureCrop: {fileID: 11400000, guid: 240f10e80091dfc4d9b931d707738119, type: 2}
+  unoccupied: {fileID: 11400000, guid: 23e631cc044050148a727dc4b9d476e5, type: 2}
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 640
+--- !u!114 &2970533294941172200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8260955854389133901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 268bac0c3b8d7d3498627793f1773172, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnipSeed: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
+  potatoSeed: {fileID: 11400000, guid: f85b81d69accc28439eb57969e334256, type: 2}
+  sunflowerSeed: {fileID: 11400000, guid: fafbdac886a16254da283ae96ac22e90, type: 2}
+  hoe: {fileID: 11400000, guid: 18f86701f2c35254d98d2257b48d1fad, type: 2}
+  wateringCan: {fileID: 11400000, guid: 6aa8f006936ec3a45b0d06ca757dfbae, type: 2}
+  scythe: {fileID: 11400000, guid: 3827470552a6a444ea0342b14b8e5144, type: 2}
+  turnipSeedCount: 15
+  potatoSeedCount: 10
+  sunflowerSeedCount: 5
