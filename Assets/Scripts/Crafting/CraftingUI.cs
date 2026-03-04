@@ -15,7 +15,6 @@ public class CraftingUI : MonoBehaviour
 
     private void Start()
     {
-        EventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
         if (panel != null) panel.SetActive(false);
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -23,7 +22,6 @@ public class CraftingUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        EventBus.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
         if (_isOpen)
             EventBus.Unsubscribe<InventoryChangedEvent>(OnInventoryChanged);
     }
@@ -42,12 +40,7 @@ public class CraftingUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
         EventBus.Unsubscribe<InventoryChangedEvent>(OnInventoryChanged);
         _selectedRecipe = null;
-
-        EventBus.Publish(new GameStateChangedEvent
-        {
-            Previous = GameState.Crafting,
-            Current = GameState.Playing
-        });
+        GameManager.Instance?.SetState(GameState.Playing);
     }
 
     public void RefreshRecipes()
@@ -98,9 +91,4 @@ public class CraftingUI : MonoBehaviour
             RefreshRecipes();
     }
 
-    private void OnGameStateChanged(GameStateChangedEvent evt)
-    {
-        if (_isOpen && evt.Current != GameState.Crafting)
-            Close();
-    }
 }

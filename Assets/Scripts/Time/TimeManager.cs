@@ -2,13 +2,15 @@ using UnityEngine;
 
 public class TimeManager : Singleton<TimeManager>, ISaveable
 {
-    [SerializeField] private float dayLengthSeconds = 720f;
-
     private float currentTime; // 0-1 normalized (0=midnight, 0.25=6AM, 0.5=noon, 1=midnight)
     private int currentDay = 1;
     private Season currentSeason = Season.Spring;
     private int currentYear = 1;
     private bool isPaused;
+
+    private float DayLength => GameManager.Instance != null
+        ? GameManager.Instance.DayLengthSeconds
+        : 720f;
 
     public float CurrentTime => currentTime;
     public int CurrentDay => currentDay;
@@ -29,9 +31,19 @@ public class TimeManager : Singleton<TimeManager>, ISaveable
     private void Update()
     {
         if (isPaused) return;
-        if (GameManager.Instance == null || !GameManager.Instance.IsPlaying) return;
+        if (GameManager.Instance == null) return;
 
-        currentTime += Time.deltaTime / dayLengthSeconds;
+        var state = GameManager.Instance.CurrentState;
+
+        // Always pause during sleep/pause
+        if (state == GameState.Sleeping || state == GameState.Paused) return;
+
+        // Configurable: pause in menus, dialogue, and crafting
+        if (GameManager.Instance.PauseTimeInMenus &&
+            (state == GameState.Menu || state == GameState.Dialogue))
+            return;
+
+        currentTime += Time.deltaTime / DayLength;
 
         EventBus.Publish(new TimeTickEvent { NormalizedTime = currentTime });
 

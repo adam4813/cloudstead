@@ -39,3 +39,4 @@ public struct GiftGivenEvent { public uint GiverId; public NPCDefinition NPC; pu
 public struct AirshipBuildModeEnteredEvent { public string AirshipId; }
 public struct AirshipBuildModeExitedEvent { public string AirshipId; }
 public struct AirshipTilePlacedEvent { public string AirshipId; public Vector3Int GridPosition; public AirshipTilemapLayer Layer; }
+public struct WorldSettingsChangedEvent { public WorldSettings Settings; }

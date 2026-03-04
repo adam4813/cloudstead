@@ -25,7 +25,7 @@ public class RecipeEntryUI : MonoBehaviour
             recipeName.text = recipe.recipeName;
 
         if (ingredients != null)
-            ingredients.text = BuildIngredientsText(recipe);
+            ingredients.text = BuildIngredientsText();
 
         if (craftButton != null)
         {
@@ -46,8 +46,13 @@ public class RecipeEntryUI : MonoBehaviour
 
     public void Refresh()
     {
-        if (craftButton == null || _recipe == null) return;
-        craftButton.interactable = CraftingManager.Instance != null && CraftingManager.Instance.CanCraft(_recipe);
+        if (_recipe == null) return;
+
+        if (ingredients != null)
+            ingredients.text = BuildIngredientsText();
+
+        if (craftButton != null)
+            craftButton.interactable = CraftingManager.Instance != null && CraftingManager.Instance.CanCraft(_recipe);
     }
 
     private void OnSelected()
@@ -61,17 +66,31 @@ public class RecipeEntryUI : MonoBehaviour
         _owner?.OnCraftButton();
     }
 
-    private static string BuildIngredientsText(RecipeDefinition recipe)
+    private string BuildIngredientsText()
     {
-        if (recipe.inputItems == null || recipe.inputItems.Length == 0)
+        if (_recipe.inputItems == null || _recipe.inputItems.Length == 0)
             return "No ingredients";
 
         var sb = new StringBuilder();
-        for (int i = 0; i < recipe.inputItems.Length; i++)
+        for (int i = 0; i < _recipe.inputItems.Length; i++)
         {
-            if (recipe.inputItems[i] == null) continue;
+            if (_recipe.inputItems[i] == null) continue;
             if (sb.Length > 0) sb.Append(", ");
-            sb.Append($"{recipe.inputItems[i].itemName} x{recipe.inputCounts[i]}");
+
+            int need = _recipe.inputCounts[i];
+            int have = InventoryManager.Instance != null
+                ? InventoryManager.Instance.GetItemCount(_recipe.inputItems[i])
+                : 0;
+
+            string color;
+            if (have >= need)
+                color = "#4CAF50"; // green — fulfilled
+            else if (have > 0)
+                color = "#FFFFFF"; // white — partial
+            else
+                color = "#F44336"; // red — none
+
+            sb.Append($"<color={color}>{_recipe.inputItems[i].itemName} {have}/{need}</color>");
         }
         return sb.ToString();
     }

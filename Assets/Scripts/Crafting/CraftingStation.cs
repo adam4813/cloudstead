@@ -25,11 +25,6 @@ public class CraftingStation : MonoBehaviour, IInteractable
             AudioSource.PlayClipAtPoint(openSound, transform.position);
 
         _craftingUI?.Open();
-
-        EventBus.Publish(new GameStateChangedEvent
-        {
-            Previous = GameState.Playing,
-            Current = GameState.Crafting
-        });
+        GameManager.Instance?.SetState(GameState.Menu);
     }
 }
