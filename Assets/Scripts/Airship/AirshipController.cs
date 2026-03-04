@@ -31,6 +31,7 @@ public class AirshipController : MonoBehaviour, ISaveable
 
     [Header("Boarding")]
     [SerializeField] private Transform helmPosition;
+    [SerializeField] private Transform disembarkOffset;
 
     [Header("Audio")]
     [SerializeField] private AudioSource engineHumSource;
@@ -195,10 +196,19 @@ public class AirshipController : MonoBehaviour, ISaveable
         if (!ctx.performed) return;
 
         LandingPad pad = SkyWorldManager.Instance?.GetNearestLandablePad(transform.position);
-        if (pad == null) return;
-
-        bool isDock = pad.GetComponent<AirshipDock>() != null;
-        DisembarkPlayer(pad.GetPlayerSpawnPosition(), isDock);
+        if (pad != null)
+        {
+            bool isDock = pad.GetComponent<AirshipDock>() != null;
+            DisembarkPlayer(pad.GetPlayerSpawnPosition(), isDock);
+        }
+        else
+        {
+            // No pad nearby — stop piloting, player stands on deck
+            Vector2 spawnPos = disembarkOffset != null
+                ? (Vector2)disembarkOffset.position
+                : (Vector2)transform.position;
+            DisembarkPlayer(spawnPos, false);
+        }
     }
 
     #region ISaveable

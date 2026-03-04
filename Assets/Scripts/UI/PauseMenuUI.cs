@@ -42,12 +42,15 @@ public class PauseMenuUI : MonoBehaviour
         }
     }
 
+    private GameState _stateBeforePause;
+
     private void TogglePause()
     {
         var state = GameManager.Instance.CurrentState;
 
-        if (state == GameState.Playing)
+        if (state == GameState.Playing || state == GameState.Airship)
         {
+            _stateBeforePause = state;
             GameManager.Instance.SetState(GameState.Paused);
             menuPanel.SetActive(true);
             Time.timeScale = 0f;
@@ -62,7 +65,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         Time.timeScale = 1f;
         menuPanel.SetActive(false);
-        GameManager.Instance.SetState(GameState.Playing);
+        GameManager.Instance.SetState(_stateBeforePause);
     }
 
     private void OnResume()
