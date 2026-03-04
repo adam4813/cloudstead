@@ -75,10 +75,12 @@ public class InteriorManager : Singleton<InteriorManager>
     {
         if (interior == null || _currentInterior == interior) return;
 
+        // Set placement context BEFORE making the interior visible,
+        // so RegisterExistingItems uses the correct interior context
+        PlacementManager.Instance?.SetContext(new InteriorPlacementContext(interior));
+
         interior.SetVisible(true);
         _currentInterior = interior;
-
-        PlacementManager.Instance?.SetContext(new InteriorPlacementContext(interior));
 
         if (_player != null)
         {

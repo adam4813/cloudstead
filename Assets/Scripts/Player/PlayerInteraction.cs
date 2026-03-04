@@ -46,7 +46,10 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (Mouse.current == null) return;
 
-        if (Mouse.current.leftButton.isPressed && currentTarget is PlacedItem placedTarget && placedTarget.CanInteract(ownerId))
+        // Check for PlacedItem on the same GameObject as the current target
+        PlacedItem placedTarget = (currentTarget as MonoBehaviour)?.GetComponent<PlacedItem>();
+
+        if (Mouse.current.leftButton.isPressed && placedTarget != null && placedTarget.CanInteract(ownerId))
         {
             _holdTimer += Time.deltaTime;
             if (_holdTimer >= pickupHoldDuration)

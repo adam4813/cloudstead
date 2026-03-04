@@ -13,10 +13,16 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     private readonly List<PlacedItem> _trackedItems = new();
 
     private IPlacementContext _context;
-    private static readonly CloudPlacementContext _defaultContext = new();
+    private CloudPlacementContext _defaultContext;
 
     /// <summary>The active placement context. Falls back to CloudPlacementContext.</summary>
     public IPlacementContext Context => _context ?? _defaultContext;
+
+    /// <summary>Sets the default cloud placement parent. Called by CloudGenerator on Start.</summary>
+    public void SetDefaultParent(Transform parent)
+    {
+        _defaultContext = new CloudPlacementContext(parent);
+    }
 
     /// <summary>
     /// Scans all children of the given container for PlacedItem components,
@@ -26,13 +32,27 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     /// </summary>
     public void RegisterExistingItems(Transform container)
     {
-        if (container == null) return;
-        if (SaveManager.Instance != null && SaveManager.Instance.IsLoadPending) return;
+        if (container == null) return; 
+
+        string sortingLayer = Context.SortingLayer;
 
         foreach (Transform child in container)
         {
             var placed = child.GetComponent<PlacedItem>();
             if (placed == null) continue;
+
+            // Ensure the object is detectable by physics queries
+            child.gameObject.layer = LayerMask.NameToLayer("Interactable");
+            if (child.GetComponent<Collider2D>() == null)
+            {
+                var col = child.gameObject.AddComponent<BoxCollider2D>();
+                col.size = new Vector2(0.8f, 0.8f);
+            }
+
+            // Set sorting layer to match the active placement context
+            var sr = child.GetComponent<SpriteRenderer>();
+            if (sr != null)
+                sr.sortingLayerName = sortingLayer;
 
             Vector3Int gridPos = new Vector3Int(
                 Mathf.FloorToInt(child.position.x),
@@ -46,6 +66,7 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
 
     public override void Initialize()
     {
+        _defaultContext ??= new CloudPlacementContext();
         SaveManager.Instance?.Register(this);
         EventBus.Subscribe<ItemRemovedFromWorldEvent>(OnItemRemoved);
     }

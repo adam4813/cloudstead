@@ -53,7 +53,11 @@ public class CloudGenerator : MonoBehaviour, ISaveable
 
         Generate();
         ResourceNodeManager.Instance?.RegisterCloud(this);
-        PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
+        if (PlacementManager.Instance != null)
+        {
+            PlacementManager.Instance.SetDefaultParent(placeableObjectsContainer);
+            PlacementManager.Instance.RegisterExistingItems(placeableObjectsContainer);
+        }
         SaveManager.Instance?.Register(this);
     }
 

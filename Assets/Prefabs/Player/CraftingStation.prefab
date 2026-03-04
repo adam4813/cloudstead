@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4959291791181683058}
   - component: {fileID: 2499050173333608181}
   - component: {fileID: 3630162342750735581}
+  - component: {fileID: 3787714776832061642}
   m_Layer: 7
   m_Name: CraftingStation
   m_TagString: Untagged
@@ -149,3 +150,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stationName: Workbench
   openSound: {fileID: 8300000, guid: 036f006609d1e45449a8b5ae9b024ace, type: 3}
+--- !u!114 &3787714776832061642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5529542955952520638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73e7ccad05c7d20449e9834f5a00c5d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sourceItem: {fileID: 11400000, guid: aae7fe93d83dab542aa2a0913413e174, type: 2}
+  _spriteRenderer: {fileID: 4959291791181683058}

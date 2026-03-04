@@ -31,9 +31,10 @@ public class InteriorPlacementContext : IPlacementContext
 
     public Transform GetParent()
     {
-        return _interior != null && _interior.ObjectsContainer != null
-            ? _interior.ObjectsContainer
-            : null;
+        if (_interior == null) return null;
+        return _interior.PlaceableObjectsContainer != null
+            ? _interior.PlaceableObjectsContainer
+            : _interior.ObjectsContainer;
     }
 
     public string SortingLayer => InteriorManager.ToInteriorLayer("Objects");

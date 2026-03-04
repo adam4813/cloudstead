@@ -33,17 +33,15 @@ public class BuildingInterior : MonoBehaviour
     [FoldoutGroup("Objects")]
     [Tooltip("Container whose children with PlacedItem components are auto-registered on start")]
     [SerializeField] private Transform placeableObjectsContainer;
+    public Transform PlaceableObjectsContainer => placeableObjectsContainer;
 
     [FoldoutGroup("Lighting")]
     [SerializeField] private Light2D interiorAmbientLight;
     public Light2D InteriorAmbientLight => interiorAmbientLight;
 
-    private void Awake() => SetVisible(false);
+    private bool _itemsRegistered;
 
-    private void Start()
-    {
-        PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
-    }
+    private void Awake() => SetVisible(false);
 
     public void SetVisible(bool visible)
     {
@@ -56,8 +54,19 @@ public class BuildingInterior : MonoBehaviour
         if (objectsContainer != null)
             objectsContainer.gameObject.SetActive(visible);
 
+        // Toggle separately in case placeableObjectsContainer is not under objectsContainer
+        if (placeableObjectsContainer != null && placeableObjectsContainer != objectsContainer
+            && (objectsContainer == null || !placeableObjectsContainer.IsChildOf(objectsContainer)))
+            placeableObjectsContainer.gameObject.SetActive(visible);
+
         if (interiorAmbientLight != null)
             interiorAmbientLight.enabled = visible;
+
+        if (visible && !_itemsRegistered)
+        {
+            _itemsRegistered = true;
+            PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
+        }
     }
 
     /// <summary>Returns true if any interior tilemap has a tile at this world-grid position (used for walkability).</summary>

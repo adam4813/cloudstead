@@ -6,6 +6,13 @@ using UnityEngine;
 /// </summary>
 public class CloudPlacementContext : IPlacementContext
 {
+    private readonly Transform _parent;
+
+    public CloudPlacementContext(Transform parent = null)
+    {
+        _parent = parent;
+    }
+
     public bool IsValidPosition(Vector3Int cellPos)
     {
         bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(cellPos);
@@ -22,7 +29,7 @@ public class CloudPlacementContext : IPlacementContext
         return new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
     }
 
-    public Transform GetParent() => null;
+    public Transform GetParent() => _parent;
 
     public string SortingLayer => "Objects";
 }
