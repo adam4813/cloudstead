@@ -45,6 +45,8 @@ public class AirshipDock : MonoBehaviour, IInteractable
             : dockedAirship.transform.position;
 
         player.transform.position = destination;
+        player.CurrentAirship = dockedAirship;
+        player.CurrentCloud = null; // leaving the cloud
 
         // Disable camera cloud-clamping immediately so it follows the player
         // onto the ship. When AirshipController.BoardPlayer fires later it

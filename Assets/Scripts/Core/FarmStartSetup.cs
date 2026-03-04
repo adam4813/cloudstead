@@ -18,6 +18,14 @@ public class FarmStartSetup : MonoBehaviour
         // Skip when loading from a save — inventory will be restored by SaveManager
         if (SaveManager.Instance != null && SaveManager.Instance.IsLoadPending) return;
 
+        // Set the player's initial cloud context
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player != null && player.CurrentCloud == null)
+        {
+            var homeCloud = FindFirstObjectByType<CloudGenerator>();
+            if (homeCloud != null) player.CurrentCloud = homeCloud;
+        }
+
         // Only give starting items if inventory is empty (first load / no save)
         if (InventoryManager.Instance == null) return;
 

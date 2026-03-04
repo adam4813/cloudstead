@@ -13,6 +13,15 @@ public class PlayerController : MonoBehaviour, ISaveable
     // Multiplayer readiness — will be assigned when networking is added
     [System.NonSerialized] public uint ownerId;
 
+    /// <summary>Set by AirshipDock/AirshipController when the player boards/disembarks.</summary>
+    public AirshipController CurrentAirship { get; set; }
+
+    /// <summary>Set by InteriorManager when the player enters/exits a building.</summary>
+    public BuildingInterior CurrentInterior { get; set; }
+
+    /// <summary>Set by AirshipDock (clear on board) / AirshipController (set on disembark) / FarmStartSetup (initial).</summary>
+    public CloudGenerator CurrentCloud { get; set; }
+
     public Direction FacingDirection { get; private set; } = Direction.Down;
     public bool IsMoving { get; private set; }
     public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
@@ -137,17 +146,36 @@ public class PlayerController : MonoBehaviour, ISaveable
         if (ctx.StartsWith("interior:"))
         {
             string buildingId = ctx.Substring("interior:".Length);
-            var interiors = FindObjectsByType<BuildingInterior>(FindObjectsSortMode.None);
-            foreach (var bi in interiors)
+            foreach (var bi in FindObjectsByType<BuildingInterior>(FindObjectsSortMode.None))
             {
                 if (bi.BuildingId == buildingId)
                 {
                     InteriorManager.Instance?.EnterInterior(bi, pos);
+                    // CurrentInterior is set by EnterInterior; find parent cloud
+                    var cloud = bi.GetComponentInParent<CloudGenerator>();
+                    if (cloud != null) CurrentCloud = cloud;
                     return;
                 }
             }
-            // Interior not found — fall through to default position
             Debug.LogWarning($"[PlayerController] RestoreState: interior '{buildingId}' not found, spawning at saved position");
+        }
+        else if (ctx.StartsWith("airship:"))
+        {
+            string id = ctx.Substring("airship:".Length);
+            foreach (var ac in FindObjectsByType<AirshipController>(FindObjectsSortMode.None))
+            {
+                if (ac.AirshipId == id) { CurrentAirship = ac; break; }
+            }
+            transform.position = pos;
+            return;
+        }
+        else if (ctx.StartsWith("cloud:"))
+        {
+            string id = ctx.Substring("cloud:".Length);
+            foreach (var cg in FindObjectsByType<CloudGenerator>(FindObjectsSortMode.None))
+            {
+                if (cg.CloudId == id) { CurrentCloud = cg; break; }
+            }
         }
 
         transform.position = pos;
@@ -155,18 +183,14 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private string ResolveContext()
     {
-        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
-        {
-            var interior = InteriorManager.Instance.CurrentInterior;
-            if (interior != null && !string.IsNullOrEmpty(interior.BuildingId))
-                return $"interior:{interior.BuildingId}";
-        }
+        if (CurrentInterior != null && !string.IsNullOrEmpty(CurrentInterior.BuildingId))
+            return $"interior:{CurrentInterior.BuildingId}";
 
-        // Future: check if aboard an airship
-        // var ac = GetComponentInParent<AirshipController>();
-        // if (ac != null) return $"airship:{ac.AirshipId}";
+        if (CurrentAirship != null)
+            return $"airship:{CurrentAirship.AirshipId}";
 
-        return "cloud:home";
+        string cloudId = CurrentCloud != null ? CurrentCloud.CloudId : "home";
+        return $"cloud:{cloudId}";
     }
 
     [System.Serializable]

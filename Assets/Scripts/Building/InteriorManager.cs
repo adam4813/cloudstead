@@ -85,6 +85,9 @@ public class InteriorManager : Singleton<InteriorManager>
             else if (interior.InteriorSpawnPoint != null)
                 _player.transform.position = interior.InteriorSpawnPoint.position;
             SetEntitySpace(_player, true);
+
+            var pc = _player.GetComponent<PlayerController>();
+            if (pc != null) pc.CurrentInterior = interior;
         }
 
         if (pauseTimeOnEnter)
@@ -104,6 +107,9 @@ public class InteriorManager : Singleton<InteriorManager>
             if (exitingFrom.ExteriorSpawnPoint != null)
                 _player.transform.position = exitingFrom.ExteriorSpawnPoint.position;
             SetEntitySpace(_player, false);
+
+            var pc = _player.GetComponent<PlayerController>();
+            if (pc != null) pc.CurrentInterior = null;
         }
 
         exitingFrom.SetVisible(false);

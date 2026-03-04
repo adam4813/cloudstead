@@ -129,7 +129,7 @@ public class AirshipController : MonoBehaviour, ISaveable
     }
 
     /// <summary>Called by OnLand when a valid landing pad is found.</summary>
-    public void DisembarkPlayer(Vector2 spawnPosition, bool moorAtDock)
+    public void DisembarkPlayer(Vector2 spawnPosition, bool moorAtDock, CloudGenerator landingCloud = null)
     {
         if (boardedPlayer == null) return;
 
@@ -170,6 +170,8 @@ public class AirshipController : MonoBehaviour, ISaveable
         if (engineHumSource != null)
             engineHumSource.Stop();
 
+        boardedPlayer.CurrentAirship = null;
+        boardedPlayer.CurrentCloud = landingCloud;
         boardedPlayer = null;
         boardedPlayerInput = null;
         boardedPlayerRb = null;
@@ -199,7 +201,9 @@ public class AirshipController : MonoBehaviour, ISaveable
         if (pad != null)
         {
             bool isDock = pad.GetComponent<AirshipDock>() != null;
-            DisembarkPlayer(pad.GetPlayerSpawnPosition(), isDock);
+            // Resolve the cloud this pad belongs to so the player's context updates
+            var cloud = pad.GetComponentInParent<CloudGenerator>();
+            DisembarkPlayer(pad.GetPlayerSpawnPosition(), isDock, cloud);
         }
         else
         {
@@ -207,7 +211,7 @@ public class AirshipController : MonoBehaviour, ISaveable
             Vector2 spawnPos = disembarkOffset != null
                 ? (Vector2)disembarkOffset.position
                 : (Vector2)transform.position;
-            DisembarkPlayer(spawnPos, false);
+            DisembarkPlayer(spawnPos, false, null);
         }
     }
 
