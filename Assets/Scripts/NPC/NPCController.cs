@@ -1,11 +1,16 @@
 using UnityEngine;
 
-public class NPCController : MonoBehaviour, IInteractable
+public class NPCController : MonoBehaviour, IInteractable, ISaveable
 {
     [SerializeField] private NPCDefinition definition;
     [SerializeField] private Transform[] scheduleWaypoints;
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private DialogueTree greetingDialogue;
+
+    [Header("Friendship")]
+    [SerializeField] private int friendshipPoints;
+    [Tooltip("Extra dialogue trees unlocked at friendship thresholds (index 0 = threshold 1, etc.)")]
+    [SerializeField] private FriendshipDialogue[] friendshipDialogues;
 
     private SpriteRenderer spriteRenderer;
     private int currentWaypointIndex;
@@ -14,10 +19,33 @@ public class NPCController : MonoBehaviour, IInteractable
     [System.NonSerialized] public uint ownerId;
 
     public NPCDefinition Definition => definition;
+    public int FriendshipPoints => friendshipPoints;
+
+    /// <summary>Unique save key per NPC instance, based on definition name.</summary>
+    public string SaveKey => $"NPC_{(definition != null ? definition.npcName : name)}";
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        SaveManager.Instance?.Register(this);
+        EventBus.Subscribe<GiftGivenEvent>(OnGiftGiven);
+    }
+
+    private void OnDestroy()
+    {
+        SaveManager.Instance?.Unregister(this);
+        EventBus.Unsubscribe<GiftGivenEvent>(OnGiftGiven);
+    }
+
+    private void OnGiftGiven(GiftGivenEvent evt)
+    {
+        if (evt.NPC != definition) return;
+        int points = definition.IsLikedGift(evt.Item) ? 2 : 1;
+        friendshipPoints += points;
     }
 
     private void Update()
@@ -65,9 +93,23 @@ public class NPCController : MonoBehaviour, IInteractable
             return;
         }
 
-        if (greetingDialogue != null)
+        // Try friendship-unlocked dialogue first (highest threshold that's met)
+        DialogueTree activeDialogue = greetingDialogue;
+        if (friendshipDialogues != null)
         {
-            DialogueManager.Instance?.StartDialogue(greetingDialogue, definition);
+            for (int i = friendshipDialogues.Length - 1; i >= 0; i--)
+            {
+                if (friendshipPoints >= friendshipDialogues[i].requiredPoints && friendshipDialogues[i].dialogue != null)
+                {
+                    activeDialogue = friendshipDialogues[i].dialogue;
+                    break;
+                }
+            }
+        }
+
+        if (activeDialogue != null)
+        {
+            DialogueManager.Instance?.StartDialogue(activeDialogue, definition);
         }
         else if (definition.greetings != null && definition.greetings.Length > 0)
         {
@@ -128,4 +170,34 @@ public class NPCController : MonoBehaviour, IInteractable
 
         DialogueManager.Instance.StartDialogue(tree, definition);
     }
+
+    #region ISaveable
+
+    public string SaveState()
+    {
+        return JsonUtility.ToJson(new NPCSaveData { friendship = friendshipPoints });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<NPCSaveData>(json);
+        if (data != null)
+            friendshipPoints = data.friendship;
+    }
+
+    [System.Serializable]
+    private class NPCSaveData
+    {
+        public int friendship;
+    }
+
+    #endregion
+}
+
+[System.Serializable]
+public struct FriendshipDialogue
+{
+    [Tooltip("Friendship points required to unlock this dialogue")]
+    public int requiredPoints;
+    public DialogueTree dialogue;
 }

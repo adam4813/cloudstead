@@ -23,6 +23,11 @@ public class AirshipController : MonoBehaviour, ISaveable
     [SerializeField] private string airshipId = "player";
     public string AirshipId => airshipId;
 
+    [Header("Ownership")]
+    [Tooltip("0 = unowned. Only the owner can pilot this airship.")]
+    [SerializeField] private uint ownerId;
+    public uint OwnerId { get => ownerId; set => ownerId = value; }
+
     [Header("Movement")]
     [SerializeField] private float thrustForce = 8f;
     [SerializeField] private float maxSpeed = 12f;
@@ -250,7 +255,8 @@ public class AirshipController : MonoBehaviour, ISaveable
         {
             posX = transform.position.x,
             posY = transform.position.y,
-            rotationZ = transform.eulerAngles.z
+            rotationZ = transform.eulerAngles.z,
+            ownerId = ownerId
         });
     }
 
@@ -261,6 +267,7 @@ public class AirshipController : MonoBehaviour, ISaveable
 
         transform.position = new Vector3(data.posX, data.posY, 0f);
         transform.rotation = Quaternion.Euler(0f, 0f, data.rotationZ);
+        ownerId = data.ownerId;
 
         // Ensure docked state on load
         rb.bodyType = RigidbodyType2D.Kinematic;
@@ -274,6 +281,7 @@ public class AirshipController : MonoBehaviour, ISaveable
         public float posX;
         public float posY;
         public float rotationZ;
+        public uint ownerId;
     }
 
     #endregion

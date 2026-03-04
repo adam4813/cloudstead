@@ -20,6 +20,10 @@ public class WorldSettings
     [Range(1, 3)]
     public int playerInteractionRange = 1;
 
+    [Header("Narrative")]
+    [Tooltip("True during a new game until the opening narrative completes (Day 2 shipyard handoff)")]
+    public bool isNewGame;
+
     public WorldSettings Clone()
     {
         return (WorldSettings)MemberwiseClone();

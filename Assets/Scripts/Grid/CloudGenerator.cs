@@ -15,6 +15,9 @@ public class CloudGenerator : MonoBehaviour, ISaveable
     [SerializeField] private string cloudId = "home";
     public string CloudId => cloudId;
 
+    [SerializeField] private string displayName = "Cloud Island";
+    public string DisplayName => displayName;
+
     [SerializeField] private int cloudWidth = 30;
     [SerializeField] private int cloudHeight = 30;
     [SerializeField] private float noiseScale = 0.15f;
@@ -59,6 +62,19 @@ public class CloudGenerator : MonoBehaviour, ISaveable
             PlacementManager.Instance.RegisterExistingItems(placeableObjectsContainer);
         }
         SaveManager.Instance?.Register(this);
+
+        // Register with island map
+        if (IslandRegistry.Instance != null)
+        {
+            IslandRegistry.Instance.RegisterIsland(new IslandInfo
+            {
+                cloudId = this.cloudId,
+                displayName = this.displayName,
+                worldCenter = (Vector2)transform.position,
+                approximateRadius = Mathf.Max(cloudWidth, cloudHeight) / 2f,
+                isHome = this.cloudId == "home"
+            });
+        }
     }
 
     private void OnDestroy()

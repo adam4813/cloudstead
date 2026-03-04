@@ -40,3 +40,13 @@ public struct AirshipBuildModeEnteredEvent { public string AirshipId; }
 public struct AirshipBuildModeExitedEvent { public string AirshipId; }
 public struct AirshipTilePlacedEvent { public string AirshipId; public Vector3Int GridPosition; public AirshipTilemapLayer Layer; }
 public struct WorldSettingsChangedEvent { public WorldSettings Settings; }
+
+// Island Map
+public struct IslandDiscoveredEvent { public string CloudId; public string DisplayName; }
+
+// Mailbox
+public struct MailReceivedEvent { public string LetterId; public string Sender; }
+public struct MailReadEvent { public string LetterId; }
+
+// Opening Narrative
+public struct NewGameStartedEvent { }

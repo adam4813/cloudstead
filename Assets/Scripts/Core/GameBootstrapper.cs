@@ -52,5 +52,9 @@ public class GameBootstrapper : MonoBehaviour
             InteriorManager.Instance.Initialize();
         if (TileConditionRegistry.Instance != null)
             TileConditionRegistry.Instance.Initialize();
+        if (IslandRegistry.Instance != null)
+            IslandRegistry.Instance.Initialize();
+        if (MailboxManager.Instance != null)
+            MailboxManager.Instance.Initialize();
     }
 }

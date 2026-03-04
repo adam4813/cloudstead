@@ -26,6 +26,14 @@ public class FarmStartSetup : MonoBehaviour
             if (homeCloud != null) player.CurrentCloud = homeCloud;
         }
 
+        // Mark as new game for opening narrative
+        if (GameManager.Instance != null)
+        {
+            var settings = GameManager.Instance.Settings.Clone();
+            settings.isNewGame = true;
+            GameManager.Instance.ApplySettings(settings);
+        }
+
         // Only give starting items if inventory is empty (first load / no save)
         if (InventoryManager.Instance == null) return;
 

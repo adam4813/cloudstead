@@ -46,7 +46,8 @@ public class AirshipHelm : MonoBehaviour, IInteractable
     public string GetInteractionPrompt() => "Pilot Airship (E)";
 
     public bool CanInteract(uint playerId) =>
-        airship != null && !airship.IsFlying && GameManager.Instance.IsPlaying;
+        airship != null && !airship.IsFlying && GameManager.Instance.IsPlaying
+        && airship.OwnerId == playerId;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
