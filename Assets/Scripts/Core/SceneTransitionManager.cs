@@ -51,10 +51,17 @@ public class SceneTransitionManager : Singleton<SceneTransitionManager>
 
         Time.timeScale = 1f;
 
+        // Signal systems to skip initial world generation when loading a save
+        if (saveSlot != null && SaveManager.Instance != null)
+            SaveManager.Instance.IsLoadPending = true;
+
         // Load scene async
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         while (!asyncLoad.isDone)
             yield return null;
+
+        // Wait one frame to let Start() methods run on new scene objects
+        yield return null;
 
         // Load save data after scene is ready
         if (saveSlot != null && SaveManager.Instance != null)

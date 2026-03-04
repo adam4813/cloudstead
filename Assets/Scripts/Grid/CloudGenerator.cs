@@ -280,7 +280,31 @@ public class CloudGenerator : MonoBehaviour, ISaveable
     {
         var data = JsonUtility.FromJson<CloudSaveData>(json);
         seed = data.seed;
-        Generate();
+        // Regenerate terrain only — don't clear obstacles, ResourceNodeManager handles node restore
+        walkabilityGrid = new bool[cloudWidth, cloudHeight];
+
+        int centerX = cloudWidth / 2;
+        int centerY = cloudHeight / 2;
+        float maxRadius = Mathf.Min(cloudWidth, cloudHeight) * 0.45f;
+
+        for (int x = 0; x < cloudWidth; x++)
+        {
+            for (int y = 0; y < cloudHeight; y++)
+            {
+                float noise = Mathf.PerlinNoise(
+                    (x + seed) * noiseScale,
+                    (y + seed) * noiseScale);
+                float distFromCenter = Vector2.Distance(
+                    new Vector2(x, y),
+                    new Vector2(centerX, centerY));
+                float falloff = 1f - Mathf.Clamp01(distFromCenter / maxRadius);
+                float centerBonus = distFromCenter < maxRadius * 0.3f ? 0.3f : 0f;
+                float value = noise * falloff + centerBonus;
+                walkabilityGrid[x, y] = value > threshold;
+            }
+        }
+        SmoothEdges();
+        PaintTilemap();
     }
 
     [System.Serializable]

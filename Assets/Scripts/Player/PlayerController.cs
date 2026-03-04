@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, ISaveable
 {
     [SerializeField] private float moveSpeed = 4f;
     [Tooltip("Y offset from transform center to sample the player's tile position (negative = lower)")]
@@ -22,6 +22,11 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         BaseSpeed = moveSpeed;
+    }
+
+    private void Start()
+    {
+        SaveManager.Instance?.Register(this);
     }
 
     private void FixedUpdate()
@@ -105,5 +110,31 @@ public class PlayerController : MonoBehaviour
             boundary.PlayBumpSound();
             boundary.PushBack(rb);
         }
+    }
+
+    public string SaveState()
+    {
+        var data = new PlayerSaveData
+        {
+            posX = transform.position.x,
+            posY = transform.position.y,
+            facing = (int)FacingDirection
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<PlayerSaveData>(json);
+        if (data == null) return;
+        transform.position = new Vector3(data.posX, data.posY, 0f);
+        FacingDirection = (Direction)data.facing;
+    }
+
+    [System.Serializable]
+    private class PlayerSaveData
+    {
+        public float posX, posY;
+        public int facing;
     }
 }

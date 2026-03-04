@@ -28,6 +28,11 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
     {
         if (cloud == null || _clouds.Contains(cloud)) return;
         _clouds.Add(cloud);
+
+        // Skip initial spawn when loading from save — RestoreState will handle node placement
+        if (SaveManager.Instance != null && SaveManager.Instance.IsLoadPending)
+            return;
+
         SpawnInitialNodes(cloud);
     }
 
@@ -210,6 +215,8 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
     public void RestoreState(string json)
     {
         var data = JsonUtility.FromJson<NodeManagerSaveData>(json);
+        if (data == null) return;
+
         _totalDays = data.totalDays;
 
         // Rebuild _lastSpawnDay
@@ -223,13 +230,17 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
             }
         }
 
-        // Destroy all existing resource nodes
+        // Destroy all existing resource nodes (DestroyImmediate so they're gone before we recreate)
         var existing = FindObjectsByType<ResourceNode>(FindObjectsSortMode.None);
         foreach (var node in existing)
-            Destroy(node.gameObject);
+        {
+            if (node != null && node.gameObject != null)
+                DestroyImmediate(node.gameObject);
+        }
 
-        // Clear active counts — they'll be re-registered by new nodes in Start()
         _activeCounts.Clear();
+
+        Debug.Log($"[ResourceNodeManager] RestoreState: {_clouds.Count} clouds registered, {data.nodes?.Length ?? 0} nodes to restore");
 
         // Recreate nodes from saved data
         if (data.nodes != null)
@@ -237,7 +248,11 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
             foreach (var entry in data.nodes)
             {
                 var def = FindDefinitionByName(entry.definitionName);
-                if (def == null) continue;
+                if (def == null)
+                {
+                    Debug.LogWarning($"[ResourceNodeManager] RestoreState: definition '{entry.definitionName}' not found");
+                    continue;
+                }
 
                 GameObject prefab = null;
                 Transform parent = null;
@@ -250,7 +265,11 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
                         break;
                     }
                 }
-                if (prefab == null) continue;
+                if (prefab == null)
+                {
+                    Debug.LogWarning($"[ResourceNodeManager] RestoreState: no prefab for '{entry.definitionName}'");
+                    continue;
+                }
 
                 var pos = new Vector3(entry.posX, entry.posY, 0f);
                 var go = Instantiate(prefab, pos, Quaternion.identity, parent);

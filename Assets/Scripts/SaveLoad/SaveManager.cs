@@ -17,6 +17,9 @@ public class SaveManager : Singleton<SaveManager>
 
     public string ActiveSlot => activeSlotName;
 
+    /// <summary>True between scene load and SaveManager.Load() completion. Systems should skip initial world generation when this is true.</summary>
+    public bool IsLoadPending { get; set; }
+
     private readonly List<ISaveable> saveables = new();
 
     public void Register(ISaveable saveable)
@@ -55,6 +58,7 @@ public class SaveManager : Singleton<SaveManager>
         if (!File.Exists(path))
         {
             Debug.LogWarning($"[SaveManager] No save found at {path}");
+            IsLoadPending = false;
             return;
         }
 
@@ -68,6 +72,7 @@ public class SaveManager : Singleton<SaveManager>
                 saveable.RestoreState(data);
         }
 
+        IsLoadPending = false;
         Debug.Log($"[SaveManager] Loaded from {path}");
     }
 

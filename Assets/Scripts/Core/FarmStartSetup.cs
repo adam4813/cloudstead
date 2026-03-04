@@ -15,6 +15,9 @@ public class FarmStartSetup : MonoBehaviour
 
     private void Start()
     {
+        // Skip when loading from a save — inventory will be restored by SaveManager
+        if (SaveManager.Instance != null && SaveManager.Instance.IsLoadPending) return;
+
         // Only give starting items if inventory is empty (first load / no save)
         if (InventoryManager.Instance == null) return;
 
