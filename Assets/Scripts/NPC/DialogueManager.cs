@@ -34,15 +34,17 @@ public class DialogueManager : Singleton<DialogueManager>
         if (!isActive) return;
 
         var node = CurrentNode;
-        if (node == null || node.nextIndex == -1)
+        if (node == null) return;
+
+        // Choices take priority — never auto-advance past a choice node
+        if (node.choiceTexts != null && node.choiceTexts.Length > 0)
+            return;
+
+        if (node.nextIndex == -1)
         {
             EndDialogue();
             return;
         }
-
-        // If node has choices, don't auto-advance
-        if (node.choiceTexts != null && node.choiceTexts.Length > 0)
-            return;
 
         currentNodeIndex = node.nextIndex;
         if (currentNodeIndex < 0 || currentNodeIndex >= currentTree.nodes.Length)

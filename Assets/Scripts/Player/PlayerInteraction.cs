@@ -113,18 +113,26 @@ public class PlayerInteraction : MonoBehaviour
 
         IInteractable nearest = null;
         float nearestDist = float.MaxValue;
+        bool nearestIsPlacedItem = false;
 
         foreach (var hit in hits)
         {
             var interactable = hit.GetComponent<IInteractable>();
-            if (interactable != null && interactable.CanInteract(ownerId))
+            if (interactable == null || !interactable.CanInteract(ownerId)) continue;
+
+            float dist = Vector2.Distance(transform.position, hit.transform.position);
+            bool isPlacedItem = interactable is PlacedItem;
+
+            // Non-PlacedItem always beats a PlacedItem; within same category, take nearest
+            bool betterTarget = nearest == null
+                || (!isPlacedItem && nearestIsPlacedItem)
+                || (isPlacedItem == nearestIsPlacedItem && dist < nearestDist);
+
+            if (betterTarget)
             {
-                float dist = Vector2.Distance(transform.position, hit.transform.position);
-                if (dist < nearestDist)
-                {
-                    nearestDist = dist;
-                    nearest = interactable;
-                }
+                nearest = interactable;
+                nearestDist = dist;
+                nearestIsPlacedItem = isPlacedItem;
             }
         }
 

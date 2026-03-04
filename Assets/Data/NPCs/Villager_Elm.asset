@@ -20,3 +20,9 @@ MonoBehaviour:
   isMerchant: 0
   shopInventory: []
   shopPrices: 
+  acceptsGifts: 1
+  likedGifts:
+  - {fileID: 11400000, guid: 6979e273ffdee914bad4f63ae5a8241e, type: 2}
+  likedGiftResponses:
+  - Planks alot
+  defaultGiftResponse: How kind of you! I'll treasure this.

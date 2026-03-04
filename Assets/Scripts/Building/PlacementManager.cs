@@ -143,6 +143,9 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     private void Update()
     {
         if (!IsPlacing || Mouse.current == null) return;
+        if (GameManager.Instance != null &&
+            GameManager.Instance.CurrentState != GameState.Playing &&
+            GameManager.Instance.CurrentState != GameState.Building) return;
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {

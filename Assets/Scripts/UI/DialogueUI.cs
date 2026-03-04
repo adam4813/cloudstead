@@ -173,8 +173,8 @@ public class DialogueUI : MonoBehaviour
         ClearChoices();
         if (node.choiceTexts != null && node.choiceTexts.Length > 0)
         {
-            foreach (var choice in node.choiceTexts)
-                CreateChoiceButton(choice);
+            for (int i = 0; i < node.choiceTexts.Length; i++)
+                CreateChoiceButton(node.choiceTexts[i], i);
         }
     }
 
@@ -200,10 +200,10 @@ public class DialogueUI : MonoBehaviour
     {
         if (choiceContainer == null) return;
         for (int i = choiceContainer.childCount - 1; i >= 0; i--)
-            Destroy(choiceContainer.GetChild(i).gameObject);
+            DestroyImmediate(choiceContainer.GetChild(i).gameObject);
     }
 
-    private void CreateChoiceButton(string text)
+    private void CreateChoiceButton(string text, int index)
     {
         if (choiceButtonPrefab == null || choiceContainer == null) return;
 
@@ -211,9 +211,12 @@ public class DialogueUI : MonoBehaviour
         var tmpText = btnGO.GetComponentInChildren<TextMeshProUGUI>();
         if (tmpText != null) tmpText.text = text;
 
-        int index = choiceContainer.childCount - 1;
         var btn = btnGO.GetComponent<Button>();
-        if (btn != null) btn.onClick.AddListener(() => OnSelectChoice(index));
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => OnSelectChoice(index));
+        }
     }
 
     private void Show()
