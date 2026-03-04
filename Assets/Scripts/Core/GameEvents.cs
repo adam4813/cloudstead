@@ -35,3 +35,7 @@ public struct ItemRemovedFromWorldEvent { public ItemDefinition Item; public Vec
 public struct ResourceNodeDepletedEvent { public ResourceNodeDefinition Definition; }
 public struct InteriorEnteredEvent { public string BuildingId; }
 public struct InteriorExitedEvent { public string BuildingId; }
+public struct GiftGivenEvent { public uint GiverId; public NPCDefinition NPC; public ItemDefinition Item; }
+public struct AirshipBuildModeEnteredEvent { public string AirshipId; }
+public struct AirshipBuildModeExitedEvent { public string AirshipId; }
+public struct AirshipTilePlacedEvent { public string AirshipId; public Vector3Int GridPosition; public AirshipTilemapLayer Layer; }

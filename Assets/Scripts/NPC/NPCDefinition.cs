@@ -40,4 +40,35 @@ public class NPCDefinition : ScriptableObject
             return shopInventory[index].buyPrice;
         return 0;
     }
+
+    [FoldoutGroup("Gifts")]
+    public bool acceptsGifts = true;
+
+    [FoldoutGroup("Gifts")]
+    public ItemDefinition[] likedGifts;
+
+    [FoldoutGroup("Gifts")]
+    [TextArea(1, 3)]
+    public string[] likedGiftResponses;
+
+    [FoldoutGroup("Gifts")]
+    [TextArea(1, 3)]
+    public string defaultGiftResponse = "How kind of you! I'll treasure this.";
+
+    public bool IsLikedGift(ItemDefinition item)
+    {
+        if (item == null || likedGifts == null) return false;
+        for (int i = 0; i < likedGifts.Length; i++)
+        {
+            if (likedGifts[i] == item) return true;
+        }
+        return false;
+    }
+
+    public string GetGiftResponse(ItemDefinition item)
+    {
+        if (IsLikedGift(item) && likedGiftResponses != null && likedGiftResponses.Length > 0)
+            return likedGiftResponses[Random.Range(0, likedGiftResponses.Length)];
+        return defaultGiftResponse;
+    }
 }

@@ -8,6 +8,9 @@ public class DialogueManager : Singleton<DialogueManager>
     private bool isActive;
 
     public bool IsActive => isActive;
+
+    /// <summary>Optional one-shot callback invoked when a dialogue choice is selected. Cleared after invocation.</summary>
+    public System.Action<int> PendingChoiceCallback { get; set; }
     public DialogueTree.DialogueNode CurrentNode =>
         currentTree != null && currentNodeIndex >= 0 && currentNodeIndex < currentTree.nodes.Length
             ? currentTree.nodes[currentNodeIndex]
@@ -49,6 +52,11 @@ public class DialogueManager : Singleton<DialogueManager>
     public void SelectChoice(int choiceIndex)
     {
         if (!isActive) return;
+
+        // Fire one-shot callback if set
+        var callback = PendingChoiceCallback;
+        PendingChoiceCallback = null;
+        callback?.Invoke(choiceIndex);
 
         var node = CurrentNode;
         if (node == null) return;

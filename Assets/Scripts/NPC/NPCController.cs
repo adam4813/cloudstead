@@ -57,6 +57,14 @@ public class NPCController : MonoBehaviour, IInteractable
                 spriteRenderer.flipX = dir.x < 0;
         }
 
+        // Check if the player is holding a giftable item
+        ItemDefinition giftItem = GetHeldGiftableItem();
+        if (giftItem != null && definition.acceptsGifts)
+        {
+            StartGiftDialogue(playerId, giftItem);
+            return;
+        }
+
         if (greetingDialogue != null)
         {
             DialogueManager.Instance?.StartDialogue(greetingDialogue, definition);
@@ -66,5 +74,58 @@ public class NPCController : MonoBehaviour, IInteractable
             string greeting = definition.greetings[Random.Range(0, definition.greetings.Length)];
             Debug.Log($"[{definition.npcName}] {greeting}");
         }
+    }
+
+    private ItemDefinition GetHeldGiftableItem()
+    {
+        var quickbar = FindFirstObjectByType<QuickbarUI>();
+        if (quickbar == null) return null;
+
+        var slot = quickbar.GetActiveSlotData();
+        if (slot == null || slot.IsEmpty()) return null;
+        if (slot.item is ToolDefinition) return null;
+        if (slot.item.category == ItemCategory.Seed) return null;
+
+        return slot.item;
+    }
+
+    private void StartGiftDialogue(uint playerId, ItemDefinition giftItem)
+    {
+        var tree = ScriptableObject.CreateInstance<DialogueTree>();
+        string response = definition.GetGiftResponse(giftItem);
+
+        tree.nodes = new DialogueTree.DialogueNode[]
+        {
+            new DialogueTree.DialogueNode
+            {
+                speakerName = definition.npcName,
+                text = $"Oh, is that a {giftItem.itemName}?",
+                choiceTexts = new[] { $"Give {giftItem.itemName}", "Never mind" },
+                choiceNextIndices = new[] { 1, -1 },
+                nextIndex = -1
+            },
+            new DialogueTree.DialogueNode
+            {
+                speakerName = definition.npcName,
+                text = response,
+                nextIndex = -1
+            }
+        };
+
+        DialogueManager.Instance.PendingChoiceCallback = (choiceIndex) =>
+        {
+            if (choiceIndex == 0)
+            {
+                InventoryManager.Instance.RemoveItem(giftItem, 1);
+                EventBus.Publish(new GiftGivenEvent
+                {
+                    GiverId = playerId,
+                    NPC = definition,
+                    Item = giftItem
+                });
+            }
+        };
+
+        DialogueManager.Instance.StartDialogue(tree, definition);
     }
 }
