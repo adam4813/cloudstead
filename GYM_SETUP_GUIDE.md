@@ -490,14 +490,14 @@ Set `dayLengthSeconds = 120` for comfortable pace. Play for **5+ in-game days**:
 ### Play Test — NPC & Shop
 
 Enter **Play mode**:
-- [ ] Walk to Mabel, press E → dialogue opens with typewriter text
-- [ ] Choose to shop → shop UI opens with items and prices
-- [ ] Buy seeds (gold deducted, item added to inventory)
-- [ ] Close shop, walk to Elm, press E → friendly dialogue plays
-- [ ] Sell crops from inventory (gold increases, item removed)
-- [ ] Gold display updates in real time on HUD
-- [ ] Dialogue UI is warm-toned and non-intrusive
-- [ ] Shop prices feel fair and generous (500 gold buys plenty)
+- [x] Walk to Mabel, press E → dialogue opens with typewriter text
+- [x] Choose to shop → shop UI opens with items and prices **Shop opening move to shop counter instead**
+- [x] Buy seeds (gold deducted, item added to inventory)
+- [x] Close shop, walk to Elm, press E → friendly dialogue plays
+- [x] Sell crops from inventory (gold increases, item removed)
+- [x] Gold display updates in real time on HUD
+- [x] Dialogue UI is warm-toned and non-intrusive
+- [x] Shop prices feel fair and generous (500 gold buys plenty)
 
 **Report issues before proceeding.**
 
@@ -535,11 +535,11 @@ Enter **Play mode**:
 
 ### Test
 
-- [ ] Every tool action produces a distinct sound
-- [ ] Plant, open/close inventory, sleep all produce sounds
-- [ ] Cloud edge contact produces soft bump
-- [ ] Low stamina → bar pulses, "Tired" icon appears, yawn sound
-- [ ] After sleep → bar stops pulsing, brief "Rested" icon
+- [x] Every tool action produces a distinct sound
+- [x] Plant, open/close inventory, sleep all produce sounds
+- [x] Cloud edge contact produces soft bump
+- [x] Low stamina → bar pulses, "Tired" icon appears, yawn sound
+- [x] After sleep → bar stops pulsing, brief "Rested" icon
 
 ---
 
@@ -553,8 +553,8 @@ Enter **Play mode**:
 
 ### Test
 
-- [ ] Cloud feels more like home with a house structure
-- [ ] Bed placement makes sense next to house
+- [x] Cloud feels more like home with a house structure
+- [x] Bed placement makes sense next to house
 
 ---
 
