@@ -41,7 +41,7 @@ public class ToolController : MonoBehaviour
         UseActiveItem(targetTile);
     }
 
-    // Called by left mouse click (InputAction) — rotates player to face target tile then uses it
+    // Called by left mouse click (InputAction) — interacts if possible, else uses tool
     public void OnMouseUseTool(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
@@ -50,8 +50,30 @@ public class ToolController : MonoBehaviour
         if (tileCursor == null || !tileCursor.IsMouseTargeting) return;
 
         Vector3Int targetTile = tileCursor.HighlightedTile;
+
+        // Check for a non-PlacedItem interactable at the clicked tile first
+        if (TryMouseInteract(targetTile)) return;
+
         playerController.FaceToward(targetTile);
         UseActiveItem(targetTile);
+    }
+
+    private bool TryMouseInteract(Vector3Int tile)
+    {
+        Vector2 center = new Vector2(tile.x + 0.5f, tile.y + 0.5f);
+        var hits = Physics2D.OverlapCircleAll(center, 0.4f, interactableMask);
+        foreach (var hit in hits)
+        {
+            var interactable = hit.GetComponent<IInteractable>();
+            if (interactable == null || interactable is PlacedItem) continue;
+            if (!interactable.CanInteract(0)) continue;
+
+            playerController.FaceToward(tile);
+            interactable.Interact(0);
+            EventBus.Publish(new InteractionEvent { Target = hit.gameObject });
+            return true;
+        }
+        return false;
     }
 
     public void OnQuickbarSlot1(InputAction.CallbackContext context)

@@ -9,6 +9,7 @@ public class TileCursor : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private PlayerController playerController;
+    private QuickbarUI quickbar;
 
     // The tile currently highlighted (mouse if valid, else facing)
     public Vector3Int HighlightedTile { get; private set; }
@@ -26,6 +27,7 @@ public class TileCursor : MonoBehaviour
         spriteRenderer.sortingOrder = 10;
 
         playerController = FindFirstObjectByType<PlayerController>();
+        quickbar = FindFirstObjectByType<QuickbarUI>();
 
         EventBus.Subscribe<InteriorEnteredEvent>(OnInteriorEntered);
         EventBus.Subscribe<InteriorExitedEvent>(OnInteriorExited);
@@ -113,7 +115,46 @@ public class TileCursor : MonoBehaviour
 
     private bool IsValidTargetTile(Vector3Int pos)
     {
-        return TileManager.Instance != null && TileManager.Instance.IsWalkable(pos);
+        if (TileManager.Instance == null || !TileManager.Instance.IsWalkable(pos))
+            return false;
+
+        var slot = quickbar != null ? quickbar.GetActiveSlotData() : null;
+        if (slot == null || slot.IsEmpty()) return true;
+
+        var item = slot.item;
+
+        if (item is ToolDefinition tool)
+        {
+            switch (tool.toolType)
+            {
+                case ToolType.Hoe:
+                    // Can till walkable non-edge tiles that aren't already tilled
+                    return !TileManager.Instance.IsEdgeTile(pos)
+                           && !FarmingManager.Instance.HasPlotAt(pos);
+                case ToolType.WateringCan:
+                    // Can water tilled/planted plots
+                    return FarmingManager.Instance.HasPlotAt(pos);
+                case ToolType.Scythe:
+                    // Can harvest mature crops
+                    var plot = FarmingManager.Instance.GetPlotAt(pos);
+                    return plot != null && plot.PlantedCrop != null
+                           && plot.CurrentStage == CropStage.Mature;
+                default:
+                    return true;
+            }
+        }
+
+        if (item.category == ItemCategory.Seed)
+        {
+            // Can plant on tilled empty plots
+            var seedPlot = FarmingManager.Instance.GetPlotAt(pos);
+            return seedPlot != null && seedPlot.PlantedCrop == null;
+        }
+
+        if (item.isPlaceable)
+            return true;
+
+        return true;
     }
 
     private Sprite CreateCursorSprite()

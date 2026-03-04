@@ -43,4 +43,11 @@ public class TileManager : Singleton<TileManager>
     {
         return soilTilemap != null && soilTilemap.HasTile(pos);
     }
+
+    public bool IsEdgeTile(Vector3Int pos)
+    {
+        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
+            return false;
+        return cloudGenerator != null && cloudGenerator.IsEdgeTile(pos.x, pos.y);
+    }
 }

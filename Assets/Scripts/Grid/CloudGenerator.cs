@@ -161,7 +161,7 @@ public class CloudGenerator : MonoBehaviour, ISaveable
         }
     }
 
-    private bool IsEdgeTile(int x, int y)
+    public bool IsEdgeTile(int x, int y)
     {
         for (int dx = -1; dx <= 1; dx++)
         {
