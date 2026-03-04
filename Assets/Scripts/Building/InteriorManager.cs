@@ -71,7 +71,7 @@ public class InteriorManager : Singleton<InteriorManager>
         }
     }
 
-    public void EnterInterior(BuildingInterior interior)
+    public void EnterInterior(BuildingInterior interior, Vector3? positionOverride = null)
     {
         if (interior == null || _currentInterior == interior) return;
 
@@ -80,7 +80,9 @@ public class InteriorManager : Singleton<InteriorManager>
 
         if (_player != null)
         {
-            if (interior.InteriorSpawnPoint != null)
+            if (positionOverride.HasValue)
+                _player.transform.position = positionOverride.Value;
+            else if (interior.InteriorSpawnPoint != null)
                 _player.transform.position = interior.InteriorSpawnPoint.position;
             SetEntitySpace(_player, true);
         }

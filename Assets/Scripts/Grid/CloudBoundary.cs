@@ -11,6 +11,8 @@ public class CloudBoundary : MonoBehaviour
     private AudioSource audioSource;
     private float bumpCooldown;
 
+    private bool _boundaryGenerated;
+
     private void Start()
     {
         if (cloudGenerator == null)
@@ -28,7 +30,22 @@ public class CloudBoundary : MonoBehaviour
         audioSource.spatialBlend = 0f;
         audioSource.playOnAwake = false;
 
+        if (!_boundaryGenerated)
+            GenerateBoundary();
+    }
+
+    /// <summary>Destroys existing boundary colliders and regenerates from the current walkability grid.</summary>
+    public void RegenerateBoundary()
+    {
+        // Remove all BoxCollider2D components (they were dynamically added)
+        foreach (var col in GetComponents<BoxCollider2D>())
+            DestroyImmediate(col);
         GenerateBoundary();
+
+        // Force composite to rebuild
+        var composite = GetComponent<CompositeCollider2D>();
+        if (composite != null)
+            composite.GenerateGeometry();
     }
 
     private void GenerateBoundary()
@@ -51,6 +68,8 @@ public class CloudBoundary : MonoBehaviour
                 col.compositeOperation = Collider2D.CompositeOperation.Merge;
             }
         }
+
+        _boundaryGenerated = true;
     }
 
     private bool HasWalkableNeighbor(int x, int y)

@@ -17,8 +17,12 @@ using UnityEngine.InputSystem;
 /// unwired in DisembarkPlayer() — no second PlayerInput needed.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class AirshipController : MonoBehaviour
+public class AirshipController : MonoBehaviour, ISaveable
 {
+    [Header("Identity")]
+    [SerializeField] private string airshipId = "player";
+    public string AirshipId => airshipId;
+
     [Header("Movement")]
     [SerializeField] private float thrustForce = 8f;
     [SerializeField] private float maxSpeed = 12f;
@@ -196,4 +200,52 @@ public class AirshipController : MonoBehaviour
         bool isDock = pad.GetComponent<AirshipDock>() != null;
         DisembarkPlayer(pad.GetPlayerSpawnPosition(), isDock);
     }
+
+    #region ISaveable
+
+    public string SaveKey => $"AirshipController:{airshipId}";
+
+    private void Start()
+    {
+        SaveManager.Instance?.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        SaveManager.Instance?.Unregister(this);
+    }
+
+    public string SaveState()
+    {
+        return JsonUtility.ToJson(new AirshipSaveData
+        {
+            posX = transform.position.x,
+            posY = transform.position.y,
+            rotationZ = transform.eulerAngles.z
+        });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<AirshipSaveData>(json);
+        if (data == null) return;
+
+        transform.position = new Vector3(data.posX, data.posY, 0f);
+        transform.rotation = Quaternion.Euler(0f, 0f, data.rotationZ);
+
+        // Ensure docked state on load
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+    }
+
+    [System.Serializable]
+    private class AirshipSaveData
+    {
+        public float posX;
+        public float posY;
+        public float rotationZ;
+    }
+
+    #endregion
 }

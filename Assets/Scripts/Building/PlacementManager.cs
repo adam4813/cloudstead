@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlacementManager : Singleton<PlacementManager>
+public class PlacementManager : Singleton<PlacementManager>, ISaveable
 {
     [SerializeField] private Material _ghostMaterial;
 
@@ -9,6 +10,25 @@ public class PlacementManager : Singleton<PlacementManager>
 
     private ItemDefinition _currentItem;
     private PlacementGhost _activeGhost;
+    private readonly List<PlacedItem> _trackedItems = new();
+
+    public override void Initialize()
+    {
+        SaveManager.Instance?.Register(this);
+        EventBus.Subscribe<ItemRemovedFromWorldEvent>(OnItemRemoved);
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        SaveManager.Instance?.Unregister(this);
+        EventBus.Unsubscribe<ItemRemovedFromWorldEvent>(OnItemRemoved);
+    }
+
+    private void OnItemRemoved(ItemRemovedFromWorldEvent evt)
+    {
+        _trackedItems.RemoveAll(p => p == null);
+    }
 
     /// <summary>
     /// Enters placement mode for the given item, showing a ghost preview.
@@ -58,6 +78,8 @@ public class PlacementManager : Singleton<PlacementManager>
             if (container != null)
                 placedItem.transform.SetParent(container, true);
         }
+
+        _trackedItems.Add(placedItem);
 
         EventBus.Publish(new ItemPlacedEvent { Item = _currentItem, GridPosition = gridPos });
 
@@ -122,7 +144,147 @@ public class PlacementManager : Singleton<PlacementManager>
         string sortingLayer = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior
             ? InteriorManager.ToInteriorLayer("Objects")
             : "Objects";
+        return CreatePlacedItemGO(item, sortingLayer);
+    }
 
+    #region ISaveable
+
+    public string SaveState()
+    {
+        _trackedItems.RemoveAll(p => p == null);
+        var entries = new PlacedItemEntry[_trackedItems.Count];
+
+        for (int i = 0; i < _trackedItems.Count; i++)
+        {
+            var item = _trackedItems[i];
+            entries[i] = new PlacedItemEntry
+            {
+                itemId = item.SourceItem != null ? item.SourceItem.ItemId : "",
+                gridX = item.GridPosition.x,
+                gridY = item.GridPosition.y,
+                context = ResolveContext(item)
+            };
+        }
+
+        return JsonUtility.ToJson(new PlacementSaveData { items = entries });
+    }
+
+    public void RestoreState(string json)
+    {
+        var data = JsonUtility.FromJson<PlacementSaveData>(json);
+        if (data?.items == null) return;
+
+        // Destroy existing player-placed items
+        foreach (var item in _trackedItems)
+            if (item != null) DestroyImmediate(item.gameObject);
+        _trackedItems.Clear();
+        PlacedItem.ClearOccupied();
+
+        var db = GameBootstrapper.Database;
+        if (db == null)
+        {
+            Debug.LogWarning("[PlacementManager] RestoreState: GameDatabase not available");
+            return;
+        }
+
+        // Build lookup for interior containers by buildingId
+        var interiors = new Dictionary<string, BuildingInterior>();
+        foreach (var bi in FindObjectsByType<BuildingInterior>(FindObjectsSortMode.None))
+        {
+            if (!string.IsNullOrEmpty(bi.BuildingId))
+                interiors[bi.BuildingId] = bi;
+        }
+
+        // Build lookup for airships by airshipId
+        var airships = new Dictionary<string, AirshipController>();
+        foreach (var ac in FindObjectsByType<AirshipController>(FindObjectsSortMode.None))
+        {
+            if (!string.IsNullOrEmpty(ac.AirshipId))
+                airships[ac.AirshipId] = ac;
+        }
+
+        // Build lookup for clouds by cloudId
+        var clouds = new Dictionary<string, CloudGenerator>();
+        foreach (var cg in FindObjectsByType<CloudGenerator>(FindObjectsSortMode.None))
+        {
+            if (!string.IsNullOrEmpty(cg.CloudId))
+                clouds[cg.CloudId] = cg;
+        }
+
+        foreach (var entry in data.items)
+        {
+            var itemDef = db.GetItem(entry.itemId);
+            if (itemDef == null)
+            {
+                Debug.LogWarning($"[PlacementManager] RestoreState: item '{entry.itemId}' not found in GameDatabase");
+                continue;
+            }
+
+            var gridPos = new Vector3Int(entry.gridX, entry.gridY, 0);
+
+            // Determine sorting layer and parent from context
+            string sortingLayer = "Objects";
+            Transform parent = null;
+            string ctx = entry.context ?? "cloud:home";
+
+            if (ctx.StartsWith("interior:"))
+            {
+                string buildingId = ctx.Substring("interior:".Length);
+                sortingLayer = InteriorManager.ToInteriorLayer("Objects");
+                if (interiors.TryGetValue(buildingId, out var bi) && bi.ObjectsContainer != null)
+                    parent = bi.ObjectsContainer;
+            }
+            else if (ctx.StartsWith("airship:"))
+            {
+                string id = ctx.Substring("airship:".Length);
+                if (airships.TryGetValue(id, out var ac))
+                    parent = ac.transform;
+            }
+            else if (ctx.StartsWith("cloud:"))
+            {
+                string id = ctx.Substring("cloud:".Length);
+                if (clouds.TryGetValue(id, out var cg))
+                    parent = cg.ObstacleParent != null ? cg.ObstacleParent : cg.transform;
+            }
+
+            PlacedItem placed = CreatePlacedItemGO(itemDef, sortingLayer);
+            placed.OnPlaced(gridPos);
+
+            if (parent != null)
+                placed.transform.SetParent(parent, true);
+
+            _trackedItems.Add(placed);
+        }
+
+        Debug.Log($"[PlacementManager] RestoreState: restored {_trackedItems.Count} placed items");
+    }
+
+    /// <summary>Determines the context string for a placed item based on its parent hierarchy.</summary>
+    private string ResolveContext(PlacedItem item)
+    {
+        if (item.transform.parent == null) return "cloud:home";
+
+        // Check if parented under a BuildingInterior's objects container
+        var bi = item.GetComponentInParent<BuildingInterior>();
+        if (bi != null && !string.IsNullOrEmpty(bi.BuildingId))
+            return $"interior:{bi.BuildingId}";
+
+        // Check if parented under an airship
+        var ac = item.GetComponentInParent<AirshipController>();
+        if (ac != null)
+            return $"airship:{ac.AirshipId}";
+
+        // Check if parented under a cloud island
+        var cloud = item.GetComponentInParent<CloudGenerator>();
+        if (cloud != null)
+            return $"cloud:{cloud.CloudId}";
+
+        return "cloud:home";
+    }
+
+    /// <summary>Creates a PlacedItem GO with explicit sorting layer (used during restore).</summary>
+    private PlacedItem CreatePlacedItemGO(ItemDefinition item, string sortingLayer)
+    {
         if (item.placeablePrefab != null)
         {
             GameObject prefabGO = Instantiate(item.placeablePrefab);
@@ -152,7 +314,23 @@ public class PlacementManager : Singleton<PlacementManager>
 
         PlacedItem placedItem = go.AddComponent<PlacedItem>();
         placedItem.Initialize(item, spriteRenderer);
-
         return placedItem;
     }
+
+    [System.Serializable]
+    private class PlacementSaveData
+    {
+        public PlacedItemEntry[] items;
+    }
+
+    [System.Serializable]
+    private class PlacedItemEntry
+    {
+        public string itemId;
+        public int gridX;
+        public int gridY;
+        public string context; // "cloud:{cloudId}", "interior:{buildingId}", "airship:{airshipId}"
+    }
+
+    #endregion
 }

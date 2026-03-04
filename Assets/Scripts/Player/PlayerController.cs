@@ -118,7 +118,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             posX = transform.position.x,
             posY = transform.position.y,
-            facing = (int)FacingDirection
+            facing = (int)FacingDirection,
+            context = ResolveContext()
         };
         return JsonUtility.ToJson(data);
     }
@@ -127,8 +128,45 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         var data = JsonUtility.FromJson<PlayerSaveData>(json);
         if (data == null) return;
-        transform.position = new Vector3(data.posX, data.posY, 0f);
+
+        var pos = new Vector3(data.posX, data.posY, 0f);
         FacingDirection = (Direction)data.facing;
+
+        string ctx = data.context ?? "cloud:home";
+
+        if (ctx.StartsWith("interior:"))
+        {
+            string buildingId = ctx.Substring("interior:".Length);
+            var interiors = FindObjectsByType<BuildingInterior>(FindObjectsSortMode.None);
+            foreach (var bi in interiors)
+            {
+                if (bi.BuildingId == buildingId)
+                {
+                    InteriorManager.Instance?.EnterInterior(bi, pos);
+                    return;
+                }
+            }
+            // Interior not found — fall through to default position
+            Debug.LogWarning($"[PlayerController] RestoreState: interior '{buildingId}' not found, spawning at saved position");
+        }
+
+        transform.position = pos;
+    }
+
+    private string ResolveContext()
+    {
+        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
+        {
+            var interior = InteriorManager.Instance.CurrentInterior;
+            if (interior != null && !string.IsNullOrEmpty(interior.BuildingId))
+                return $"interior:{interior.BuildingId}";
+        }
+
+        // Future: check if aboard an airship
+        // var ac = GetComponentInParent<AirshipController>();
+        // if (ac != null) return $"airship:{ac.AirshipId}";
+
+        return "cloud:home";
     }
 
     [System.Serializable]
@@ -136,5 +174,6 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         public float posX, posY;
         public int facing;
+        public string context;
     }
 }

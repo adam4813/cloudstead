@@ -38,7 +38,7 @@ public class SaveManager : Singleton<SaveManager>
         var saveData = new Dictionary<string, string>();
         foreach (var saveable in saveables)
         {
-            string key = saveable.GetType().Name;
+            string key = saveable.SaveKey;
             saveData[key] = saveable.SaveState();
         }
 
@@ -67,7 +67,7 @@ public class SaveManager : Singleton<SaveManager>
 
         foreach (var saveable in saveables)
         {
-            string key = saveable.GetType().Name;
+            string key = saveable.SaveKey;
             if (saveData.TryGet(key, out string data))
                 saveable.RestoreState(data);
         }

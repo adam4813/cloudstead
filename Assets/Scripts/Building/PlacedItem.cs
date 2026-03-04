@@ -10,7 +10,12 @@ public class PlacedItem : MonoBehaviour, IInteractable, IBuildable
 
     private static readonly Dictionary<Vector3Int, PlacedItem> _occupiedPositions = new();
 
+    public ItemDefinition SourceItem => _sourceItem;
+    public Vector3Int GridPosition => _gridPosition;
     public Vector2Int GridSize => Vector2Int.one;
+
+    /// <summary>Clears the static occupied-positions map. Called before restoring from save.</summary>
+    public static void ClearOccupied() => _occupiedPositions.Clear();
 
     /// <summary>Sets source item and optionally wires the sprite renderer when created at runtime.</summary>
     public void Initialize(ItemDefinition item, SpriteRenderer sr = null)

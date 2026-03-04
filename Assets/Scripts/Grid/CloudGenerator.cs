@@ -12,6 +12,9 @@ public class ResourceNodeSpawnConfig
 
 public class CloudGenerator : MonoBehaviour, ISaveable
 {
+    [SerializeField] private string cloudId = "home";
+    public string CloudId => cloudId;
+
     [SerializeField] private int cloudWidth = 30;
     [SerializeField] private int cloudHeight = 30;
     [SerializeField] private float noiseScale = 0.15f;
@@ -57,7 +60,12 @@ public class CloudGenerator : MonoBehaviour, ISaveable
 
     public void Generate()
     {
+        GenerateTerrain();
         ClearObstacles();
+    }
+
+    private void GenerateTerrain()
+    {
         walkabilityGrid = new bool[cloudWidth, cloudHeight];
 
         int centerX = cloudWidth / 2;
@@ -88,6 +96,11 @@ public class CloudGenerator : MonoBehaviour, ISaveable
 
         SmoothEdges();
         PaintTilemap();
+
+        // Rebuild boundary colliders if they exist
+        var boundary = GetComponent<CloudBoundary>();
+        if (boundary != null)
+            boundary.RegenerateBoundary();
     }
 
     private void SmoothEdges()
@@ -271,6 +284,8 @@ public class CloudGenerator : MonoBehaviour, ISaveable
 
     #region ISaveable
 
+    public string SaveKey => $"CloudGenerator:{cloudId}";
+
     public string SaveState()
     {
         return JsonUtility.ToJson(new CloudSaveData { seed = seed });
@@ -280,31 +295,7 @@ public class CloudGenerator : MonoBehaviour, ISaveable
     {
         var data = JsonUtility.FromJson<CloudSaveData>(json);
         seed = data.seed;
-        // Regenerate terrain only — don't clear obstacles, ResourceNodeManager handles node restore
-        walkabilityGrid = new bool[cloudWidth, cloudHeight];
-
-        int centerX = cloudWidth / 2;
-        int centerY = cloudHeight / 2;
-        float maxRadius = Mathf.Min(cloudWidth, cloudHeight) * 0.45f;
-
-        for (int x = 0; x < cloudWidth; x++)
-        {
-            for (int y = 0; y < cloudHeight; y++)
-            {
-                float noise = Mathf.PerlinNoise(
-                    (x + seed) * noiseScale,
-                    (y + seed) * noiseScale);
-                float distFromCenter = Vector2.Distance(
-                    new Vector2(x, y),
-                    new Vector2(centerX, centerY));
-                float falloff = 1f - Mathf.Clamp01(distFromCenter / maxRadius);
-                float centerBonus = distFromCenter < maxRadius * 0.3f ? 0.3f : 0f;
-                float value = noise * falloff + centerBonus;
-                walkabilityGrid[x, y] = value > threshold;
-            }
-        }
-        SmoothEdges();
-        PaintTilemap();
+        GenerateTerrain();
     }
 
     [System.Serializable]
