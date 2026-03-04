@@ -38,6 +38,18 @@ public class ItemDefinition : ScriptableObject
     [Tooltip("Optional prefab to spawn when placed. If null, creates a default PlacedItem with the item icon.")]
     public GameObject placeablePrefab;
 
+    [FoldoutGroup("Placement")]
+    [Tooltip("If true, this item can only be placed while in build/edit mode on the airship")]
+    public bool requiresBuildMode;
+
+    [FoldoutGroup("Airship")]
+    [Tooltip("If set, this item places a tile on the airship's tilemap instead of spawning a PlacedItem")]
+    public UnityEngine.Tilemaps.TileBase airshipTile;
+
+    [FoldoutGroup("Airship")]
+    [Tooltip("The tilemap layer this ship part targets: Floor, Decoration, Walls")]
+    public AirshipTilemapLayer airshipLayer = AirshipTilemapLayer.Floor;
+
     [FoldoutGroup("Consumable")]
     [Tooltip("Amount of stamina restored when this item is eaten. 0 = not a consumable.")]
     [Min(0)]

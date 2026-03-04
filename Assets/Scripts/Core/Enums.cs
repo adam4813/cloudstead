@@ -5,3 +5,4 @@ public enum ToolType { Hoe, WateringCan, Axe, Pickaxe, Scythe }
 public enum SoilState { Untilled, Tilled, Watered }
 public enum CropStage { Seed, Sprout, Growing, Mature }
 public enum Direction { Up, Down, Left, Right }
+public enum AirshipTilemapLayer { Floor, Decoration, Walls }

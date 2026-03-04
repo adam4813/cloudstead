@@ -48,7 +48,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         var state = GameManager.Instance.CurrentState;
 
-        if (state == GameState.Playing || state == GameState.Airship)
+        if (state == GameState.Playing || state == GameState.Airship || state == GameState.Building)
         {
             _stateBeforePause = state;
             GameManager.Instance.SetState(GameState.Paused);

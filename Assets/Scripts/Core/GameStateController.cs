@@ -51,6 +51,11 @@ public class GameStateController : MonoBehaviour
                 SwitchMapIfNeeded("Airship");
                 Time.timeScale = 1f;
                 break;
+
+            case GameState.Building:
+                SwitchMapIfNeeded("Player");
+                Time.timeScale = 1f;
+                break;
         }
     }
 
