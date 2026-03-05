@@ -22,7 +22,6 @@ public class CameraController : MonoBehaviour
     [Header("Bounds")]
     [SerializeField] private bool clampToCloud = true;
 
-    private CloudGenerator cloudGenerator;
     private Camera cam;
     private Transform currentTarget;
     private float targetZoom;
@@ -43,8 +42,6 @@ public class CameraController : MonoBehaviour
         if (cam != null)
             cam.orthographicSize = onCloudZoom;
 
-        cloudGenerator = FindFirstObjectByType<CloudGenerator>();
-
         EventBus.Subscribe<AirshipBoardedEvent>(OnAirshipBoarded);
         EventBus.Subscribe<AirshipLandedEvent>(OnAirshipLanded);
     }
@@ -64,7 +61,7 @@ public class CameraController : MonoBehaviour
         Vector3 smoothed = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
 
         // Clamp only when on the cloud (not during airship flight)
-        if (clampToCloud && cloudGenerator != null)
+        if (clampToCloud && CloudIsland.Current != null)
             smoothed = ClampToCloudBounds(smoothed);
 
         transform.position = smoothed;
@@ -84,23 +81,24 @@ public class CameraController : MonoBehaviour
             return pos;
         }
 
-        if (cam == null || cloudGenerator == null) return pos;
+        var cg = CloudIsland.Current;
+        if (cam == null || cg == null) return pos;
 
         float halfHeight = cam.orthographicSize;
         float halfWidth = halfHeight * cam.aspect;
 
-        float ox = cloudGenerator.TileOrigin.x;
-        float oy = cloudGenerator.TileOrigin.y;
+        float ox = cg.TileOrigin.x;
+        float oy = cg.TileOrigin.y;
 
         float minX = ox + halfWidth;
-        float maxX = ox + cloudGenerator.Width - halfWidth;
+        float maxX = ox + cg.Width - halfWidth;
         float minY = oy + halfHeight;
-        float maxY = oy + cloudGenerator.Height - halfHeight;
+        float maxY = oy + cg.Height - halfHeight;
 
-        if (minX > maxX) pos.x = ox + cloudGenerator.Width / 2f;
+        if (minX > maxX) pos.x = ox + cg.Width / 2f;
         else pos.x = Mathf.Clamp(pos.x, minX, maxX);
 
-        if (minY > maxY) pos.y = oy + cloudGenerator.Height / 2f;
+        if (minY > maxY) pos.y = oy + cg.Height / 2f;
         else pos.y = Mathf.Clamp(pos.y, minY, maxY);
 
         pos.z = zOffset;

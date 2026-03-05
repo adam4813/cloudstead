@@ -147,6 +147,7 @@ MonoBehaviour:
     pauseTimeInMenus: 1
     dayLengthSeconds: 720
     playerInteractionRange: 1
+    isNewGame: 0
 --- !u!114 &2672554739586647260
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,7 +205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingGold: 500
---- !u!1 &2301987998288783987
+--- !u!1 &2951111353187731708
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -212,46 +213,42 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7045724583464077311}
-  - component: {fileID: 5444244583687063594}
+  - component: {fileID: 8222730668703103041}
+  - component: {fileID: 2637988940558389233}
   m_Layer: 0
-  m_Name: TileManager
+  m_Name: IslandRegistry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7045724583464077311
+--- !u!4 &8222730668703103041
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2301987998288783987}
+  m_GameObject: {fileID: 2951111353187731708}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7501672253185261565}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5444244583687063594
+--- !u!114 &2637988940558389233
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2301987998288783987}
+  m_GameObject: {fileID: 2951111353187731708}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e4fde384838d1040ba504b3d9a55da2, type: 3}
+  m_Script: {fileID: 11500000, guid: e97cdb768e7f2d84ca35ab9ae6de2450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundTilemap: {fileID: 0}
-  soilTilemap: {fileID: 0}
-  decorationTilemap: {fileID: 0}
-  cloudGenerator: {fileID: 0}
 --- !u!1 &2972591144042886531
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,7 +278,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7045724583464077311}
   - {fileID: 8074713831843311873}
   - {fileID: 3916626369448236993}
   - {fileID: 5316192680040649613}
@@ -297,6 +293,7 @@ Transform:
   - {fileID: 6496948664784846645}
   - {fileID: 2086115484827588863}
   - {fileID: 6660561036548403386}
+  - {fileID: 8222730668703103041}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3421941287067178369

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
 {
-    private readonly List<CloudGenerator> _clouds = new();
+    private readonly List<CloudIsland> _clouds = new();
     private readonly Dictionary<ResourceNodeDefinition, int> _activeCounts = new();
     private readonly Dictionary<ResourceNodeDefinition, int> _lastSpawnDay = new();
     private System.Random _rng;
@@ -24,7 +24,7 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
         base.OnDestroy();
     }
 
-    public void RegisterCloud(CloudGenerator cloud)
+    public void RegisterCloud(CloudIsland cloud)
     {
         if (cloud == null || _clouds.Contains(cloud)) return;
         _clouds.Add(cloud);
@@ -36,7 +36,7 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
         SpawnInitialNodes(cloud);
     }
 
-    public void UnregisterCloud(CloudGenerator cloud) => _clouds.Remove(cloud);
+    public void UnregisterCloud(CloudIsland cloud) => _clouds.Remove(cloud);
 
     public void RegisterNode(ResourceNodeDefinition def)
     {
@@ -52,7 +52,7 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
             _activeCounts[def] = Mathf.Max(0, _activeCounts[def] - 1);
     }
 
-    private void SpawnInitialNodes(CloudGenerator cloud)
+    private void SpawnInitialNodes(CloudIsland cloud)
     {
         if (cloud.NodeConfigs == null || cloud.NodeConfigs.Length == 0) return;
 
@@ -120,7 +120,7 @@ public class ResourceNodeManager : Singleton<ResourceNodeManager>, ISaveable
         }
 
         // Find eligible clouds and total cap
-        var eligible = new List<CloudGenerator>();
+        var eligible = new List<CloudIsland>();
         int totalMax = 0;
         foreach (var cloud in _clouds)
         {

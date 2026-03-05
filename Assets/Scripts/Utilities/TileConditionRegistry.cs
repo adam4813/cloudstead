@@ -66,10 +66,10 @@ public class TileConditionRegistry : Singleton<TileConditionRegistry>
     private void RegisterBuiltInConditions()
     {
         RegisterCondition(walkable, pos =>
-            TileManager.Instance != null && TileManager.Instance.IsWalkable(pos));
+            CloudIsland.IsCurrentWalkable(pos));
 
         RegisterCondition(nonEdge, pos =>
-            TileManager.Instance != null && !TileManager.Instance.IsEdgeTile(pos));
+            !CloudIsland.IsCurrentEdgeTile(pos));
 
         RegisterCondition(hasFarmPlot, pos =>
             FarmingManager.Instance != null && FarmingManager.Instance.HasPlotAt(pos));

@@ -26,12 +26,12 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
     public bool TillSoil(Vector3Int pos, uint playerId)
     {
-        if (TileManager.Instance == null) return false;
-        if (!TileManager.Instance.IsWalkable(pos)) return false;
+        if (CloudIsland.Current == null) return false;
+        if (!CloudIsland.IsCurrentWalkable(pos)) return false;
         if (!IsInteriorTile(pos)) return false;
         if (farmPlots.ContainsKey(pos)) return false;
 
-        TileManager.Instance.SetTile(pos, tilledSoilTile, TileManager.Instance.SoilTilemap);
+        CloudIsland.Current.SoilTilemap?.SetTile(pos, tilledSoilTile);
 
         var plotGO = new GameObject($"FarmPlot_{pos.x}_{pos.y}");
         plotGO.transform.position = pos.TileToWorld();
@@ -67,14 +67,14 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         if (plot.PlantedCrop == null && plot.SoilState == SoilState.Tilled)
         {
             plot.Water();
-            TileManager.Instance.SetTile(pos, wateredSoilTile, TileManager.Instance.SoilTilemap);
+            CloudIsland.Current?.SoilTilemap?.SetTile(pos, wateredSoilTile);
             return true;
         }
 
         if (plot.PlantedCrop == null) return false;
 
         plot.Water();
-        TileManager.Instance.SetTile(pos, wateredSoilTile, TileManager.Instance.SoilTilemap);
+        CloudIsland.Current?.SoilTilemap?.SetTile(pos, wateredSoilTile);
 
         EventBus.Publish(new CropWateredEvent { Position = pos });
         return true;
@@ -100,7 +100,7 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         else
         {
             plot.ClearCrop();
-            TileManager.Instance.SetTile(pos, tilledSoilTile, TileManager.Instance.SoilTilemap);
+            CloudIsland.Current?.SoilTilemap?.SetTile(pos, tilledSoilTile);
         }
 
         return true;
@@ -136,7 +136,7 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
             if (plot.IsWatered)
             {
                 plot.ResetWatered();
-                TileManager.Instance.SetTile(pos, tilledSoilTile, TileManager.Instance.SoilTilemap);
+                CloudIsland.Current?.SoilTilemap?.SetTile(pos, tilledSoilTile);
             }
         }
     }
@@ -154,15 +154,15 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
     private bool IsInteriorTile(Vector3Int pos)
     {
-        var gen = FindFirstObjectByType<CloudGenerator>();
-        if (gen == null) return true;
+        var island = CloudIsland.Current;
+        if (island == null) return true;
 
         for (int dx = -1; dx <= 1; dx++)
         {
             for (int dy = -1; dy <= 1; dy++)
             {
                 if (dx == 0 && dy == 0) continue;
-                if (!gen.IsWalkable(new Vector3Int(pos.x + dx, pos.y + dy, 0)))
+                if (!island.IsWalkable(new Vector3Int(pos.x + dx, pos.y + dy, 0)))
                     return false;
             }
         }
@@ -210,10 +210,10 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         {
             var pos = new Vector3Int(plotData.posX, plotData.posY, plotData.posZ);
 
-            if (TileManager.Instance != null)
+            if (CloudIsland.Current != null)
             {
                 var tile = plotData.isWatered ? wateredSoilTile : tilledSoilTile;
-                TileManager.Instance.SetTile(pos, tile, TileManager.Instance.SoilTilemap);
+                CloudIsland.Current.SoilTilemap?.SetTile(pos, tile);
             }
 
             var plotGO = new GameObject($"FarmPlot_{pos.x}_{pos.y}");

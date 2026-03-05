@@ -28,8 +28,6 @@ public class GameBootstrapper : MonoBehaviour
             InventoryManager.Instance.Initialize();
         if (FarmingManager.Instance != null)
             FarmingManager.Instance.Initialize();
-        if (TileManager.Instance != null)
-            TileManager.Instance.Initialize();
         if (SaveManager.Instance != null)
             SaveManager.Instance.Initialize();
         if (SceneTransitionManager.Instance != null)

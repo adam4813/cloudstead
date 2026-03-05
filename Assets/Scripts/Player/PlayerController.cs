@@ -20,7 +20,16 @@ public class PlayerController : MonoBehaviour, ISaveable
     public BuildingInterior CurrentInterior { get; set; }
 
     /// <summary>Set by AirshipDock (clear on board) / AirshipController (set on disembark) / FarmStartSetup (initial).</summary>
-    public CloudGenerator CurrentCloud { get; set; }
+    public CloudIsland CurrentCloud
+    {
+        get => _currentCloud;
+        set
+        {
+            _currentCloud = value;
+            CloudIsland.Current = value;
+        }
+    }
+    private CloudIsland _currentCloud;
 
     public Direction FacingDirection { get; private set; } = Direction.Down;
     public bool IsMoving { get; private set; }
@@ -152,7 +161,7 @@ public class PlayerController : MonoBehaviour, ISaveable
                 {
                     InteriorManager.Instance?.EnterInterior(bi, pos);
                     // CurrentInterior is set by EnterInterior; find parent cloud
-                    var cloud = bi.GetComponentInParent<CloudGenerator>();
+                    var cloud = bi.GetComponentInParent<CloudIsland>();
                     if (cloud != null) CurrentCloud = cloud;
                     return;
                 }
@@ -172,7 +181,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         else if (ctx.StartsWith("cloud:"))
         {
             string id = ctx.Substring("cloud:".Length);
-            foreach (var cg in FindObjectsByType<CloudGenerator>(FindObjectsSortMode.None))
+            foreach (var cg in FindObjectsByType<CloudIsland>(FindObjectsSortMode.None))
             {
                 if (cg.CloudId == id) { CurrentCloud = cg; break; }
             }

@@ -15,7 +15,7 @@ public class InteriorPlacementContext : IPlacementContext
 
     public bool IsValidPosition(Vector3Int cellPos)
     {
-        bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(cellPos);
+        bool walkable = CloudIsland.IsCurrentWalkable(cellPos);
         return walkable && !PlacedItem.IsOccupied(cellPos);
     }
 

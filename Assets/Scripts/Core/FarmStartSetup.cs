@@ -22,7 +22,7 @@ public class FarmStartSetup : MonoBehaviour
         var player = FindFirstObjectByType<PlayerController>();
         if (player != null && player.CurrentCloud == null)
         {
-            var homeCloud = FindFirstObjectByType<CloudGenerator>();
+            var homeCloud = FindFirstObjectByType<CloudIsland>();
             if (homeCloud != null) player.CurrentCloud = homeCloud;
         }
 

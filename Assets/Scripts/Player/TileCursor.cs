@@ -62,7 +62,7 @@ public class TileCursor : MonoBehaviour
 
         // Try to target the tile under the mouse cursor
         Vector3Int mouseTile = GetMouseTile();
-        bool mouseWalkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(mouseTile);
+        bool mouseWalkable = CloudIsland.IsCurrentWalkable(mouseTile);
         bool mouseInRange = IsWithinRange(mouseTile);
 
         if (debugLogging)
@@ -115,7 +115,7 @@ public class TileCursor : MonoBehaviour
 
     private bool IsValidTargetTile(Vector3Int pos)
     {
-        if (TileManager.Instance == null || !TileManager.Instance.IsWalkable(pos))
+        if (!CloudIsland.IsCurrentWalkable(pos))
             return false;
 
         var slot = quickbar != null ? quickbar.GetActiveSlotData() : null;

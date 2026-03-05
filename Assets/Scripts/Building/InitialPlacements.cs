@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 
 /// <summary>
 /// Defines items that should be placed when a cloud or interior is first created.
-/// Attach to any CloudGenerator or BuildingInterior GameObject. On Start, each
+/// Attach to any CloudIsland or BuildingInterior GameObject. On Start, each
 /// entry is placed through the standard PlacementManager flow (SpawnItemAt).
 /// Skipped when loading a save — PlacementManager.RestoreState handles that.
 /// </summary>

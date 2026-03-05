@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Default placement context for the cloud surface.
-/// Validates against TileManager walkability, uses grid+0.5 positioning.
+/// Validates against cloud walkability, uses grid+0.5 positioning.
 /// </summary>
 public class CloudPlacementContext : IPlacementContext
 {
@@ -15,7 +15,7 @@ public class CloudPlacementContext : IPlacementContext
 
     public bool IsValidPosition(Vector3Int cellPos)
     {
-        bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(cellPos);
+        bool walkable = CloudIsland.IsCurrentWalkable(cellPos);
         return walkable && !PlacedItem.IsOccupied(cellPos);
     }
 

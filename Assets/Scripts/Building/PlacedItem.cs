@@ -25,9 +25,9 @@ public class PlacedItem : MonoBehaviour, IInteractable, IBuildable
     }
 
     // IBuildable
-    public bool CanPlaceAt(Vector3Int gridPosition, TileManager tileManager)
+    public bool CanPlaceAt(Vector3Int gridPosition)
     {
-        return tileManager.IsWalkable(gridPosition) && !IsOccupied(gridPosition);
+        return CloudIsland.IsCurrentWalkable(gridPosition) && !IsOccupied(gridPosition);
     }
 
     public void OnPlaced(Vector3Int gridPosition)

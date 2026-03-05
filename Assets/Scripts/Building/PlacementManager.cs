@@ -18,7 +18,7 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     /// <summary>The active placement context. Falls back to CloudPlacementContext.</summary>
     public IPlacementContext Context => _context ?? _defaultContext;
 
-    /// <summary>Sets the default cloud placement parent. Called by CloudGenerator on Start.</summary>
+    /// <summary>Sets the default cloud placement parent. Called by CloudIsland on Start.</summary>
     public void SetDefaultParent(Transform parent)
     {
         _defaultContext = new CloudPlacementContext(parent);
@@ -27,7 +27,7 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
     /// <summary>
     /// Scans all children of the given container for PlacedItem components,
     /// registers them in the occupied-positions map, and tracks them for save/restore.
-    /// Call from CloudGenerator/BuildingInterior Start() for scene-placed objects.
+    /// Call from CloudIsland/BuildingInterior Start() for scene-placed objects.
     /// Skipped when loading a save — RestoreState handles reconstruction.
     /// </summary>
     public void RegisterExistingItems(Transform container)
@@ -310,8 +310,8 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
         }
 
         // Build lookup for clouds by cloudId
-        var clouds = new Dictionary<string, CloudGenerator>();
-        foreach (var cg in FindObjectsByType<CloudGenerator>(FindObjectsSortMode.None))
+        var clouds = new Dictionary<string, CloudIsland>();
+        foreach (var cg in FindObjectsByType<CloudIsland>(FindObjectsSortMode.None))
         {
             if (!string.IsNullOrEmpty(cg.CloudId))
                 clouds[cg.CloudId] = cg;
@@ -399,7 +399,7 @@ public class PlacementManager : Singleton<PlacementManager>, ISaveable
             return $"airship:{ac.AirshipId}";
 
         // Check if parented under a cloud island
-        var cloud = item.GetComponentInParent<CloudGenerator>();
+        var cloud = item.GetComponentInParent<CloudIsland>();
         if (cloud != null)
             return $"cloud:{cloud.CloudId}";
 

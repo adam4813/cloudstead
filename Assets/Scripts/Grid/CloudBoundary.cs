@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(CompositeCollider2D))]
 public class CloudBoundary : MonoBehaviour
 {
-    [SerializeField] private CloudGenerator cloudGenerator;
+    [SerializeField] private CloudIsland cloudIsland;
     [SerializeField] private AudioClip edgeBumpSound;
     [SerializeField] private float pushBackForce = 8f;
 
@@ -15,8 +15,8 @@ public class CloudBoundary : MonoBehaviour
 
     private void Start()
     {
-        if (cloudGenerator == null)
-            cloudGenerator = GetComponent<CloudGenerator>();
+        if (cloudIsland == null)
+            cloudIsland = GetComponent<CloudIsland>();
 
         // Configure Rigidbody2D as static so composite works properly
         var rb = GetComponent<Rigidbody2D>();
@@ -50,20 +50,23 @@ public class CloudBoundary : MonoBehaviour
 
     private void GenerateBoundary()
     {
-        if (cloudGenerator == null || cloudGenerator.WalkabilityGrid == null)
+        if (cloudIsland == null || cloudIsland.WalkabilityGrid == null)
             return;
 
-        var origin = cloudGenerator.TileOrigin;
+        var origin = cloudIsland.TileOrigin;
 
-        for (int x = 0; x < cloudGenerator.Width; x++)
+        for (int x = 0; x < cloudIsland.Width; x++)
         {
-            for (int y = 0; y < cloudGenerator.Height; y++)
+            for (int y = 0; y < cloudIsland.Height; y++)
             {
-                if (cloudGenerator.WalkabilityGrid[x, y]) continue;
+                if (cloudIsland.WalkabilityGrid[x, y]) continue;
                 if (!HasWalkableNeighbor(x, y)) continue;
 
                 var col = gameObject.AddComponent<BoxCollider2D>();
-                col.offset = new Vector2(origin.x + x + 0.5f, origin.y + y + 0.5f);
+                // offset is local space — subtract transform.position from world coords
+                col.offset = new Vector2(
+                    origin.x + x + 0.5f - transform.position.x,
+                    origin.y + y + 0.5f - transform.position.y);
                 col.size = Vector2.one;
                 col.compositeOperation = Collider2D.CompositeOperation.Merge;
             }
@@ -74,9 +77,9 @@ public class CloudBoundary : MonoBehaviour
 
     private bool HasWalkableNeighbor(int x, int y)
     {
-        var grid = cloudGenerator.WalkabilityGrid;
-        int w = cloudGenerator.Width;
-        int h = cloudGenerator.Height;
+        var grid = cloudIsland.WalkabilityGrid;
+        int w = cloudIsland.Width;
+        int h = cloudIsland.Height;
 
         for (int dx = -1; dx <= 1; dx++)
         {
@@ -103,8 +106,8 @@ public class CloudBoundary : MonoBehaviour
 
     public void PushBack(Rigidbody2D playerRb)
     {
-        if (playerRb == null || cloudGenerator == null) return;
-        Vector2 center = cloudGenerator.GetCenterWorldPosition();
+        if (playerRb == null || cloudIsland == null) return;
+        Vector2 center = cloudIsland.GetCenterWorldPosition();
         Vector2 pushDir = (center - playerRb.position).normalized;
         playerRb.AddForce(pushDir * pushBackForce);
     }

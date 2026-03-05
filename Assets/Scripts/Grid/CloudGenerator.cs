@@ -1,333 +1,124 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-[System.Serializable]
-public class ResourceNodeSpawnConfig
+/// <summary>
+/// Procedural cloud terrain generation algorithm.
+/// Populates a CloudIsland's walkability grid and paints its tilemap.
+/// Lives as a sibling component on the same GameObject as CloudIsland.
+/// </summary>
+public class CloudGenerator : MonoBehaviour
 {
-    public ResourceNodeDefinition definition;
-    public GameObject prefab;
-    [Range(0, 20)] public int maxCount;
-}
-
-public class CloudGenerator : MonoBehaviour, ISaveable
-{
-    [SerializeField] private string cloudId = "home";
-    public string CloudId => cloudId;
-
-    [SerializeField] private string displayName = "Cloud Island";
-    public string DisplayName => displayName;
-
-    [SerializeField] private int cloudWidth = 30;
-    [SerializeField] private int cloudHeight = 30;
+    [Header("Generation")]
     [SerializeField] private float noiseScale = 0.15f;
     [SerializeField] private float threshold = 0.4f;
-    [SerializeField] private int seed;
-    [SerializeField] private Tilemap groundTilemap;
+
+    [Header("Tiles")]
     [SerializeField] private TileBase cloudTile;
     [SerializeField] private TileBase edgeTile;
 
-    [Header("Obstacles")]
-    [SerializeField] private ResourceNodeSpawnConfig[] nodeConfigs;
-    [SerializeField] [Range(0f, 0.5f)] private float obstacleSafeZoneRadius = 0.08f;
-    [SerializeField] private Transform obstacleParent;
-
-    [Header("Placed Objects")]
-    [Tooltip("Container whose children with PlacedItem components are auto-registered on start")]
-    [SerializeField] private Transform placeableObjectsContainer;
-
-    private bool[,] walkabilityGrid;
-
-    /// <summary>Bottom-left tile coordinate. GO's position is the cloud centre.</summary>
-    public Vector2Int TileOrigin => new Vector2Int(
-        Mathf.RoundToInt(transform.position.x) - cloudWidth / 2,
-        Mathf.RoundToInt(transform.position.y) - cloudHeight / 2);
-    public Vector3Int Origin => new Vector3Int(TileOrigin.x, TileOrigin.y, 0);
-    public bool[,] WalkabilityGrid => walkabilityGrid;
-    public int Width => cloudWidth;
-    public int Height => cloudHeight;
-    public Transform ObstacleParent => obstacleParent;
-    public ResourceNodeSpawnConfig[] NodeConfigs => nodeConfigs;
-
-    private void Start()
+    /// <summary>Generates terrain for the given island: walkability grid, tilemap painting, boundary rebuild.</summary>
+    public void Generate(CloudIsland island)
     {
-        if (seed == 0)
-            seed = Random.Range(1, 99999);
-
-        Generate();
-        ResourceNodeManager.Instance?.RegisterCloud(this);
-        if (PlacementManager.Instance != null)
-        {
-            PlacementManager.Instance.SetDefaultParent(placeableObjectsContainer);
-            PlacementManager.Instance.RegisterExistingItems(placeableObjectsContainer);
-        }
-        SaveManager.Instance?.Register(this);
-
-        // Register with island map
-        if (IslandRegistry.Instance != null)
-        {
-            IslandRegistry.Instance.RegisterIsland(new IslandInfo
-            {
-                cloudId = this.cloudId,
-                displayName = this.displayName,
-                worldCenter = (Vector2)transform.position,
-                approximateRadius = Mathf.Max(cloudWidth, cloudHeight) / 2f,
-                isHome = this.cloudId == "home"
-            });
-        }
+        GenerateTerrain(island);
+        ClearObstacles(island);
     }
 
-    private void OnDestroy()
+    private void GenerateTerrain(CloudIsland island)
     {
-        SaveManager.Instance?.Unregister(this);
-        ResourceNodeManager.Instance?.UnregisterCloud(this);
-    }
+        int w = island.Width;
+        int h = island.Height;
+        var grid = new bool[w, h];
 
-    public void Generate()
-    {
-        GenerateTerrain();
-        ClearObstacles();
-    }
+        int centerX = w / 2;
+        int centerY = h / 2;
+        float maxRadius = Mathf.Min(w, h) * 0.45f;
 
-    private void GenerateTerrain()
-    {
-        walkabilityGrid = new bool[cloudWidth, cloudHeight];
-
-        int centerX = cloudWidth / 2;
-        int centerY = cloudHeight / 2;
-        float maxRadius = Mathf.Min(cloudWidth, cloudHeight) * 0.45f;
-
-        for (int x = 0; x < cloudWidth; x++)
+        for (int x = 0; x < w; x++)
         {
-            for (int y = 0; y < cloudHeight; y++)
+            for (int y = 0; y < h; y++)
             {
                 float noise = Mathf.PerlinNoise(
-                    (x + seed) * noiseScale,
-                    (y + seed) * noiseScale);
+                    (x + island.Seed) * noiseScale,
+                    (y + island.Seed) * noiseScale);
 
                 float distFromCenter = Vector2.Distance(
                     new Vector2(x, y),
                     new Vector2(centerX, centerY));
 
                 float falloff = 1f - Mathf.Clamp01(distFromCenter / maxRadius);
-
-                // Center area always solid (safe spawn)
                 float centerBonus = distFromCenter < maxRadius * 0.3f ? 0.3f : 0f;
-
                 float value = noise * falloff + centerBonus;
-                walkabilityGrid[x, y] = value > threshold;
+                grid[x, y] = value > threshold;
             }
         }
 
-        SmoothEdges();
-        PaintTilemap();
+        // Smooth edges
+        var smoothed = new bool[w, h];
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++)
+                smoothed[x, y] = CountNeighbors(grid, x, y, w, h) >= 4;
 
-        // Rebuild boundary colliders if they exist
-        var boundary = GetComponent<CloudBoundary>();
+        island.WalkabilityGrid = smoothed;
+        PaintTilemap(island);
+
+        var boundary = island.GetComponent<CloudBoundary>();
         if (boundary != null)
             boundary.RegenerateBoundary();
     }
 
-    private void SmoothEdges()
-    {
-        var smoothed = new bool[cloudWidth, cloudHeight];
-        for (int x = 0; x < cloudWidth; x++)
-        {
-            for (int y = 0; y < cloudHeight; y++)
-            {
-                int neighbors = CountNeighbors(x, y);
-                smoothed[x, y] = neighbors >= 4;
-            }
-        }
-        walkabilityGrid = smoothed;
-    }
-
-    private int CountNeighbors(int x, int y)
+    private int CountNeighbors(bool[,] grid, int x, int y, int w, int h)
     {
         int count = 0;
         for (int dx = -1; dx <= 1; dx++)
-        {
             for (int dy = -1; dy <= 1; dy++)
             {
                 int nx = x + dx;
                 int ny = y + dy;
-                if (nx >= 0 && nx < cloudWidth && ny >= 0 && ny < cloudHeight)
-                {
-                    if (walkabilityGrid[nx, ny]) count++;
-                }
-                else
-                {
-                    // Out of bounds counts as empty
-                }
+                if (nx >= 0 && nx < w && ny >= 0 && ny < h && grid[nx, ny])
+                    count++;
             }
-        }
         return count;
     }
 
-    private void PaintTilemap()
+    private void PaintTilemap(CloudIsland island)
     {
-        if (groundTilemap == null) return;
+        var tilemap = island.GroundTilemap;
+        if (tilemap == null) return;
 
-        groundTilemap.ClearAllTiles();
+        tilemap.ClearAllTiles();
 
-        int ox = TileOrigin.x;
-        int oy = TileOrigin.y;
+        int ox = island.TileOrigin.x;
+        int oy = island.TileOrigin.y;
+        var grid = island.WalkabilityGrid;
 
-        for (int x = 0; x < cloudWidth; x++)
+        for (int x = 0; x < island.Width; x++)
         {
-            for (int y = 0; y < cloudHeight; y++)
+            for (int y = 0; y < island.Height; y++)
             {
-                if (!walkabilityGrid[x, y]) continue;
-
+                if (!grid[x, y]) continue;
                 var pos = new Vector3Int(ox + x, oy + y, 0);
-                bool isEdge = IsEdgeTile(x, y);
-                groundTilemap.SetTile(pos, isEdge ? (edgeTile ?? cloudTile) : cloudTile);
+                bool isEdge = island.IsEdgeTile(x, y);
+                tilemap.SetTile(pos, isEdge ? (edgeTile ?? cloudTile) : cloudTile);
             }
         }
     }
 
-    public bool IsEdgeTile(int x, int y)
+    private void ClearObstacles(CloudIsland island)
     {
-        for (int dx = -1; dx <= 1; dx++)
+        var parent = island.ObstacleParent;
+        if (parent != null)
         {
-            for (int dy = -1; dy <= 1; dy++)
-            {
-                if (dx == 0 && dy == 0) continue;
-                int nx = x + dx;
-                int ny = y + dy;
-                if (nx < 0 || nx >= cloudWidth || ny < 0 || ny >= cloudHeight)
-                    return true;
-                if (!walkabilityGrid[nx, ny])
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    private void ClearObstacles()
-    {
-        if (obstacleParent != null)
-        {
-            for (int i = obstacleParent.childCount - 1; i >= 0; i--)
-                DestroyImmediate(obstacleParent.GetChild(i).gameObject);
+            for (int i = parent.childCount - 1; i >= 0; i--)
+                DestroyImmediate(parent.GetChild(i).gameObject);
         }
         else
         {
-            for (int i = transform.childCount - 1; i >= 0; i--)
+            for (int i = island.transform.childCount - 1; i >= 0; i--)
             {
-                var child = transform.GetChild(i);
+                var child = island.transform.GetChild(i);
                 if (child.GetComponent<ResourceNode>() != null)
                     DestroyImmediate(child.gameObject);
             }
         }
     }
-
-    /// <summary>Returns all valid obstacle spawn positions in seeded-shuffled order for ResourceNodeManager to consume.</summary>
-    public List<Vector3> GetShuffledCandidateTiles()
-    {
-        var rng = new System.Random(seed);
-        var origin = TileOrigin;
-        float centerX = cloudWidth / 2f;
-        float centerY = cloudHeight / 2f;
-        float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * obstacleSafeZoneRadius;
-
-        var candidates = new List<Vector2Int>();
-        for (int x = 0; x < cloudWidth; x++)
-            for (int y = 0; y < cloudHeight; y++)
-            {
-                if (!walkabilityGrid[x, y]) continue;
-                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
-                if (dist <= safeRadius) continue;
-                candidates.Add(new Vector2Int(x, y));
-            }
-
-        for (int i = candidates.Count - 1; i > 0; i--)
-        {
-            int j = rng.Next(i + 1);
-            (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
-        }
-
-        var result = new List<Vector3>(candidates.Count);
-        foreach (var c in candidates)
-            result.Add(new Vector3(origin.x + c.x + 0.5f, origin.y + c.y + 0.5f, 0f));
-        return result;
-    }
-
-    public int GetMaxCount(ResourceNodeDefinition def)
-    {
-        if (nodeConfigs == null) return 0;
-        foreach (var c in nodeConfigs)
-            if (c.definition == def) return c.maxCount;
-        return 0;
-    }
-
-    public GameObject GetPrefab(ResourceNodeDefinition def)
-    {
-        if (nodeConfigs == null) return null;
-        foreach (var c in nodeConfigs)
-            if (c.definition == def) return c.prefab;
-        return null;
-    }
-
-    /// <summary>Returns a random world position for a new obstacle, or null if none available.</summary>
-    public Vector3? GetRandomObstacleTile(System.Random rng)
-    {
-        if (walkabilityGrid == null) return null;
-        var origin = TileOrigin;
-        float centerX = cloudWidth / 2f;
-        float centerY = cloudHeight / 2f;
-        float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * obstacleSafeZoneRadius;
-
-        var candidates = new List<Vector2Int>();
-        for (int x = 0; x < cloudWidth; x++)
-            for (int y = 0; y < cloudHeight; y++)
-            {
-                if (!walkabilityGrid[x, y]) continue;
-                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
-                if (dist <= safeRadius) continue;
-                candidates.Add(new Vector2Int(x, y));
-            }
-
-        if (candidates.Count == 0) return null;
-        var pick = candidates[rng.Next(candidates.Count)];
-        return new Vector3(origin.x + pick.x + 0.5f, origin.y + pick.y + 0.5f, 0f);
-    }
-
-    public bool IsWalkable(Vector3Int tilePos)
-    {
-        int x = tilePos.x - TileOrigin.x;
-        int y = tilePos.y - TileOrigin.y;
-        if (x < 0 || x >= cloudWidth || y < 0 || y >= cloudHeight)
-            return false;
-        return walkabilityGrid[x, y];
-    }
-
-    public Vector3 GetCenterWorldPosition()
-    {
-        return transform.position + new Vector3(0.5f, 0.5f, 0f);
-    }
-
-    #region ISaveable
-
-    public string SaveKey => $"CloudGenerator:{cloudId}";
-
-    public string SaveState()
-    {
-        return JsonUtility.ToJson(new CloudSaveData { seed = seed });
-    }
-
-    public void RestoreState(string json)
-    {
-        var data = JsonUtility.FromJson<CloudSaveData>(json);
-        seed = data.seed;
-        GenerateTerrain();
-    }
-
-    [System.Serializable]
-    private class CloudSaveData
-    {
-        public int seed;
-    }
-
-    #endregion
 }

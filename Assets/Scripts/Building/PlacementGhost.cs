@@ -51,7 +51,7 @@ public class PlacementGhost : MonoBehaviour
             Vector3Int gridPos = new Vector3Int(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.y), 0);
             transform.position = new Vector3(gridPos.x + 0.5f, gridPos.y + 0.5f, 0f);
 
-            bool walkable = TileManager.Instance != null && TileManager.Instance.IsWalkable(gridPos);
+            bool walkable = CloudIsland.IsCurrentWalkable(gridPos);
             bool free = !PlacedItem.IsOccupied(gridPos);
             UpdateValidity(walkable && free);
         }
