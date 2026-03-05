@@ -550,7 +550,6 @@ MonoBehaviour:
   onCloudZoom: 8
   airshipZoom: 14
   zoomLerpSpeed: 2
-  clampToCloud: 1
 --- !u!114 &356501581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -637,8 +636,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 8
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
