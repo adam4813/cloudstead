@@ -43,6 +43,9 @@ public class AirshipController : MonoBehaviour, ISaveable
     /// <summary>Active helm: player-placed override if set, otherwise the prefab default.</summary>
     private Transform ActiveHelm => _helmOverride != null ? _helmOverride : helmPosition;
 
+    /// <summary>Returns the active helm transform for external callers (e.g., CutscenePlayer passenger boarding).</summary>
+    public Transform GetHelmTransform() => ActiveHelm;
+
     /// <summary>
     /// Called by AirshipHelm to register a player-placed helm as the active position.
     /// Pass null to revert to the default prefab helm.

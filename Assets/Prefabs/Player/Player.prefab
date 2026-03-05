@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 607124346451061711}
   - component: {fileID: 3706692122621475951}
   - component: {fileID: 5536184563866091617}
+  - component: {fileID: 5955791245315160781}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -479,6 +480,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileColor: {r: 0, g: 1, b: 1, a: 0.35}
+--- !u!114 &5955791245315160781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4901904424283389085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e23342ac06bd124b8e1d20404d49312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actorId: Player
+  defaultMoveSpeed: 2.5
 --- !u!1 &5735815932759391133
 GameObject:
   m_ObjectHideFlags: 0

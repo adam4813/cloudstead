@@ -50,3 +50,7 @@ public struct MailReadEvent { public string LetterId; }
 
 // Opening Narrative
 public struct NewGameStartedEvent { }
+
+// Cutscene
+public struct CutsceneStartedEvent { public string CutsceneId; }
+public struct CutsceneEndedEvent { public string CutsceneId; }

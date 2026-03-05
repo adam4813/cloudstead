@@ -54,5 +54,7 @@ public class GameBootstrapper : MonoBehaviour
             IslandRegistry.Instance.Initialize();
         if (MailboxManager.Instance != null)
             MailboxManager.Instance.Initialize();
+        if (CutscenePlayer.Instance != null)
+            CutscenePlayer.Instance.Initialize();
     }
 }

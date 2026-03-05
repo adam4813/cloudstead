@@ -1,0 +1,248 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b5450c4c1a9ba4aac9d99a2cdec500, type: 3}
+  m_Name: Mayor_Day1_Welcome
+  m_EditorClassIdentifier: 
+  cutsceneId: Mayor_Day1_Welcome
+  description: 
+  steps:
+  - type: 2
+    actorId: 
+    targetActorId: Mayor
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 5
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 0.5
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 4
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: b4ad691835344c146b8a6f07a26bb8e4, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 0
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: -0.5, y: 3.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 1
+    actorId: Player
+    targetActorId: 
+    worldPosition: {x: 0.5, y: 3.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 4
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: 76719611291a5ea468a77e5800ab6acd, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 0
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 1
+    actorId: Player
+    targetActorId: 
+    worldPosition: {x: 1.5, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 4
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: 267c441e6efe63e40ae04a98a276a092, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 0
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 1
+    actorId: Player
+    targetActorId: 
+    worldPosition: {x: 1.5, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 4
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: 7a8cdcbaf197b00438640ad7aecd524f, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 0
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0.5, y: -4.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 1
+    actorId: Player
+    targetActorId: 
+    worldPosition: {x: 1.5, y: -4.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 4
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: 890f73f3861a0644bb087007fe271bd4, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 3
+    actorId: 
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 6
+    actorId: Mayor
+    targetActorId: MayorAirship
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 0
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 0
+    actorId: MayorAirship
+    targetActorId: 
+    worldPosition: {x: 20, y: -5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 0
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 7
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 20, y: -5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 0
+    ownerIdValue: 0
+    disembarkCloudId: Town
+  - type: 5
+    actorId: MayorAirship
+    targetActorId: 
+    worldPosition: {x: 5, y: -4.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 0.5
+    boolValue: 0
+    ownerIdValue: 0
+    disembarkCloudId: 
+  - type: 8
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 0
+    ownerIdValue: 0
+    disembarkCloudId: 

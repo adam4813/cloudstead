@@ -25,6 +25,7 @@ public class GameStateController : MonoBehaviour
         switch (evt.Current)
         {
             case GameState.Playing:
+                playerInput.enabled = true;
                 SwitchMapIfNeeded("Player");
                 Time.timeScale = 1f;
                 break;
@@ -47,6 +48,11 @@ public class GameStateController : MonoBehaviour
                 playerInput.enabled = true;
                 break;
 
+            case GameState.Cutscene:
+                // Disable all input during cutscenes — CutscenePlayer controls everything
+                playerInput.enabled = false;
+                break;
+
             case GameState.Airship:
                 SwitchMapIfNeeded("Airship");
                 Time.timeScale = 1f;
@@ -61,6 +67,7 @@ public class GameStateController : MonoBehaviour
 
     private void SwitchMapIfNeeded(string mapName)
     {
+        if (!playerInput.enabled) return;
         if (playerInput.currentActionMap?.name != mapName)
             playerInput.SwitchCurrentActionMap(mapName);
     }

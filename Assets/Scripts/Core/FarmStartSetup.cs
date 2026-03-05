@@ -32,6 +32,7 @@ public class FarmStartSetup : MonoBehaviour
             var settings = GameManager.Instance.Settings.Clone();
             settings.isNewGame = true;
             GameManager.Instance.ApplySettings(settings);
+            EventBus.Publish(new NewGameStartedEvent());
         }
 
         // Only give starting items if inventory is empty (first load / no save)

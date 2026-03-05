@@ -87,8 +87,11 @@ public class CloudGenerator : MonoBehaviour
 
         tilemap.ClearAllTiles();
 
-        int ox = island.TileOrigin.x;
-        int oy = island.TileOrigin.y;
+        // Tiles are placed in Grid-local cell space.
+        // The Grid is a child of the cloud GO, so cell (0,0) = cloud GO world position.
+        // Offset by -width/2, -height/2 to center the cloud on the GO.
+        int ox = -island.Width / 2;
+        int oy = -island.Height / 2;
         var grid = island.WalkabilityGrid;
 
         for (int x = 0; x < island.Width; x++)

@@ -1887,6 +1887,7 @@ GameObject:
   - component: {fileID: 8902549803477472496}
   - component: {fileID: 3486765621919220756}
   - component: {fileID: 1686140614070736373}
+  - component: {fileID: 1963720796077718373}
   m_Layer: 0
   m_Name: PlayerAirship
   m_TagString: Untagged
@@ -1952,6 +1953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   airshipId: player
+  ownerId: 0
   thrustForce: 8
   maxSpeed: 12
   linearDrag: 2
@@ -2575,6 +2577,20 @@ MonoBehaviour:
     goldCost: 0
   validColor: {r: 0, g: 1, b: 0, a: 0.5}
   invalidColor: {r: 1, g: 0, b: 0, a: 0.5}
+--- !u!114 &1963720796077718373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8318497825843822746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e23342ac06bd124b8e1d20404d49312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actorId: PlayerAirship
+  defaultMoveSpeed: 2.5
 --- !u!1001 &8295385705654263682
 PrefabInstance:
   m_ObjectHideFlags: 0

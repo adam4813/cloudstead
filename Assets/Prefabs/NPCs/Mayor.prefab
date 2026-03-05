@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 9213786706760431312}
   - component: {fileID: 5052023315137941225}
   - component: {fileID: 7302712606168588977}
+  - component: {fileID: 7062009580557157653}
   m_Layer: 7
   m_Name: Mayor
   m_TagString: Untagged
@@ -103,8 +104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
-  scheduleWaypoints:
-  - {fileID: 0}
+  scheduleWaypoints: []
   moveSpeed: 2
   greetingDialogue: {fileID: 11400000, guid: a83acf27fe81b264491036af7efd37f5, type: 2}
   friendshipPoints: 0
@@ -167,17 +167,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c67593929fa6ae347869545d83d90930, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  definition: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
-  moveSpeed: 2.5
-  farmTourWaypoints: []
-  farmTourDialogueLines: []
-  townTourWaypoints: []
-  townTourDialogueLines: []
-  mayorAirship: {fileID: 0}
-  playerAirship: {fileID: 0}
-  playerOwnerId: 0
-  arrivalLine: Welcome to your new home in the clouds!
-  departureLine: I'll swing back tomorrow morning. Get some rest.
-  day2ArrivalLine: Morning! Ready to see the town?
-  shipyardLine: Your airship was being finished up here. She's all yours now. Fly
-    safe.
+  day1Cutscene: {fileID: 11400000, guid: 182d23f9766b5554b9f882dbb86c5cee, type: 2}
+  day2Cutscene: {fileID: 11400000, guid: f69b561e5f72daf47b47e36976407256, type: 2}
+--- !u!114 &7062009580557157653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4680885027002066436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e23342ac06bd124b8e1d20404d49312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actorId: Mayor
+  defaultMoveSpeed: 2.5
