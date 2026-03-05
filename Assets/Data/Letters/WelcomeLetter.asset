@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 579f56999e91de74dadd20e600bac0ac, type: 3}
+  m_Name: WelcomeLetter
+  m_EditorClassIdentifier: 
+  sender: Mayor
+  subject: Hello, welcome!
+  body: 'Welcome to the cloudss I hope your first day is calm and peaceful.
+
+
+    Take
+    these seeds as a welcoming gift.'
+  deliveryDay: 0
+  deliverySeason: 0
+  attachedItem: {fileID: 11400000, guid: 915f18cf828e6034fafac9466a00f3ee, type: 2}
+  attachedItemCount: 18

@@ -61,7 +61,7 @@ MonoBehaviour:
   mapPanel: {fileID: 7831442349624860100}
   islandContainer: {fileID: 4507798685908349035}
   islandDotPrefab: {fileID: 2021707802902106601, guid: f8497f8b82fa66341a329bf21d5af3dc, type: 3}
-  mapScale: 2
+  mapScale: 0.75
   playerMarker: {fileID: 1236023359980653660}
 --- !u!1 &3271300507025185434
 GameObject:

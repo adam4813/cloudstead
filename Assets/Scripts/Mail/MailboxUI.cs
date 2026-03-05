@@ -11,6 +11,7 @@ public class MailboxUI : MonoBehaviour
 {
     [Header("Panel")]
     [SerializeField] private GameObject mailPanel;
+    [SerializeField] private Button closeButton;
 
     [Header("Letter List (left)")]
     [SerializeField] private Transform letterListContent;
@@ -33,6 +34,16 @@ public class MailboxUI : MonoBehaviour
             mailPanel.SetActive(false);
         if (claimButton != null)
             claimButton.onClick.AddListener(OnClaimClicked);
+        if (letterListContent != null)
+        {
+            for (var i = 0; i < letterListContent.childCount; i++)
+                Destroy(letterListContent.GetChild(i).gameObject);
+            foreach (var go in _entryInstances)
+                Destroy(go);
+            _entryInstances.Clear();
+        }
+        if (closeButton != null)
+            closeButton.onClick.AddListener(Close);
     }
 
     public void Open()
