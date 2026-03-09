@@ -15,6 +15,30 @@ MonoBehaviour:
   cutsceneId: Mayor_Day1_Welcome
   description: 
   steps:
+  - type: 6
+    actorId: Mayor
+    targetActorId: MayorAirship
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+    followOffset: {x: 0, y: 0}
+  - type: 6
+    actorId: Player
+    targetActorId: MayorAirship
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: 
+    followOffset: {x: 0, y: 0}
   - type: 2
     actorId: 
     targetActorId: Mayor
@@ -27,17 +51,41 @@ MonoBehaviour:
     ownerIdValue: 0
     disembarkCloudId: 
     followOffset: {x: 0, y: 0}
-  - type: 5
-    actorId: 
+  - type: 0
+    actorId: MayorAirship
     targetActorId: 
-    worldPosition: {x: 0, y: 0}
+    worldPosition: {x: 1, y: -18}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
     duration: 0.5
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloudId: home
+    followOffset: {x: 0, y: 0}
+  - type: 7
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0, y: -14}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 0.5
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: home
+    followOffset: {x: 0, y: 0}
+  - type: 7
+    actorId: Player
+    targetActorId: 
+    worldPosition: {x: -1, y: -14}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 0.5
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloudId: home
     followOffset: {x: 0, y: 0}
   - type: 4
     actorId: 
@@ -78,7 +126,7 @@ MonoBehaviour:
   - type: 0
     actorId: Mayor
     targetActorId: 
-    worldPosition: {x: -0.5, y: 3.5}
+    worldPosition: {x: 7, y: -12}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
@@ -102,7 +150,7 @@ MonoBehaviour:
   - type: 0
     actorId: Mayor
     targetActorId: 
-    worldPosition: {x: 0, y: 0}
+    worldPosition: {x: -6, y: -8}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
@@ -126,7 +174,7 @@ MonoBehaviour:
   - type: 0
     actorId: Mayor
     targetActorId: 
-    worldPosition: {x: 0, y: 0}
+    worldPosition: {x: 4, y: -10}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
@@ -150,7 +198,7 @@ MonoBehaviour:
   - type: 0
     actorId: Mayor
     targetActorId: 
-    worldPosition: {x: 0.5, y: -4.5}
+    worldPosition: {x: 0, y: -14}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
@@ -210,7 +258,7 @@ MonoBehaviour:
   - type: 0
     actorId: MayorAirship
     targetActorId: 
-    worldPosition: {x: 20, y: -5}
+    worldPosition: {x: 20, y: -20}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
@@ -222,7 +270,7 @@ MonoBehaviour:
   - type: 7
     actorId: Mayor
     targetActorId: 
-    worldPosition: {x: 20, y: -5}
+    worldPosition: {x: 20, y: -20}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}

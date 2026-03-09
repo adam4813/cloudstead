@@ -183,6 +183,12 @@ public class CloudIsland : MonoBehaviour, ISaveable
         return transform.position + new Vector3(0.5f, 0.5f, 0f);
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(0.4f, 0.8f, 1f, 0.8f);
+        Gizmos.DrawWireCube(transform.position, new Vector3(cloudWidth, cloudHeight, 0f));
+    }
+
     // ── Resource Node Queries ────────────────────────────────────────────────
 
     public List<Vector3> GetShuffledCandidateTiles()

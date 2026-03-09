@@ -359,7 +359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   padName: Home Dock
-  landingRadius: 5
+  landingRadius: 10
   playerSpawnPoint: {fileID: 8551266595918066850}
   labelObject: {fileID: 2868375689790210672}
 --- !u!114 &8127177574637189828
