@@ -59,8 +59,8 @@ public class CutsceneStep
     public uint ownerIdValue;
 
     [BoxGroup("Parameters"), ShowIf("@type == CutsceneStepType.DisembarkAirship")]
-    [LabelText("Landing Cloud ID"), Tooltip("CloudIsland.cloudId the player lands on. Leave empty to clear.")]
-    public string disembarkCloudId;
+    [LabelText("Landing Cloud"), Tooltip("The CloudIslandDefinition the actor lands on. Leave empty to clear.")]
+    public CloudIslandDefinition disembarkCloud;
 
     [BoxGroup("Parameters"), ShowIf("@type == CutsceneStepType.FollowActor")]
     [LabelText("Trail Distance"), Tooltip("Distance to maintain behind the leader per axis (always positive). Sign is auto-determined: x=1 stays 1 unit behind on X, y=1 stays 1 unit behind on Y.")]

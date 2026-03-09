@@ -68,7 +68,12 @@ public class TileCursor : MonoBehaviour
         if (debugLogging)
         {
             Vector3Int playerFeetTile = playerController.GetFeetTile();
-            Debug.Log($"[TileCursor] mouseTile={mouseTile} walkable={mouseWalkable} inRange={mouseInRange} playerFeetTile={playerFeetTile} feetPos={playerController.GetFeetPosition()}");
+            var island = CloudIsland.Current;
+            bool hasGrid = island?.WalkabilityGrid != null;
+            bool interior = InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior;
+            Debug.Log($"[TileCursor] mouseTile={mouseTile} walkable={mouseWalkable} inRange={mouseInRange} " +
+                      $"playerFeetTile={playerFeetTile} Current={island?.CloudId ?? "NULL"} " +
+                      $"hasGrid={hasGrid} isInterior={interior}");
         }
 
         if (mouseWalkable && mouseInRange)

@@ -30,10 +30,10 @@ public class CutsceneEditorWindow : OdinEditorWindow
     // ── Left panel: asset list ──────────────────────────────────────────────
 
     [HorizontalGroup("Split", 0.3f)]
-    [BoxGroup("Split/Assets"), LabelText("Cutscene Assets")]
-    [ListDrawerSettings(IsReadOnly = true, ShowPaging = false, HideAddButton = true, HideRemoveButton = true)]
-    [ShowInInspector, HideLabel]
+    [BoxGroup("Split/Assets")]
     private List<CutsceneDefinition> _assetList = new();
+
+    private Vector2 _assetScrollPos;
 
     // ── Right panel: selected cutscene ──────────────────────────────────────
 
@@ -86,6 +86,18 @@ public class CutsceneEditorWindow : OdinEditorWindow
     [Button("+ Ownership", ButtonSizes.Small), GUIColor(0.9f, 0.8f, 0.6f)]
     private void AddOwnership()  => AppendStep(CutsceneStepType.TransferOwnership);
 
+    [HorizontalGroup("Split/Editor/Bar4")]
+    [Button("+ Return Control", ButtonSizes.Small), GUIColor(0.6f, 1f, 0.8f)]
+    private void AddReturnControl() => AppendStep(CutsceneStepType.ReturnPlayerControl);
+
+    [HorizontalGroup("Split/Editor/Bar4")]
+    [Button("+ Follow", ButtonSizes.Small), GUIColor(0.6f, 1f, 0.8f)]
+    private void AddFollow()     => AppendStep(CutsceneStepType.FollowActor);
+
+    [HorizontalGroup("Split/Editor/Bar4")]
+    [Button("+ Stop Follow", ButtonSizes.Small), GUIColor(0.6f, 1f, 0.8f)]
+    private void AddStopFollow() => AppendStep(CutsceneStepType.StopFollowActor);
+
     // ── Lifecycle ───────────────────────────────────────────────────────────
 
     protected override void OnEnable()
@@ -129,18 +141,28 @@ public class CutsceneEditorWindow : OdinEditorWindow
 
     // Clicking an asset in the list selects it
     [OnInspectorGUI, BoxGroup("Split/Assets")]
-    private void DrawAssetButtons()
+    private void DrawAssetList()
     {
-        // handled by InlineEditor selection below
+        _assetScrollPos = EditorGUILayout.BeginScrollView(_assetScrollPos);
+        foreach (var asset in _assetList)
+        {
+            if (asset == null) continue;
+            bool isSelected = asset == _selected;
+
+            var prev = GUI.backgroundColor;
+            GUI.backgroundColor = isSelected ? new Color(0.4f, 0.8f, 1f) : new Color(0.85f, 0.85f, 0.85f);
+            if (GUILayout.Button(asset.name, EditorStyles.toolbarButton, GUILayout.Height(22)))
+            {
+                _selected = asset;
+                GUI.FocusControl(null);
+            }
+            GUI.backgroundColor = prev;
+        }
+        EditorGUILayout.EndScrollView();
     }
 
     protected override void OnImGUI()
     {
-        // Handle click on asset list items
-        if (Event.current.type == EventType.MouseDown)
-        {
-            // Selection is handled by OdinInspector's list drawer click-through
-        }
         base.OnImGUI();
     }
 

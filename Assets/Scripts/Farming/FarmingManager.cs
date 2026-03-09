@@ -28,7 +28,6 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     {
         if (CloudIsland.Current == null) return false;
         if (!CloudIsland.IsCurrentWalkable(pos)) return false;
-        if (!IsInteriorTile(pos)) return false;
         if (farmPlots.ContainsKey(pos)) return false;
 
         CloudIsland.Current.SoilTilemap?.SetTile(pos, tilledSoilTile);
@@ -150,23 +149,6 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     public bool HasPlotAt(Vector3Int pos)
     {
         return farmPlots.ContainsKey(pos);
-    }
-
-    private bool IsInteriorTile(Vector3Int pos)
-    {
-        var island = CloudIsland.Current;
-        if (island == null) return true;
-
-        for (int dx = -1; dx <= 1; dx++)
-        {
-            for (int dy = -1; dy <= 1; dy++)
-            {
-                if (dx == 0 && dy == 0) continue;
-                if (!island.IsWalkable(new Vector3Int(pos.x + dx, pos.y + dy, 0)))
-                    return false;
-            }
-        }
-        return true;
     }
 
     public string SaveState()

@@ -181,8 +181,20 @@ public static class CreateMayorCutscenes
     private static CutsceneStep BoardAirship(string passenger, string airship)
         => new CutsceneStep { type = CutsceneStepType.BoardAirship, actorId = passenger, targetActorId = airship };
 
-    private static CutsceneStep DisembarkAirship(string actor, Vector2 pos, string cloudId)
-        => new CutsceneStep { type = CutsceneStepType.DisembarkAirship, actorId = actor, worldPosition = pos, disembarkCloudId = cloudId };
+    private static CutsceneStep DisembarkAirship(string actor, Vector2 pos, string cloudId = null)
+    {
+        CloudIslandDefinition cloud = null;
+        if (!string.IsNullOrEmpty(cloudId))
+        {
+            var guids = AssetDatabase.FindAssets("t:CloudIslandDefinition");
+            foreach (var g in guids)
+            {
+                var def = AssetDatabase.LoadAssetAtPath<CloudIslandDefinition>(AssetDatabase.GUIDToAssetPath(g));
+                if (def != null && def.cloudId == cloudId) { cloud = def; break; }
+            }
+        }
+        return new CutsceneStep { type = CutsceneStepType.DisembarkAirship, actorId = actor, worldPosition = pos, disembarkCloud = cloud };
+    }
 
     private static CutsceneStep TransferOwnership(string airshipActor, uint ownerId)
         => new CutsceneStep { type = CutsceneStepType.TransferOwnership, actorId = airshipActor, ownerIdValue = ownerId };
@@ -243,13 +255,14 @@ public static class CreateMayorCutscenes
             e.FindPropertyRelative("duration").floatValue          = s.duration;
             e.FindPropertyRelative("boolValue").boolValue          = s.boolValue;
             e.FindPropertyRelative("ownerIdValue").longValue       = s.ownerIdValue;
-            e.FindPropertyRelative("disembarkCloudId").stringValue = s.disembarkCloudId ?? "";
 
-            // Object references (dialogue tree, speaker)
-            var dialogueProp = e.FindPropertyRelative("dialogue");
-            var speakerProp  = e.FindPropertyRelative("speaker");
-            if (dialogueProp != null) dialogueProp.objectReferenceValue = s.dialogue;
-            if (speakerProp  != null) speakerProp.objectReferenceValue  = s.speaker;
+            // Object references (dialogue tree, speaker, disembark cloud)
+            var dialogueProp      = e.FindPropertyRelative("dialogue");
+            var speakerProp       = e.FindPropertyRelative("speaker");
+            var disembarkCloudProp = e.FindPropertyRelative("disembarkCloud");
+            if (dialogueProp      != null) dialogueProp.objectReferenceValue      = s.dialogue;
+            if (speakerProp       != null) speakerProp.objectReferenceValue       = s.speaker;
+            if (disembarkCloudProp != null) disembarkCloudProp.objectReferenceValue = s.disembarkCloud;
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();

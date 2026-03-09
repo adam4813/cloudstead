@@ -300,12 +300,13 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
         {
             playerCtrl.CurrentAirship = null;
 
-            // Find and assign landing cloud if ID provided
-            if (!string.IsNullOrEmpty(step.disembarkCloudId))
+            // Find and assign landing cloud via definition SO
+            if (step.disembarkCloud != null)
             {
+                string id = step.disembarkCloud.cloudId;
                 foreach (var island in FindObjectsByType<CloudIsland>(FindObjectsSortMode.None))
                 {
-                    if (island.CloudId == step.disembarkCloudId)
+                    if (island.CloudId == id)
                     {
                         playerCtrl.CurrentCloud = island;
                         break;

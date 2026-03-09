@@ -15,9 +15,9 @@ MonoBehaviour:
   cutsceneId: Mayor_Day2_TownVisit
   description: 
   steps:
-  - type: 1
+  - type: 6
     actorId: Mayor
-    targetActorId: 
+    targetActorId: MayorAirship
     worldPosition: {x: 0.5, y: 3.5}
     moveSpeed: 0
     dialogue: {fileID: 0}
@@ -25,18 +25,20 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 1
     actorId: MayorAirship
     targetActorId: 
-    worldPosition: {x: 3, y: -10}
+    worldPosition: {x: 20, y: -19}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 8
     actorId: Mayor
     targetActorId: 
@@ -47,7 +49,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 2
     actorId: 
     targetActorId: Mayor
@@ -58,18 +61,32 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 5
-    actorId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
+  - type: 0
+    actorId: MayorAirship
     targetActorId: 
-    worldPosition: {x: 0, y: 0}
+    worldPosition: {x: 0, y: -17}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
     duration: 0.5
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
+  - type: 7
+    actorId: Mayor
+    targetActorId: 
+    worldPosition: {x: 0, y: -13}
+    moveSpeed: 0
+    dialogue: {fileID: 11400000, guid: 0be1934857c16184680e222c3c99fe4e, type: 2}
+    speaker: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloud: {fileID: 11400000, guid: 5f48ef5b94f589b4f9dc7fd2eb1cb7bf, type: 2}
+    followOffset: {x: 0, y: 0}
   - type: 4
     actorId: 
     targetActorId: 
@@ -80,29 +97,44 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 0
-    actorId: Mayor
-    targetActorId: 
-    worldPosition: {x: 0.5, y: -4.5}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 1
     actorId: Player
     targetActorId: 
-    worldPosition: {x: 1.5, y: -4.5}
+    worldPosition: {x: 1, y: -13}
     moveSpeed: 0
     dialogue: {fileID: 0}
     speaker: {fileID: 0}
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
+  - type: 6
+    actorId: Player
+    targetActorId: MayorAirship
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
+  - type: 6
+    actorId: Mayor
+    targetActorId: MayorAirship
+    worldPosition: {x: 0, y: 0}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 2
     actorId: 
     targetActorId: MayorAirship
@@ -113,29 +145,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 6
-    actorId: Player
-    targetActorId: MayorAirship
-    worldPosition: {x: 0, y: 0}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 6
-    actorId: Mayor
-    targetActorId: MayorAirship
-    worldPosition: {x: 0, y: 0}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 0
     actorId: MayorAirship
     targetActorId: 
@@ -146,7 +157,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 7
     actorId: Player
     targetActorId: 
@@ -157,7 +169,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: town
+    disembarkCloud: {fileID: 11400000, guid: 22fa9d82dcb99da43a6ad507d671996c, type: 2}
+    followOffset: {x: 0, y: 0}
   - type: 7
     actorId: Mayor
     targetActorId: 
@@ -168,7 +181,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: town
+    disembarkCloud: {fileID: 11400000, guid: 22fa9d82dcb99da43a6ad507d671996c, type: 2}
+    followOffset: {x: 0, y: 0}
   - type: 2
     actorId: 
     targetActorId: Mayor
@@ -179,7 +193,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 5
     actorId: 
     targetActorId: 
@@ -190,7 +205,20 @@ MonoBehaviour:
     duration: 0.3
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
+  - type: 11
+    actorId: Player
+    targetActorId: Mayor
+    worldPosition: {x: 103, y: 5.5}
+    moveSpeed: 0
+    dialogue: {fileID: 0}
+    speaker: {fileID: 0}
+    duration: 1
+    boolValue: 1
+    ownerIdValue: 0
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0.5, y: 0.5}
   - type: 0
     actorId: Mayor
     targetActorId: 
@@ -201,18 +229,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 1
-    actorId: Player
-    targetActorId: 
-    worldPosition: {x: 104.5, y: 5.5}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 4
     actorId: 
     targetActorId: 
@@ -223,7 +241,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 0
     actorId: Mayor
     targetActorId: 
@@ -234,18 +253,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 1
-    actorId: Player
-    targetActorId: 
-    worldPosition: {x: 101.5, y: 0}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 4
     actorId: 
     targetActorId: 
@@ -256,7 +265,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 0
     actorId: Mayor
     targetActorId: 
@@ -267,18 +277,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 1
-    actorId: Player
-    targetActorId: 
-    worldPosition: {x: 101.5, y: 0}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 1
-    ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 4
     actorId: 
     targetActorId: 
@@ -289,7 +289,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 9
     actorId: PlayerAirship
     targetActorId: 
@@ -300,7 +301,8 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}
   - type: 3
     actorId: 
     targetActorId: 
@@ -311,15 +313,5 @@ MonoBehaviour:
     duration: 1
     boolValue: 1
     ownerIdValue: 0
-    disembarkCloudId: 
-  - type: 8
-    actorId: Mayor
-    targetActorId: 
-    worldPosition: {x: 0, y: 0}
-    moveSpeed: 0
-    dialogue: {fileID: 0}
-    speaker: {fileID: 0}
-    duration: 1
-    boolValue: 0
-    ownerIdValue: 0
-    disembarkCloudId: 
+    disembarkCloud: {fileID: 0}
+    followOffset: {x: 0, y: 0}

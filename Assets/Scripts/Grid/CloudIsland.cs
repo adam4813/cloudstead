@@ -18,17 +18,8 @@ public class ResourceNodeSpawnConfig
 public class CloudIsland : MonoBehaviour, ISaveable
 {
     [Header("Identity")]
-    [SerializeField] private string cloudId = "home";
-    [SerializeField] private string displayName = "Cloud Island";
-
-    [Header("Size")]
-    [SerializeField] private int cloudWidth = 30;
-    [SerializeField] private int cloudHeight = 30;
-    [SerializeField] private int seed;
-
-    [Header("Generation")]
-    [Tooltip("When true, walkability is derived from the existing painted tilemap instead of being procedurally generated. Boundary and resource nodes are still built automatically.")]
-    [SerializeField] private bool handBuilt;
+    [Tooltip("Optional: link a CloudIslandDefinition SO to share the cloud ID and display name across assets.")]
+    [SerializeField] private CloudIslandDefinition definition;
 
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
@@ -49,13 +40,15 @@ public class CloudIsland : MonoBehaviour, ISaveable
 
     private bool[,] walkabilityGrid;
 
+    private int seed;
+
     // ── Public Properties ────────────────────────────────────────────────────
 
-    public string CloudId => cloudId;
-    public string DisplayName => displayName;
-    public int Width => cloudWidth;
-    public int Height => cloudHeight;
-    public int Seed { get => seed; set => seed = value; }
+    public string CloudId => definition.cloudId;
+    public string DisplayName => definition.displayName;
+    public int Width => definition.cloudWidth;
+    public int Height => definition.cloudHeight;
+    public int Seed => seed;
     public bool[,] WalkabilityGrid { get => walkabilityGrid; set => walkabilityGrid = value; }
     public Tilemap GroundTilemap => groundTilemap;
     public Tilemap SoilTilemap => soilTilemap;
@@ -66,15 +59,14 @@ public class CloudIsland : MonoBehaviour, ISaveable
 
     /// <summary>Bottom-left tile coordinate. GO's position is the cloud centre.</summary>
     public Vector2Int TileOrigin => new(
-        Mathf.RoundToInt(transform.position.x) - cloudWidth / 2,
-        Mathf.RoundToInt(transform.position.y) - cloudHeight / 2);
+        Mathf.RoundToInt(transform.position.x) - Width / 2,
+        Mathf.RoundToInt(transform.position.y) - Width / 2);
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
 
     private void Start()
     {
-        if (seed == 0)
-            seed = Random.Range(1, 99999);
+        seed = definition.seed == 0 ?  Random.Range(1, 99999) : definition.seed;
 
         InitializeMap();
 
@@ -90,11 +82,11 @@ public class CloudIsland : MonoBehaviour, ISaveable
         {
             IslandRegistry.Instance.RegisterIsland(new IslandInfo
             {
-                cloudId = cloudId,
-                displayName = displayName,
+                cloudId = definition.cloudId,
+                displayName = definition.displayName,
                 worldCenter = transform.position,
-                approximateRadius = Mathf.Max(cloudWidth, cloudHeight) / 2f,
-                isHome = cloudId == "home"
+                approximateRadius = Mathf.Max(definition.cloudWidth, definition.cloudHeight) / 2f,
+                isHome = definition.cloudId == "home"
             });
         }
     }
@@ -102,7 +94,7 @@ public class CloudIsland : MonoBehaviour, ISaveable
     private void InitializeMap()
     {
         ClearResourceNodes();
-        if (handBuilt)
+        if (definition.handBuilt)
         {
             BuildWalkabilityFromTilemap();
         }
@@ -127,7 +119,7 @@ public class CloudIsland : MonoBehaviour, ISaveable
         if (walkabilityGrid == null) return false;
         int x = tilePos.x - TileOrigin.x;
         int y = tilePos.y - TileOrigin.y;
-        if (x < 0 || x >= cloudWidth || y < 0 || y >= cloudHeight)
+        if (x < 0 || x >= definition.cloudWidth || y < 0 || y >= definition.cloudHeight)
             return false;
         return walkabilityGrid[x, y];
     }
@@ -135,18 +127,16 @@ public class CloudIsland : MonoBehaviour, ISaveable
     public bool IsEdgeTile(int x, int y)
     {
         if (walkabilityGrid == null) return false;
-        for (int dx = -1; dx <= 1; dx++)
+        // Cardinal neighbours only — diagonal gaps (cloud corner cutouts) don't count as an edge
+        (int dx, int dy)[] cardinals = { (0,1),(0,-1),(1,0),(-1,0) };
+        foreach (var (dx, dy) in cardinals)
         {
-            for (int dy = -1; dy <= 1; dy++)
-            {
-                if (dx == 0 && dy == 0) continue;
-                int nx = x + dx;
-                int ny = y + dy;
-                if (nx < 0 || nx >= cloudWidth || ny < 0 || ny >= cloudHeight)
-                    return true;
-                if (!walkabilityGrid[nx, ny])
-                    return true;
-            }
+            int nx = x + dx;
+            int ny = y + dy;
+            if (nx < 0 || nx >= definition.cloudWidth || ny < 0 || ny >= definition.cloudHeight)
+                return true;
+            if (!walkabilityGrid[nx, ny])
+                return true;
         }
         return false;
     }
@@ -186,7 +176,7 @@ public class CloudIsland : MonoBehaviour, ISaveable
     private void OnDrawGizmos()
     {
         Gizmos.color = new Color(0.4f, 0.8f, 1f, 0.8f);
-        Gizmos.DrawWireCube(transform.position, new Vector3(cloudWidth, cloudHeight, 0f));
+        Gizmos.DrawWireCube(transform.position, new Vector3(definition.cloudWidth, definition.cloudHeight, 0f));
     }
 
     // ── Resource Node Queries ────────────────────────────────────────────────
@@ -195,13 +185,13 @@ public class CloudIsland : MonoBehaviour, ISaveable
     {
         var rng = new System.Random(seed);
         var origin = TileOrigin;
-        float centerX = cloudWidth / 2f;
-        float centerY = cloudHeight / 2f;
-        float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * obstacleSafeZoneRadius;
+        float centerX = definition.cloudWidth / 2f;
+        float centerY = definition.cloudHeight / 2f;
+        float safeRadius = Mathf.Min(definition.cloudWidth, definition.cloudHeight) * obstacleSafeZoneRadius;
 
         var candidates = new List<Vector2Int>();
-        for (int x = 0; x < cloudWidth; x++)
-            for (int y = 0; y < cloudHeight; y++)
+        for (int x = 0; x < definition.cloudWidth; x++)
+            for (int y = 0; y < definition.cloudHeight; y++)
             {
                 if (!walkabilityGrid[x, y]) continue;
                 float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
@@ -241,13 +231,13 @@ public class CloudIsland : MonoBehaviour, ISaveable
     {
         if (walkabilityGrid == null) return null;
         var origin = TileOrigin;
-        float centerX = cloudWidth / 2f;
-        float centerY = cloudHeight / 2f;
-        float safeRadius = Mathf.Min(cloudWidth, cloudHeight) * obstacleSafeZoneRadius;
+        float centerX = definition.cloudWidth / 2f;
+        float centerY = definition.cloudHeight / 2f;
+        float safeRadius = Mathf.Min(definition.cloudWidth, definition.cloudHeight) * obstacleSafeZoneRadius;
 
         var candidates = new List<Vector2Int>();
-        for (int x = 0; x < cloudWidth; x++)
-            for (int y = 0; y < cloudHeight; y++)
+        for (int x = 0; x < definition.cloudWidth; x++)
+            for (int y = 0; y < definition.cloudHeight; y++)
             {
                 if (!walkabilityGrid[x, y]) continue;
                 float dist = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
@@ -269,13 +259,13 @@ public class CloudIsland : MonoBehaviour, ISaveable
     /// </summary>
     private void BuildWalkabilityFromTilemap()
     {
-        var grid = new bool[cloudWidth, cloudHeight];
+        var grid = new bool[definition.cloudWidth, definition.cloudHeight];
         if (groundTilemap)
         {
-            var ox = -cloudWidth / 2;
-            var oy = -cloudHeight / 2;
-            for (var x = 0; x < cloudWidth; x++)
-                for (var y = 0; y < cloudHeight; y++)
+            var ox = -definition.cloudWidth / 2;
+            var oy = -definition.cloudHeight / 2;
+            for (var x = 0; x < definition.cloudWidth; x++)
+                for (var y = 0; y < definition.cloudHeight; y++)
                     grid[x, y] = groundTilemap.HasTile(new Vector3Int(ox + x, oy + y, 0));
         }
         walkabilityGrid = grid;
@@ -302,7 +292,7 @@ public class CloudIsland : MonoBehaviour, ISaveable
 
     // ── ISaveable ────────────────────────────────────────────────────────────
 
-    public string SaveKey => $"CloudIsland:{cloudId}";
+    public string SaveKey => $"CloudIsland:{CloudId}";
 
     public string SaveState()
     {
