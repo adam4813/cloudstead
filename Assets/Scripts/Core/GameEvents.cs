@@ -54,3 +54,7 @@ public struct NewGameStartedEvent { }
 // Cutscene
 public struct CutsceneStartedEvent { public string CutsceneId; }
 public struct CutsceneEndedEvent { public string CutsceneId; }
+
+// Navigation / Waypoint
+public struct WaypointSetEvent { public IslandInfo Target; }
+public struct WaypointClearedEvent { }

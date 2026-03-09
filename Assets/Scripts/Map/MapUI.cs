@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 /// <summary>
-/// Simple sky map UI showing all registered islands as labeled circles.
-/// Toggle via M key or HUD button. View-only — no click-to-fly.
+/// Sky map UI showing all registered islands as labeled circles.
+/// Toggle via M key or HUD button. Click an island dot to set it as a waypoint.
 /// </summary>
 public class MapUI : MonoBehaviour
 {
@@ -19,7 +21,11 @@ public class MapUI : MonoBehaviour
     [Header("Player Marker")]
     [SerializeField] private RectTransform playerMarker;
 
+    [Header("Waypoint")]
+    [SerializeField] private Color waypointHighlightColor = new(1f, 0.85f, 0.3f, 1f);
+
     private bool _isOpen;
+    private readonly List<(GameObject dot, IslandInfo island)> _dotEntries = new();
 
     private void Start()
     {
@@ -45,7 +51,8 @@ public class MapUI : MonoBehaviour
     public void Open()
     {
         if (_isOpen) return;
-        if (GameManager.Instance != null && !GameManager.Instance.IsPlaying) return;
+        var gm = GameManager.Instance;
+        if (gm != null && gm.CurrentState != GameState.Playing && gm.CurrentState != GameState.Airship) return;
 
         _isOpen = true;
         if (mapPanel != null)
@@ -63,6 +70,7 @@ public class MapUI : MonoBehaviour
         if (mapPanel != null)
             mapPanel.SetActive(false);
 
+        //GameManager.Instance?.RestorePreviousState();
         GameManager.Instance?.SetState(GameState.Playing);
     }
 
@@ -71,12 +79,17 @@ public class MapUI : MonoBehaviour
         if (IslandRegistry.Instance == null || islandContainer == null) return;
 
         // Clear old dots
-        for (int i = islandContainer.childCount - 1; i >= 0; i--)
-            Destroy(islandContainer.GetChild(i).gameObject);
+        foreach (var entry in _dotEntries)
+            if (entry.dot != null) Destroy(entry.dot);
+        _dotEntries.Clear();
 
         var islands = IslandRegistry.Instance.Islands;
         var home = IslandRegistry.Instance.GetHome();
         Vector2 homeCenter = home.HasValue ? home.Value.worldCenter : Vector2.zero;
+
+        string activeWaypointId = WaypointManager.Instance != null && WaypointManager.Instance.HasWaypoint
+            ? WaypointManager.Instance.CurrentWaypoint.Value.cloudId
+            : null;
 
         foreach (var island in islands)
         {
@@ -98,10 +111,27 @@ public class MapUI : MonoBehaviour
             if (label != null)
                 label.text = island.displayName;
 
-            // Home gets a distinct color
+            // Color — highlight active waypoint, otherwise home green / default blue
             var img = dot.GetComponent<Image>();
             if (img != null)
-                img.color = island.isHome ? new Color(0.5f, 0.85f, 0.5f, 0.8f) : new Color(0.7f, 0.8f, 1f, 0.8f);
+            {
+                if (island.cloudId == activeWaypointId)
+                    img.color = waypointHighlightColor;
+                else if (island.isHome)
+                    img.color = new Color(0.5f, 0.85f, 0.5f, 0.8f);
+                else
+                    img.color = new Color(0.7f, 0.8f, 1f, 0.8f);
+            }
+
+            // Make clickable for waypoint setting
+            var btn = dot.GetComponent<Button>();
+            if (btn == null)
+                btn = dot.AddComponent<Button>();
+
+            var captured = island;
+            btn.onClick.AddListener(() => OnIslandClicked(captured));
+
+            _dotEntries.Add((dot, island));
         }
 
         // Update player marker
@@ -114,5 +144,24 @@ public class MapUI : MonoBehaviour
                 playerMarker.anchoredPosition = playerOffset;
             }
         }
+    }
+
+    private void OnIslandClicked(IslandInfo island)
+    {
+        if (WaypointManager.Instance == null) return;
+
+        // Toggle waypoint: click same island again to clear
+        if (WaypointManager.Instance.HasWaypoint &&
+            WaypointManager.Instance.CurrentWaypoint.Value.cloudId == island.cloudId)
+        {
+            WaypointManager.Instance.ClearWaypoint();
+        }
+        else
+        {
+            WaypointManager.Instance.SetWaypoint(island);
+        }
+
+        // Refresh to update highlight colors
+        RefreshMap();
     }
 }

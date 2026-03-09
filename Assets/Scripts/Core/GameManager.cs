@@ -5,6 +5,8 @@ public class GameManager : Singleton<GameManager>, ISaveable
     [SerializeField] private GameState currentState = GameState.Playing;
     [SerializeField] private WorldSettings settings = new();
 
+    private GameState previousState = GameState.Playing;
+
     public WorldSettings Settings => settings;
 
     // Convenience accessors
@@ -13,6 +15,7 @@ public class GameManager : Singleton<GameManager>, ISaveable
     public float DayLengthSeconds => settings.dayLengthSeconds;
 
     public GameState CurrentState => currentState;
+    public GameState PreviousState => previousState;
     public bool IsPlaying => currentState == GameState.Playing;
 
     public override void Initialize()
@@ -30,14 +33,23 @@ public class GameManager : Singleton<GameManager>, ISaveable
     {
         if (newState == currentState) return;
 
-        var previous = currentState;
+        previousState = currentState;
         currentState = newState;
 
         EventBus.Publish(new GameStateChangedEvent
         {
-            Previous = previous,
+            Previous = previousState,
             Current = newState
         });
+    }
+
+    /// <summary>
+    /// Returns to the state that was active before the current one.
+    /// Useful for overlay UIs (inventory, map) that should restore Airship/Playing/etc.
+    /// </summary>
+    public void RestorePreviousState()
+    {
+        SetState(previousState);
     }
 
     /// <summary>Applies new settings at runtime. Publishes event so systems can react.</summary>

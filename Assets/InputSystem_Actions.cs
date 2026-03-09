@@ -663,6 +663,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""a1c20001-4000-4000-8000-000000000004"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -742,6 +751,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""OpenMap"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b3a00004-0000-4000-8000-000000000001"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""OpenInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b3a00004-0000-4000-8000-000000000002"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""OpenInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -790,6 +821,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Airship_Thrust = m_Airship.FindAction("Thrust", throwIfNotFound: true);
         m_Airship_Land = m_Airship.FindAction("Land", throwIfNotFound: true);
         m_Airship_OpenMap = m_Airship.FindAction("OpenMap", throwIfNotFound: true);
+        m_Airship_OpenInventory = m_Airship.FindAction("OpenInventory", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
@@ -1221,6 +1253,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Airship_Thrust;
     private readonly InputAction m_Airship_Land;
     private readonly InputAction m_Airship_OpenMap;
+    private readonly InputAction m_Airship_OpenInventory;
     /// <summary>
     /// Provides access to input actions defined in input action map "Airship".
     /// </summary>
@@ -1244,6 +1277,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Airship/OpenMap".
         /// </summary>
         public InputAction @OpenMap => m_Wrapper.m_Airship_OpenMap;
+        /// <summary>
+        /// Provides access to the underlying input action "Airship/OpenInventory".
+        /// </summary>
+        public InputAction @OpenInventory => m_Wrapper.m_Airship_OpenInventory;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1279,6 +1316,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @OpenMap.started += instance.OnOpenMap;
             @OpenMap.performed += instance.OnOpenMap;
             @OpenMap.canceled += instance.OnOpenMap;
+            @OpenInventory.started += instance.OnOpenInventory;
+            @OpenInventory.performed += instance.OnOpenInventory;
+            @OpenInventory.canceled += instance.OnOpenInventory;
         }
 
         /// <summary>
@@ -1299,6 +1339,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @OpenMap.started -= instance.OnOpenMap;
             @OpenMap.performed -= instance.OnOpenMap;
             @OpenMap.canceled -= instance.OnOpenMap;
+            @OpenInventory.started -= instance.OnOpenInventory;
+            @OpenInventory.performed -= instance.OnOpenInventory;
+            @OpenInventory.canceled -= instance.OnOpenInventory;
         }
 
         /// <summary>
@@ -1501,5 +1544,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnOpenMap(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "OpenInventory" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenInventory(InputAction.CallbackContext context);
     }
 }

@@ -13,6 +13,7 @@ public class InventoryUI : MonoBehaviour
 
     private SlotUI[] slotUIs;
     private bool isOpen;
+    private InputAction _airshipOpenInventory;
 
     private void Start()
     {
@@ -21,11 +22,22 @@ public class InventoryUI : MonoBehaviour
         EventBus.Subscribe<InventoryChangedEvent>(OnInventoryChanged);
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
+
+        // Subscribe to Airship map's OpenInventory so it works while piloting
+        var playerInput = FindFirstObjectByType<PlayerInput>();
+        if (playerInput != null)
+        {
+            _airshipOpenInventory = playerInput.actions.FindActionMap("Airship")?.FindAction("OpenInventory");
+            if (_airshipOpenInventory != null)
+                _airshipOpenInventory.performed += OnOpenInventory;
+        }
     }
 
     private void OnDestroy()
     {
         EventBus.Unsubscribe<InventoryChangedEvent>(OnInventoryChanged);
+        if (_airshipOpenInventory != null)
+            _airshipOpenInventory.performed -= OnOpenInventory;
     }
 
     private void InitializeSlots()
@@ -84,6 +96,9 @@ public class InventoryUI : MonoBehaviour
 
     public void Open()
     {
+        var gm = GameManager.Instance;
+        if (gm != null && gm.CurrentState != GameState.Playing && gm.CurrentState != GameState.Airship) return;
+
         isOpen = true;
         if (panel != null) panel.SetActive(true);
         RefreshSlots();
@@ -99,6 +114,7 @@ public class InventoryUI : MonoBehaviour
         if (closeSound != null && Camera.main != null)
             AudioSource.PlayClipAtPoint(closeSound, Camera.main.transform.position);
         GameManager.Instance?.SetState(GameState.Playing);
+        //GameManager.Instance?.RestorePreviousState();
     }
 
     private void RefreshSlots()

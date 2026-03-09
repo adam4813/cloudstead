@@ -56,5 +56,7 @@ public class GameBootstrapper : MonoBehaviour
             MailboxManager.Instance.Initialize();
         if (CutscenePlayer.Instance != null)
             CutscenePlayer.Instance.Initialize();
+        if (WaypointManager.Instance != null)
+            WaypointManager.Instance.Initialize();
     }
 }
