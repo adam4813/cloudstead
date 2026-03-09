@@ -17,13 +17,7 @@ public class CloudGenerator : MonoBehaviour
     [SerializeField] private TileBase edgeTile;
 
     /// <summary>Generates terrain for the given island: walkability grid, tilemap painting, boundary rebuild.</summary>
-    public void Generate(CloudIsland island)
-    {
-        GenerateTerrain(island);
-        ClearObstacles(island);
-    }
-
-    private void GenerateTerrain(CloudIsland island)
+    public void GenerateTerrain(CloudIsland island)
     {
         int w = island.Width;
         int h = island.Height;
@@ -60,10 +54,6 @@ public class CloudGenerator : MonoBehaviour
 
         island.WalkabilityGrid = smoothed;
         PaintTilemap(island);
-
-        var boundary = island.GetComponent<CloudBoundary>();
-        if (boundary != null)
-            boundary.RegenerateBoundary();
     }
 
     private int CountNeighbors(bool[,] grid, int x, int y, int w, int h)
@@ -83,7 +73,7 @@ public class CloudGenerator : MonoBehaviour
     private void PaintTilemap(CloudIsland island)
     {
         var tilemap = island.GroundTilemap;
-        if (tilemap == null) return;
+        if (!tilemap) return;
 
         tilemap.ClearAllTiles();
 
@@ -102,25 +92,6 @@ public class CloudGenerator : MonoBehaviour
                 var pos = new Vector3Int(ox + x, oy + y, 0);
                 bool isEdge = island.IsEdgeTile(x, y);
                 tilemap.SetTile(pos, isEdge ? (edgeTile ?? cloudTile) : cloudTile);
-            }
-        }
-    }
-
-    private void ClearObstacles(CloudIsland island)
-    {
-        var parent = island.ObstacleParent;
-        if (parent != null)
-        {
-            for (int i = parent.childCount - 1; i >= 0; i--)
-                DestroyImmediate(parent.GetChild(i).gameObject);
-        }
-        else
-        {
-            for (int i = island.transform.childCount - 1; i >= 0; i--)
-            {
-                var child = island.transform.GetChild(i);
-                if (child.GetComponent<ResourceNode>() != null)
-                    DestroyImmediate(child.gameObject);
             }
         }
     }

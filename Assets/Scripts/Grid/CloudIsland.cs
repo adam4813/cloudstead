@@ -26,6 +26,10 @@ public class CloudIsland : MonoBehaviour, ISaveable
     [SerializeField] private int cloudHeight = 30;
     [SerializeField] private int seed;
 
+    [Header("Generation")]
+    [Tooltip("When true, walkability is derived from the existing painted tilemap instead of being procedurally generated. Boundary and resource nodes are still built automatically.")]
+    [SerializeField] private bool handBuilt;
+
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap soilTilemap;
@@ -61,10 +65,9 @@ public class CloudIsland : MonoBehaviour, ISaveable
     public ResourceNodeSpawnConfig[] NodeConfigs => nodeConfigs;
 
     /// <summary>Bottom-left tile coordinate. GO's position is the cloud centre.</summary>
-    public Vector2Int TileOrigin => new Vector2Int(
+    public Vector2Int TileOrigin => new(
         Mathf.RoundToInt(transform.position.x) - cloudWidth / 2,
         Mathf.RoundToInt(transform.position.y) - cloudHeight / 2);
-    public Vector3Int Origin => new Vector3Int(TileOrigin.x, TileOrigin.y, 0);
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -73,9 +76,7 @@ public class CloudIsland : MonoBehaviour, ISaveable
         if (seed == 0)
             seed = Random.Range(1, 99999);
 
-        var generator = GetComponent<CloudGenerator>();
-        if (generator != null)
-            generator.Generate(this);
+        InitializeMap();
 
         ResourceNodeManager.Instance?.RegisterCloud(this);
         if (PlacementManager.Instance != null)
@@ -89,13 +90,28 @@ public class CloudIsland : MonoBehaviour, ISaveable
         {
             IslandRegistry.Instance.RegisterIsland(new IslandInfo
             {
-                cloudId = this.cloudId,
-                displayName = this.displayName,
-                worldCenter = (Vector2)transform.position,
+                cloudId = cloudId,
+                displayName = displayName,
+                worldCenter = transform.position,
                 approximateRadius = Mathf.Max(cloudWidth, cloudHeight) / 2f,
-                isHome = this.cloudId == "home"
+                isHome = cloudId == "home"
             });
         }
+    }
+
+    private void InitializeMap()
+    {
+        ClearResourceNodes();
+        if (handBuilt)
+        {
+            BuildWalkabilityFromTilemap();
+        }
+        else
+        {
+            var generator = GetComponent<CloudGenerator>();
+            generator?.GenerateTerrain(this);
+        }
+        GetComponent<CloudBoundary>()?.RegenerateBoundary();
     }
 
     private void OnDestroy()
@@ -238,6 +254,46 @@ public class CloudIsland : MonoBehaviour, ISaveable
         return new Vector3(origin.x + pick.x + 0.5f, origin.y + pick.y + 0.5f, 0f);
     }
 
+    // ── Hand-built support ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Derives the walkability grid from whatever tiles are currently painted on
+    /// groundTilemap. Used when handBuilt is true so designer-placed tiles drive
+    /// boundary generation and resource spawning.
+    /// </summary>
+    private void BuildWalkabilityFromTilemap()
+    {
+        var grid = new bool[cloudWidth, cloudHeight];
+        if (groundTilemap)
+        {
+            var ox = -cloudWidth / 2;
+            var oy = -cloudHeight / 2;
+            for (var x = 0; x < cloudWidth; x++)
+                for (var y = 0; y < cloudHeight; y++)
+                    grid[x, y] = groundTilemap.HasTile(new Vector3Int(ox + x, oy + y, 0));
+        }
+        walkabilityGrid = grid;
+    }
+
+    /// <summary>Destroys all ResourceNode children so ResourceNodeManager can re-spawn them.</summary>
+    private void ClearResourceNodes()
+    {
+        if (obstacleParent)
+        {
+            for (var i = obstacleParent.childCount - 1; i >= 0; i--)
+                DestroyImmediate(obstacleParent.GetChild(i).gameObject);
+        }
+        else
+        {
+            for (var i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child.GetComponent<ResourceNode>())
+                    DestroyImmediate(child.gameObject);
+            }
+        }
+    }
+
     // ── ISaveable ────────────────────────────────────────────────────────────
 
     public string SaveKey => $"CloudIsland:{cloudId}";
@@ -251,9 +307,8 @@ public class CloudIsland : MonoBehaviour, ISaveable
     {
         var data = JsonUtility.FromJson<CloudSaveData>(json);
         seed = data.seed;
-        var generator = GetComponent<CloudGenerator>();
-        if (generator != null)
-            generator.Generate(this);
+
+        InitializeMap();
     }
 
     [System.Serializable]
