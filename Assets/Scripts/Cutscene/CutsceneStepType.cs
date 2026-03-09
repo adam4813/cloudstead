@@ -29,4 +29,13 @@ public enum CutsceneStepType
 
     /// <summary>Sets the ownerId on a named AirshipController component.</summary>
     TransferOwnership,
+
+    /// <summary>Re-enables player input without ending the cutscene. Subsequent steps still execute.</summary>
+    ReturnPlayerControl,
+
+    /// <summary>Non-blocking: follower actor continuously tracks leader actor at an offset until cutscene ends.</summary>
+    FollowActor,
+
+    /// <summary>Stops a named actor's active follow behaviour.</summary>
+    StopFollowActor,
 }

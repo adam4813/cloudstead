@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -18,6 +19,7 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
     private bool _isPlaying;
     private Coroutine _current;
     private string _activeCutsceneId;
+    private readonly List<CutsceneActor> _followingActors = new List<CutsceneActor>();
 
     public bool IsPlaying => _isPlaying;
 
@@ -76,6 +78,11 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
     {
         _isPlaying = false;
         _current = null;
+
+        // Stop any ongoing follow behaviours
+        foreach (var actor in _followingActors)
+            actor?.StopFollowing();
+        _followingActors.Clear();
 
         // Return camera to player
         var player = FindFirstObjectByType<PlayerController>();
@@ -156,6 +163,42 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
                     airshipCtrl.OwnerId = step.ownerIdValue;
                 else
                     Debug.LogWarning($"[CutscenePlayer] TransferOwnership: no AirshipController on '{step.actorId}'.");
+                break;
+
+            case CutsceneStepType.ReturnPlayerControl:
+                var playerCtrlRPC = FindFirstObjectByType<PlayerController>();
+                var playerActor = playerCtrlRPC != null ? CutsceneActor.Get("Player") : null;
+                playerActor?.StopFollowing();
+                var playerInput = playerCtrlRPC?.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+                if (playerInput != null)
+                {
+                    playerInput.enabled = true;
+                    playerInput.SwitchCurrentActionMap("Player");
+                    GameManager.Instance?.SetState(GameState.Playing);
+                }
+                break;
+
+            case CutsceneStepType.FollowActor:
+                var follower = CutsceneActor.Get(step.actorId);
+                var leader   = CutsceneActor.Get(step.targetActorId);
+                if (follower != null && leader != null)
+                {
+                    follower.StartFollowing(leader, step.followOffset, step.moveSpeed);
+                    _followingActors.Add(follower);
+                }
+                else
+                    Debug.LogWarning($"[CutscenePlayer] FollowActor: could not find '{step.actorId}' or leader '{step.targetActorId}'.");
+                break;
+
+            case CutsceneStepType.StopFollowActor:
+                var stopActor = CutsceneActor.Get(step.actorId);
+                if (stopActor != null)
+                {
+                    stopActor.StopFollowing();
+                    _followingActors.Remove(stopActor);
+                }
+                else
+                    Debug.LogWarning($"[CutscenePlayer] StopFollowActor: actor '{step.actorId}' not found.");
                 break;
         }
     }

@@ -28,7 +28,7 @@ public class CutsceneStep
     [LabelText("World Position")]
     public Vector2 worldPosition;
 
-    [BoxGroup("Parameters"), ShowIf("@type == CutsceneStepType.MoveActor")]
+    [BoxGroup("Parameters"), ShowIf("@type == CutsceneStepType.MoveActor || type == CutsceneStepType.FollowActor")]
     [LabelText("Move Speed (0 = actor default)"), MinValue(0)]
     public float moveSpeed;
 
@@ -62,14 +62,20 @@ public class CutsceneStep
     [LabelText("Landing Cloud ID"), Tooltip("CloudIsland.cloudId the player lands on. Leave empty to clear.")]
     public string disembarkCloudId;
 
+    [BoxGroup("Parameters"), ShowIf("@type == CutsceneStepType.FollowActor")]
+    [LabelText("Trail Distance"), Tooltip("Distance to maintain behind the leader per axis (always positive). Sign is auto-determined: x=1 stays 1 unit behind on X, y=1 stays 1 unit behind on Y.")]
+    public Vector2 followOffset;
+
     // ── ShowIf predicates ──────────────────────────────────────────────────
 
     private bool NeedsActorId => type != CutsceneStepType.Wait
                                && type != CutsceneStepType.ReturnCamera
-                               && type != CutsceneStepType.FocusCamera;
+                               && type != CutsceneStepType.FocusCamera
+                               && type != CutsceneStepType.ReturnPlayerControl;
 
     private bool NeedsTargetId => type == CutsceneStepType.FocusCamera
-                                || type == CutsceneStepType.BoardAirship;
+                                || type == CutsceneStepType.BoardAirship
+                                || type == CutsceneStepType.FollowActor;
 
     private bool NeedsWorldPosition => type == CutsceneStepType.MoveActor
                                      || type == CutsceneStepType.TeleportActor
