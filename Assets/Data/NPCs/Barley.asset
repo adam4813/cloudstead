@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0255ef0921a6af84b835c1130c050817, type: 3}
+  m_Name: Barley
+  m_EditorClassIdentifier: 
+  npcName: Barley
+  portrait: {fileID: 0}
+  greetings:
+  - Welcome to Cloud's Rest! Take a seat anywhere.
+  - Ah, my favorite farmer! What'll it be?
+  - The stew's on and the kettle's warm.
+  farewells:
+  - Don't be a stranger!
+  - Clear skies and full bellies to you!
+  - "Come back any evening \u2014 there's always room."
+  isMerchant: 0
+  shopInventory: []
+  shopPrices: 
+  acceptsGifts: 1
+  likedGifts: []
+  likedGiftResponses: []
+  defaultGiftResponse: For me? You're too kind! I might just work this into tonight's
+    recipe.

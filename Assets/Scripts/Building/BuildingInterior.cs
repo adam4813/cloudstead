@@ -9,6 +9,11 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] private string buildingId;
     public string BuildingId => buildingId;
 
+    [FoldoutGroup("Identity")]
+    [Tooltip("Optional data definition. Provides name, hours, owner NPC. If null, building is always open.")]
+    [SerializeField] private BuildingDefinition definition;
+    public BuildingDefinition Definition => definition;
+
     [FoldoutGroup("Tilemaps")]
     [Tooltip("All interior tilemap layers (floor, walls, decoration). Colliders on these tilemaps enable/disable automatically.")]
     [SerializeField] private Tilemap[] interiorTilemaps;
@@ -101,5 +106,12 @@ public class BuildingInterior : MonoBehaviour
             else bounds.Encapsulate(worldBounds);
         }
         return bounds;
+    }
+
+    /// <summary>Returns true if this building is currently open (or has no schedule definition).</summary>
+    public bool IsOpen()
+    {
+        if (definition == null) return true;
+        return definition.IsOpenNow();
     }
 }

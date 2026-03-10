@@ -1,11 +1,18 @@
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 public class NPCController : MonoBehaviour, IInteractable, ISaveable
 {
     [SerializeField] private NPCDefinition definition;
-    [SerializeField] private Transform[] scheduleWaypoints;
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private DialogueTree greetingDialogue;
+
+    [Header("Waypoints (fallback if no schedule)")]
+    [SerializeField] private Transform[] scheduleWaypoints;
+
+    [Header("Time-Based Schedule")]
+    [Tooltip("If populated, NPC swaps active waypoints based on the current hour. Evaluated top-to-bottom; first matching entry wins.")]
+    [SerializeField] private NPCScheduleEntry[] schedule;
 
     [Header("Friendship")]
     [SerializeField] private int friendshipPoints;
@@ -14,6 +21,8 @@ public class NPCController : MonoBehaviour, IInteractable, ISaveable
 
     private SpriteRenderer spriteRenderer;
     private int currentWaypointIndex;
+    private Transform[] _activeWaypoints;
+    private float _lastScheduleHour = -1f;
 
     // Multiplayer readiness — will be assigned when networking is added
     [System.NonSerialized] public uint ownerId;
@@ -31,14 +40,17 @@ public class NPCController : MonoBehaviour, IInteractable, ISaveable
 
     private void Start()
     {
+        _activeWaypoints = scheduleWaypoints;
         SaveManager.Instance?.Register(this);
         EventBus.Subscribe<GiftGivenEvent>(OnGiftGiven);
+        EventBus.Subscribe<TimeTickEvent>(OnTimeTick);
     }
 
     private void OnDestroy()
     {
         SaveManager.Instance?.Unregister(this);
         EventBus.Unsubscribe<GiftGivenEvent>(OnGiftGiven);
+        EventBus.Unsubscribe<TimeTickEvent>(OnTimeTick);
     }
 
     private void OnGiftGiven(GiftGivenEvent evt)
@@ -48,18 +60,55 @@ public class NPCController : MonoBehaviour, IInteractable, ISaveable
         friendshipPoints += points;
     }
 
+    private void OnTimeTick(TimeTickEvent evt)
+    {
+        if (schedule == null || schedule.Length == 0) return;
+
+        float hour = evt.NormalizedTime * 24f;
+
+        // Only re-evaluate once per in-game hour to avoid thrashing
+        int hourInt = Mathf.FloorToInt(hour);
+        if (hourInt == Mathf.FloorToInt(_lastScheduleHour)) return;
+        _lastScheduleHour = hour;
+
+        // Find the active schedule entry (last entry whose startHour <= current hour)
+        Transform[] best = scheduleWaypoints; // fallback
+        for (int i = schedule.Length - 1; i >= 0; i--)
+        {
+            if (hour >= schedule[i].startHour && schedule[i].waypoints != null && schedule[i].waypoints.Length > 0)
+            {
+                best = schedule[i].waypoints;
+                break;
+            }
+        }
+
+        if (best != _activeWaypoints)
+        {
+            _activeWaypoints = best;
+            currentWaypointIndex = 0;
+        }
+    }
+
     private void Update()
     {
-        if (scheduleWaypoints == null || scheduleWaypoints.Length == 0) return;
+        if (_activeWaypoints == null || _activeWaypoints.Length == 0) return;
 
-        var target = scheduleWaypoints[currentWaypointIndex];
+        var target = _activeWaypoints[currentWaypointIndex];
         if (target == null) return;
 
         float step = moveSpeed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, target.position, step);
 
+        // Flip sprite to face movement direction
+        if (spriteRenderer != null)
+        {
+            Vector2 dir = target.position - transform.position;
+            if (Mathf.Abs(dir.x) > 0.01f)
+                spriteRenderer.flipX = dir.x < 0;
+        }
+
         if (Vector3.Distance(transform.position, target.position) < 0.1f)
-            currentWaypointIndex = (currentWaypointIndex + 1) % scheduleWaypoints.Length;
+            currentWaypointIndex = (currentWaypointIndex + 1) % _activeWaypoints.Length;
     }
 
     public bool CanInteract(uint playerId)
@@ -200,4 +249,15 @@ public struct FriendshipDialogue
     [Tooltip("Friendship points required to unlock this dialogue")]
     public int requiredPoints;
     public DialogueTree dialogue;
+}
+
+[System.Serializable]
+public struct NPCScheduleEntry
+{
+    [Tooltip("Hour (24h) when this schedule block begins. Entries should be ordered earliest-to-latest.")]
+    [Range(0f, 24f)]
+    public float startHour;
+
+    [Tooltip("Waypoints the NPC patrols during this time block.")]
+    public Transform[] waypoints;
 }
