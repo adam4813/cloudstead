@@ -17,7 +17,7 @@ MonoBehaviour:
   description: A quiet place of contemplation beneath an open sky. Seasonal ceremonies
     bring the whole village together.
   ownerNPC: {fileID: 0}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 649f529faf384e542b73e052845bf96c, type: 3}
   alwaysOpen: 1
   openHour: 0
   closeHour: 0

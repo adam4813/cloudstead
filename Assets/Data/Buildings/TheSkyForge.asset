@@ -17,7 +17,7 @@ MonoBehaviour:
   description: A rooftop smithy where cloud-iron is hammered into sturdy tools and
     equipment. The ring of the anvil carries far on the wind.
   ownerNPC: {fileID: 11400000, guid: 46d6984a4ee11c644b9cd704e7afbab6, type: 2}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 580f85bfe1d47b74c85836feafe804cb, type: 3}
   alwaysOpen: 0
   openHour: 10
   closeHour: 18

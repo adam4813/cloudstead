@@ -12884,6 +12884,7 @@ MonoBehaviour:
   targetInterior: {fileID: 0}
   isExitDoor: 1
   doorSound: {fileID: 0}
+  closedMessage: Closed right now. Come back later!
 --- !u!212 &1136024150
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -18556,6 +18557,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingId: mabel_shop
+  definition: {fileID: 0}
   interiorTilemaps:
   - {fileID: 1799808614}
   - {fileID: 402533987}
@@ -18614,6 +18616,7 @@ MonoBehaviour:
   targetInterior: {fileID: 1393098591}
   isExitDoor: 0
   doorSound: {fileID: 0}
+  closedMessage: Closed right now. Come back later!
 --- !u!61 &1494814201
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -19208,6 +19211,7 @@ MonoBehaviour:
   targetInterior: {fileID: 0}
   isExitDoor: 1
   doorSound: {fileID: 0}
+  closedMessage: Closed right now. Come back later!
 --- !u!212 &1778638415
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -20273,6 +20277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingId: player_house
+  definition: {fileID: 0}
   interiorTilemaps:
   - {fileID: 2137096644}
   - {fileID: 813732483}
@@ -36413,14 +36418,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mayor
       objectReference: {fileID: 0}
-    - target: {fileID: 7302712606168588977, guid: 6c9fbb669794241488827caf1a9c34b9, type: 3}
-      propertyPath: day1Cutscene
-      value: 
-      objectReference: {fileID: 11400000, guid: 182d23f9766b5554b9f882dbb86c5cee, type: 2}
-    - target: {fileID: 7302712606168588977, guid: 6c9fbb669794241488827caf1a9c34b9, type: 3}
-      propertyPath: day2Cutscene
-      value: 
-      objectReference: {fileID: 11400000, guid: f69b561e5f72daf47b47e36976407256, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -17,7 +17,7 @@ MonoBehaviour:
   description: The administrative heart of the village. Community notices and seasonal
     event postings line the walls. The Mayor holds office here.
   ownerNPC: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f1f2064a963b5be4b85a6ea59c0bedff, type: 3}
   alwaysOpen: 1
   openHour: 0
   closeHour: 0

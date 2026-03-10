@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Dockmaster Riggins keeps the sky-docks in order. Airship parts, hull
     repairs, and flight charts for the adventurous.
   ownerNPC: {fileID: 11400000, guid: 5a573aee8492d644bb6d70010b3eccc0, type: 2}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ccfefd6fb45c3bf4eb0cb35e39531758, type: 3}
   alwaysOpen: 0
   openHour: 7
   closeHour: 17

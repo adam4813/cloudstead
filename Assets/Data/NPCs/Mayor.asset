@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mayor
   m_EditorClassIdentifier: 
   npcName: Mayor
-  portrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  portrait: {fileID: 21300000, guid: 4a2fa8abba41ea44bb837d8143399d94, type: 3}
   greetings:
   - What a lovely day! If you need anything, please ask.
   farewells: []

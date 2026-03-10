@@ -17,7 +17,7 @@ MonoBehaviour:
   description: A gentle windmill whose sails turn lazily in the upper winds. Grain
     is milled and cloud-fiber spun into usable thread here.
   ownerNPC: {fileID: 0}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 7b2cae01d72a88b4ebd689283867244e, type: 3}
   alwaysOpen: 0
   openHour: 6
   closeHour: 20

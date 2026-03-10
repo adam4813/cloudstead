@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Your cozy home among the clouds. A warm hearth, a soft bed, and endless
     sky out every window.
   ownerNPC: {fileID: 0}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b75700af3f0659d49898e9feca29897f, type: 3}
   alwaysOpen: 1
   openHour: 0
   closeHour: 0

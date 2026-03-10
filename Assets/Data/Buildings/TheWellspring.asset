@@ -17,7 +17,7 @@ MonoBehaviour:
   description: A gentle fountain at the village center where water rises from the
     cloud itself, sparkling in the light.
   ownerNPC: {fileID: 0}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e48c0c48753db3d41b103b9172caa946, type: 3}
   alwaysOpen: 1
   openHour: 0
   closeHour: 0

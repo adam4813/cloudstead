@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Merchant_Mabel
   m_EditorClassIdentifier: 
   npcName: Mabel
-  portrait: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  portrait: {fileID: 21300000, guid: 052ea277bb7cf4a40bbb133b0ce895b8, type: 3}
   greetings:
   - '"Welcome to my shop, dear!", "Looking for seeds?"'
   farewells: []

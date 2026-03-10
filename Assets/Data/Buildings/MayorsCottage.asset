@@ -17,7 +17,7 @@ MonoBehaviour:
   description: A tidy cottage with a wrap-around porch and climbing vines. The Mayor
     can always be found with tea in hand.
   ownerNPC: {fileID: 11400000, guid: bfc6e3f1e40704746bb36e291509e7f7, type: 2}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c63b9c0ae0d619548b30a1af5d65e3e1, type: 3}
   alwaysOpen: 1
   openHour: 0
   closeHour: 0
