@@ -2,8 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Marks the fixed mooring point on the cloud edge where the airship parks.
-/// Interacting with the dock teleports the player onto the airship deck so
-/// they can walk to the helm and press E to start flying.
+/// Interacting with the dock parents the player to the airship and teleports
+/// them onto the deck so they move with the ship even as a passenger.
+/// The player can then walk to the helm and press E to start flying.
 ///
 /// When the player is already aboard a docked airship, interacting with
 /// the dock enters ship edit mode (tile editing via AirshipBuildMode).
@@ -47,11 +48,13 @@ public class AirshipDock : MonoBehaviour, IInteractable
         }
         else
         {
-            // Board the airship from the cloud
+            // Board the airship from the cloud — parent so the player
+            // moves with the ship even as a passenger (not yet piloting).
             Vector3 destination = boardingPosition != null
                 ? boardingPosition.position
                 : dockedAirship.transform.position;
 
+            player.transform.SetParent(dockedAirship.transform);
             player.transform.position = destination;
             player.CurrentAirship = dockedAirship;
             player.CurrentCloud = null;

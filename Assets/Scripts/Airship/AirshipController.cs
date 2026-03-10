@@ -140,7 +140,8 @@ public class AirshipController : MonoBehaviour, ISaveable
         foreach (var col in boardedPlayerColliders)
             col.enabled = false;
 
-        // Teleport to helm — no SetParent, FixedUpdate pins the position each frame
+        // Teleport to helm — FixedUpdate pins the position each frame.
+        // Player may already be parented to the airship from AirshipDock boarding.
         if (ActiveHelm != null)
             boardedPlayer.transform.position = ActiveHelm.position;
 
