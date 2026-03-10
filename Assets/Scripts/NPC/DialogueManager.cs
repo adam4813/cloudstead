@@ -15,6 +15,7 @@ public class DialogueManager : Singleton<DialogueManager>
         currentTree != null && currentNodeIndex >= 0 && currentNodeIndex < currentTree.nodes.Length
             ? currentTree.nodes[currentNodeIndex]
             : null;
+    public NPCDefinition CurrentSpeaker => currentSpeaker;
 
     public void StartDialogue(DialogueTree tree, NPCDefinition speaker)
     {
@@ -26,7 +27,7 @@ public class DialogueManager : Singleton<DialogueManager>
         isActive = true;
 
         GameManager.Instance?.SetState(GameState.Dialogue);
-        EventBus.Publish(new DialogueStartedEvent { SpeakerName = speaker?.npcName ?? "" });
+        EventBus.Publish(new DialogueStartedEvent { SpeakerName = speaker?.npcName ?? "", SpeakerPortrait = speaker?.portrait });
     }
 
     public void AdvanceDialogue()

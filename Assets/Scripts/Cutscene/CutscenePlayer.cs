@@ -104,7 +104,7 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
         if (GameManager.Instance && (
                 GameManager.Instance.CurrentState == GameState.Cutscene ||
                 GameManager.Instance.CurrentState == GameState.Dialogue))
-            GameManager.Instance?.RestorePreviousState();
+            GameManager.Instance?.SetState(GameState.Playing);
 
         EventBus.Publish(new CutsceneEndedEvent { CutsceneId = id ?? "" });
     }

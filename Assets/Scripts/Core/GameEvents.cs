@@ -19,7 +19,7 @@ public struct InteractionEvent { public GameObject Target; }
 public struct GameStateChangedEvent { public GameState Previous; public GameState Current; }
 public struct SceneTransitionEvent { public string TargetScene; }
 public struct GoldChangedEvent { public int NewAmount; }
-public struct DialogueStartedEvent { public string SpeakerName; }
+public struct DialogueStartedEvent { public string SpeakerName; public Sprite SpeakerPortrait; }
 public struct DialogueEndedEvent { }
 public struct ItemBoughtEvent { public ItemDefinition Item; public int Price; }
 public struct ItemSoldEvent { public ItemDefinition Item; public int Price; }

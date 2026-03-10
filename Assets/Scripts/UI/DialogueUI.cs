@@ -59,6 +59,8 @@ public class DialogueUI : MonoBehaviour
                     var merchant = pendingShopMerchant;
                     pendingShopMerchant = null;
                     Hide();
+                    // Set previous state to playing, so closing the shop doesn't return to dialogue
+                    GameManager.Instance?.SetState(GameState.Playing);
                     ShopManager.Instance?.OpenShop(merchant);
                 }
                 return;
@@ -158,6 +160,21 @@ public class DialogueUI : MonoBehaviour
 
         if (nameText != null)
             nameText.text = node.speakerName;
+
+        if (portraitImage != null)
+        {
+            if (DialogueManager.Instance?.CurrentSpeaker?.portrait != null)
+            {
+                portraitImage.sprite = DialogueManager.Instance.CurrentSpeaker.portrait;
+                portraitImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                portraitImage.gameObject.SetActive(false);
+                portraitImage.sprite = null;
+            }
+        }
+
 
         // Start typewriter effect
         fullText = node.text;
