@@ -28,6 +28,7 @@ public class CraftingUI : MonoBehaviour
 
     public void Open()
     {
+        if (_isOpen) return;
         _isOpen = true;
         if (panel != null) panel.SetActive(true);
         EventBus.Subscribe<InventoryChangedEvent>(OnInventoryChanged);
@@ -36,11 +37,12 @@ public class CraftingUI : MonoBehaviour
 
     public void Close()
     {
+        if (!_isOpen) return;
         _isOpen = false;
         if (panel != null) panel.SetActive(false);
         EventBus.Unsubscribe<InventoryChangedEvent>(OnInventoryChanged);
         _selectedRecipe = null;
-        GameManager.Instance?.SetState(GameState.Playing);
+        GameManager.Instance?.RestorePreviousState();
     }
 
     public void RefreshRecipes()

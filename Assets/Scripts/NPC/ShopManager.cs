@@ -58,6 +58,6 @@ public class ShopManager : Singleton<ShopManager>
     public void CloseShop()
     {
         currentMerchant = null;
-        GameManager.Instance?.SetState(GameState.Playing);
+        GameManager.Instance?.RestorePreviousState();
     }
 }

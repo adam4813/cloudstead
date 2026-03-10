@@ -78,8 +78,7 @@ public class AirshipController : MonoBehaviour, ISaveable
         if (!IsFlying) return;
 
         // Pause flight input while overlay UI is open (inventory, map)
-        if (GameManager.Instance != null &&
-            (GameManager.Instance.CurrentState != GameState.Airship || GameManager.Instance.CurrentState != GameState.Cutscene))
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.Airship)
         {
             thrustInput = Vector2.zero;
             return;

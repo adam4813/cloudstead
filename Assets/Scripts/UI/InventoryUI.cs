@@ -18,7 +18,9 @@ public class InventoryUI : MonoBehaviour
     private void Start()
     {
         InitializeSlots();
-        Close();
+        // Hide panel without triggering a state change
+        isOpen = false;
+        if (panel != null) panel.SetActive(false);
         EventBus.Subscribe<InventoryChangedEvent>(OnInventoryChanged);
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -96,9 +98,11 @@ public class InventoryUI : MonoBehaviour
 
     public void Open()
     {
+        if (isOpen) return;
         var gm = GameManager.Instance;
         if (gm != null && gm.CurrentState != GameState.Playing && gm.CurrentState != GameState.Airship) return;
 
+        Debug.Log("Opening Inventory UI");
         isOpen = true;
         if (panel != null) panel.SetActive(true);
         RefreshSlots();
@@ -109,12 +113,12 @@ public class InventoryUI : MonoBehaviour
 
     public void Close()
     {
+        if (!isOpen) return;
         isOpen = false;
         if (panel != null) panel.SetActive(false);
         if (closeSound != null && Camera.main != null)
             AudioSource.PlayClipAtPoint(closeSound, Camera.main.transform.position);
-        GameManager.Instance?.SetState(GameState.Playing);
-        //GameManager.Instance?.RestorePreviousState();
+        GameManager.Instance?.RestorePreviousState();
     }
 
     private void RefreshSlots()

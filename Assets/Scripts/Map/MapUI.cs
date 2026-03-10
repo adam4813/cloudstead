@@ -70,8 +70,7 @@ public class MapUI : MonoBehaviour
         if (mapPanel != null)
             mapPanel.SetActive(false);
 
-        //GameManager.Instance?.RestorePreviousState();
-        GameManager.Instance?.SetState(GameState.Playing);
+        GameManager.Instance?.RestorePreviousState();
     }
 
     private void RefreshMap()

@@ -90,6 +90,6 @@ public class DialogueManager : Singleton<DialogueManager>
         currentNodeIndex = -1;
 
         EventBus.Publish(new DialogueEndedEvent());
-        GameManager.Instance?.SetState(GameState.Playing);
+        GameManager.Instance?.RestorePreviousState();
     }
 }

@@ -23,10 +23,7 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
 
     public bool IsPlaying => _isPlaying;
 
-    public override void Initialize()
-    {
-        _camera = FindFirstObjectByType<CameraController>();
-    }
+    public override void Initialize() { _camera = FindFirstObjectByType<CameraController>(); }
 
     // ── Public API ──────────────────────────────────────────────────────────
 
@@ -37,18 +34,32 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
             Debug.LogWarning("[CutscenePlayer] Play called with null definition.");
             return;
         }
+
         if (!def.IsValid)
         {
             Debug.LogWarning($"[CutscenePlayer] '{def.name}' has no steps — nothing to play.");
             return;
         }
-        if (_current != null) StopCoroutine(_current);
+
+        if (_isPlaying)
+        {
+            Debug.LogWarning(
+                $"[CutscenePlayer] Already playing '{_activeCutsceneId}' — ignoring '{def.CutsceneId}'. Stop the current cutscene first."
+            );
+            return;
+        }
+
         _current = StartCoroutine(ExecuteSequence(def));
     }
 
     public void Stop()
     {
-        if (_current != null) { StopCoroutine(_current); _current = null; }
+        if (_current != null)
+        {
+            StopCoroutine(_current);
+            _current = null;
+        }
+
         EndCutscene(_activeCutsceneId);
     }
 
@@ -86,10 +97,15 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
 
         // Return camera to player
         var player = FindFirstObjectByType<PlayerController>();
-        if (player != null && _camera != null)
+        if (player && _camera)
             _camera.SetTarget(player.transform);
 
-        GameManager.Instance?.SetState(GameState.Playing);
+        // Restore Playing state if not already done by a step (e.g. ReturnPlayerControl)
+        if (GameManager.Instance && (
+                GameManager.Instance.CurrentState == GameState.Cutscene ||
+                GameManager.Instance.CurrentState == GameState.Dialogue))
+            GameManager.Instance?.RestorePreviousState();
+
         EventBus.Publish(new CutsceneEndedEvent { CutsceneId = id ?? "" });
     }
 
@@ -124,6 +140,7 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
                     else
                         Debug.LogWarning($"[CutscenePlayer] FocusCamera: actor '{step.targetActorId}' not found.");
                 }
+
                 break;
 
             case CutsceneStepType.ReturnCamera:
@@ -176,18 +193,22 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
                     playerInput.SwitchCurrentActionMap("Player");
                     GameManager.Instance?.SetState(GameState.Playing);
                 }
+
                 break;
 
             case CutsceneStepType.FollowActor:
                 var follower = CutsceneActor.Get(step.actorId);
-                var leader   = CutsceneActor.Get(step.targetActorId);
+                var leader = CutsceneActor.Get(step.targetActorId);
                 if (follower != null && leader != null)
                 {
                     follower.StartFollowing(leader, step.followOffset, step.moveSpeed);
                     _followingActors.Add(follower);
                 }
                 else
-                    Debug.LogWarning($"[CutscenePlayer] FollowActor: could not find '{step.actorId}' or leader '{step.targetActorId}'.");
+                    Debug.LogWarning(
+                        $"[CutscenePlayer] FollowActor: could not find '{step.actorId}' or leader '{step.targetActorId}'."
+                    );
+
                 break;
 
             case CutsceneStepType.StopFollowActor:
@@ -199,6 +220,7 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
                 }
                 else
                     Debug.LogWarning($"[CutscenePlayer] StopFollowActor: actor '{step.actorId}' not found.");
+
                 break;
         }
     }
@@ -226,16 +248,18 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
     private IEnumerator BoardAirshipStep(CutsceneStep step)
     {
         var passengerActor = CutsceneActor.Get(step.actorId);
-        var airshipActor   = CutsceneActor.Get(step.targetActorId);
+        var airshipActor = CutsceneActor.Get(step.targetActorId);
 
         if (passengerActor == null || airshipActor == null)
         {
-            Debug.LogWarning($"[CutscenePlayer] BoardAirship: could not find actor '{step.actorId}' or airship '{step.targetActorId}'.");
+            Debug.LogWarning(
+                $"[CutscenePlayer] BoardAirship: could not find actor '{step.actorId}' or airship '{step.targetActorId}'."
+            );
             yield break;
         }
 
         var airshipCtrl = airshipActor.GetComponent<AirshipController>();
-        var playerCtrl  = passengerActor.GetComponent<PlayerController>();
+        var playerCtrl = passengerActor.GetComponent<PlayerController>();
         var passengerRb = passengerActor.GetComponent<Rigidbody2D>();
 
         // Disable passenger physics
@@ -282,11 +306,13 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
         }
 
         var passengerRb = passengerActor.GetComponent<Rigidbody2D>();
-        var playerCtrl  = passengerActor.GetComponent<PlayerController>();
+        var playerCtrl = passengerActor.GetComponent<PlayerController>();
 
         // Unparent from airship
         passengerActor.transform.SetParent(null);
-        passengerActor.transform.position = new Vector3(step.worldPosition.x, step.worldPosition.y, passengerActor.transform.position.z);
+        passengerActor.transform.position = new Vector3(
+            step.worldPosition.x, step.worldPosition.y, passengerActor.transform.position.z
+        );
 
         // Re-enable colliders
         foreach (var col in passengerActor.GetComponents<Collider2D>())

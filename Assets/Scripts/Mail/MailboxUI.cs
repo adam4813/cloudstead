@@ -67,7 +67,7 @@ public class MailboxUI : MonoBehaviour
         if (mailPanel != null)
             mailPanel.SetActive(false);
 
-        GameManager.Instance?.SetState(GameState.Playing);
+        GameManager.Instance?.RestorePreviousState();
     }
 
     private void RefreshList()
