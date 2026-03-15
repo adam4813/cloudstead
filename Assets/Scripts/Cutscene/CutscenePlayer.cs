@@ -23,7 +23,48 @@ public class CutscenePlayer : Singleton<CutscenePlayer>
 
     public bool IsPlaying => _isPlaying;
 
-    public override void Initialize() { _camera = FindFirstObjectByType<CameraController>(); }
+    // Cached delegates for safe unsubscribe
+    private System.Action<PlayerSleptEvent> _onSlept;
+    private System.Action<InteriorEnteredEvent> _onInteriorEntered;
+    private System.Action<InteriorExitedEvent> _onInteriorExited;
+    private System.Action<AirshipBoardedEvent> _onAirshipBoarded;
+    private System.Action<AirshipLandedEvent> _onAirshipLanded;
+
+    public override void Initialize()
+    {
+        _camera = FindFirstObjectByType<CameraController>();
+
+        // Short-term safety net: abort any active cutscene on context change or sleep
+        _onSlept = _ => AbortIfPlaying();
+        _onInteriorEntered = _ => AbortIfPlaying();
+        _onInteriorExited = _ => AbortIfPlaying();
+        _onAirshipBoarded = _ => AbortIfPlaying();
+        _onAirshipLanded = _ => AbortIfPlaying();
+
+        EventBus.Subscribe(_onSlept);
+        EventBus.Subscribe(_onInteriorEntered);
+        EventBus.Subscribe(_onInteriorExited);
+        EventBus.Subscribe(_onAirshipBoarded);
+        EventBus.Subscribe(_onAirshipLanded);
+    }
+
+    private void OnDestroy()
+    {
+        EventBus.Unsubscribe(_onSlept);
+        EventBus.Unsubscribe(_onInteriorEntered);
+        EventBus.Unsubscribe(_onInteriorExited);
+        EventBus.Unsubscribe(_onAirshipBoarded);
+        EventBus.Unsubscribe(_onAirshipLanded);
+    }
+
+    private void AbortIfPlaying()
+    {
+        if (_isPlaying)
+        {
+            Debug.LogWarning($"[CutscenePlayer] Aborting cutscene '{_activeCutsceneId}' due to context change.");
+            Stop();
+        }
+    }
 
     // ── Public API ──────────────────────────────────────────────────────────
 
