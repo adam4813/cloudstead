@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 1110572351757768640}
   - component: {fileID: 2907849498164255375}
   - component: {fileID: 943280076375734286}
-  m_Layer: 7
+  m_Layer: 5
   m_Name: DockLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -344,7 +344,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.5, y: 1.5}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
 --- !u!114 &6801528434730278711
 MonoBehaviour:

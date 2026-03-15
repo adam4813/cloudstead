@@ -17,4 +17,4 @@ MonoBehaviour:
   cloudWidth: 100
   cloudHeight: 100
   seed: 0
-  handBuilt: 0
+  handBuilt: 1
