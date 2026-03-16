@@ -25,6 +25,15 @@ public class BuildingDefinition : ScriptableObject
     [PreviewField(64)]
     public Sprite icon;
 
+    [FoldoutGroup("Structure")]
+    [Tooltip("Prefab containing exterior tilemaps, colliders, and DoorTrigger. Must have a BuildingStructure component on the root.")]
+    [AssetsOnly]
+    public GameObject exteriorPrefab;
+
+    [FoldoutGroup("Structure")]
+    [Tooltip("If true, the exterior prefab includes a BuildingInterior and door. If false, the building is exterior-only (e.g. well, shrine).")]
+    public bool hasInterior = true;
+
     [FoldoutGroup("Schedule")]
     [Tooltip("If true, building is always accessible regardless of hour/day.")]
     public bool alwaysOpen = true;

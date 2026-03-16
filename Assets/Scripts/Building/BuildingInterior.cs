@@ -9,11 +9,6 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] private string buildingId;
     public string BuildingId => buildingId;
 
-    [FoldoutGroup("Identity")]
-    [Tooltip("Optional data definition. Provides name, hours, owner NPC. If null, building is always open.")]
-    [SerializeField] private BuildingDefinition definition;
-    public BuildingDefinition Definition => definition;
-
     [FoldoutGroup("Tilemaps")]
     [Tooltip("All interior tilemap layers (floor, walls, decoration). Colliders on these tilemaps enable/disable automatically.")]
     [SerializeField] private Tilemap[] interiorTilemaps;
@@ -67,11 +62,43 @@ public class BuildingInterior : MonoBehaviour
         if (interiorAmbientLight != null)
             interiorAmbientLight.enabled = visible;
 
+        // Set interior layers so the player (on InteriorSpace) collides correctly:
+        // - Tilemaps → InteriorSpace (structural: walls, floors)
+        // - Objects → InteriorInteractable (things the player can interact with)
+        if (visible)
+        {
+            int structLayer = LayerMask.NameToLayer("InteriorSpace");
+            int interactLayer = LayerMask.NameToLayer("InteriorInteractable");
+
+            if (structLayer >= 0)
+            {
+                foreach (var tm in interiorTilemaps)
+                    if (tm != null) tm.gameObject.layer = structLayer;
+            }
+
+            if (interactLayer >= 0)
+            {
+                if (objectsContainer != null)
+                    SetLayerRecursive(objectsContainer, interactLayer);
+                if (placeableObjectsContainer != null
+                    && placeableObjectsContainer != objectsContainer
+                    && (objectsContainer == null || !placeableObjectsContainer.IsChildOf(objectsContainer)))
+                    SetLayerRecursive(placeableObjectsContainer, interactLayer);
+            }
+        }
+
         if (visible && !_itemsRegistered)
         {
             _itemsRegistered = true;
             PlacementManager.Instance?.RegisterExistingItems(placeableObjectsContainer);
         }
+    }
+
+    private static void SetLayerRecursive(Transform root, int layer)
+    {
+        root.gameObject.layer = layer;
+        foreach (Transform child in root)
+            SetLayerRecursive(child, layer);
     }
 
     /// <summary>Returns true if any interior tilemap has a tile at this world-grid position (used for walkability).</summary>
@@ -106,12 +133,5 @@ public class BuildingInterior : MonoBehaviour
             else bounds.Encapsulate(worldBounds);
         }
         return bounds;
-    }
-
-    /// <summary>Returns true if this building is currently open (or has no schedule definition).</summary>
-    public bool IsOpen()
-    {
-        if (definition == null) return true;
-        return definition.IsOpenNow();
     }
 }

@@ -16,6 +16,10 @@ public class InteriorManager : Singleton<InteriorManager>
     [Tooltip("Physics layer for interior entities.")]
     [SerializeField] private string interiorPhysicsLayer = "InteriorSpace";
 
+    [FoldoutGroup("Layers")]
+    [Tooltip("Physics layer for interactable objects inside interiors.")]
+    [SerializeField] private string interiorInteractableLayer = "InteriorInteractable";
+
     // Exterior → Interior sorting layer mapping
     private static readonly Dictionary<string, string> _toInterior = new()
     {
@@ -50,6 +54,34 @@ public class InteriorManager : Singleton<InteriorManager>
     public override void Initialize()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
+
+        // InteriorSpace should only collide with itself and InteriorInteractable.
+        // This prevents the player (moved to InteriorSpace on entry) from hitting
+        // exterior obstacles, tilemaps, cloud boundary, NPCs, etc.
+        int interiorLayer = LayerMask.NameToLayer(interiorPhysicsLayer);
+        int interactLayer = LayerMask.NameToLayer(interiorInteractableLayer);
+        if (interiorLayer >= 0)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                if (i == interiorLayer || i == interactLayer) continue;
+                Physics2D.IgnoreLayerCollision(interiorLayer, i, true);
+            }
+            Physics2D.IgnoreLayerCollision(interiorLayer, interiorLayer, false);
+            if (interactLayer >= 0)
+                Physics2D.IgnoreLayerCollision(interiorLayer, interactLayer, false);
+        }
+    }
+
+    /// <summary>
+    /// Returns the appropriate LayerMask for interaction queries (OverlapCircle, raycasts)
+    /// based on whether the player is currently inside an interior.
+    /// </summary>
+    public LayerMask GetInteractableMask(LayerMask exteriorMask)
+    {
+        if (!IsInsideInterior) return exteriorMask;
+        int layer = LayerMask.NameToLayer(interiorInteractableLayer);
+        return layer >= 0 ? (LayerMask)(1 << layer) : exteriorMask;
     }
 
     /// <summary>Switches a GameObject's physics layer and all SpriteRenderers to the target space.

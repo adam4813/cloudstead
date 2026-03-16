@@ -3,13 +3,19 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class DoorTrigger : MonoBehaviour
 {
-    [Tooltip("The interior to enter. Leave null for exit doors — InteriorManager already knows the current interior.")]
-    [SerializeField] private BuildingInterior targetInterior;
+    [Tooltip("The building structure this door belongs to. Auto-discovered from parent if null.")]
+    [SerializeField] private BuildingStructure structure;
     [SerializeField] private bool isExitDoor;
     [SerializeField] private AudioClip doorSound;
 
     [Header("Closed Hours")]
     [SerializeField] private string closedMessage = "Closed right now. Come back later!";
+
+    private void Awake()
+    {
+        if (structure == null)
+            structure = GetComponentInParent<BuildingStructure>();
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -24,14 +30,18 @@ public class DoorTrigger : MonoBehaviour
         }
 
         // Check building hours before entry
-        if (targetInterior != null && !targetInterior.IsOpen())
+        var def = structure != null ? structure.Definition : null;
+        if (def != null && !def.IsOpenNow())
         {
-            ShowClosedMessage();
+            ShowClosedMessage(def);
             return;
         }
 
+        var interior = structure != null ? structure.Interior : null;
+        if (interior == null) return;
+
         PlayDoorSound();
-        InteriorManager.Instance.EnterInterior(targetInterior);
+        InteriorManager.Instance.EnterInterior(interior);
     }
 
     private void PlayDoorSound()
@@ -40,12 +50,10 @@ public class DoorTrigger : MonoBehaviour
             AudioSource.PlayClipAtPoint(doorSound, transform.position);
     }
 
-    private void ShowClosedMessage()
+    private void ShowClosedMessage(BuildingDefinition def)
     {
         string msg = closedMessage;
 
-        // Include hours if the building has a definition with a schedule
-        var def = targetInterior?.Definition;
         if (def != null && !def.alwaysOpen)
             msg = $"{def.buildingName} is closed. Opens at {FormatHour(def.openHour)}.";
 
