@@ -8,10 +8,19 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     [SerializeField] private TileBase wateredSoilTile;
     [SerializeField] private GameObject cropPrefab;
 
-    private Dictionary<Vector3Int, FarmPlot> farmPlots = new();
+    // Plots grouped by context (cloud, interior, airship)
+    private readonly Dictionary<string, Dictionary<Vector3Int, FarmPlot>> _plotsByContext = new();
+
+    // Registered contexts for AdvanceDay tile visual updates
+    private readonly Dictionary<string, IFarmingContext> _contextRegistry = new();
+
+    private PlayerController _playerController;
 
     public override void Initialize()
     {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) _playerController = player.GetComponent<PlayerController>();
+
         EventBus.Subscribe<DayStartedEvent>(OnDayStarted);
 
         if (SaveManager.Instance != null)
@@ -24,26 +33,67 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         base.OnDestroy();
     }
 
+    // ── Context Resolution ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Resolves the active IFarmingContext: interior → airship → cloud, in priority order.
+    /// Returns null if no context is available.
+    /// </summary>
+    public IFarmingContext GetCurrentContext()
+    {
+        if (InteriorManager.Instance != null && InteriorManager.Instance.IsInsideInterior)
+            return InteriorManager.Instance.CurrentInterior;
+
+        if (_playerController != null && _playerController.CurrentAirship != null)
+            return _playerController.CurrentAirship;
+
+        return CloudIsland.Current;
+    }
+
+    private Dictionary<Vector3Int, FarmPlot> GetOrCreatePlots(IFarmingContext ctx)
+    {
+        if (!_plotsByContext.TryGetValue(ctx.ContextId, out var plots))
+        {
+            plots = new Dictionary<Vector3Int, FarmPlot>();
+            _plotsByContext[ctx.ContextId] = plots;
+        }
+        _contextRegistry[ctx.ContextId] = ctx;
+        return plots;
+    }
+
+    private Dictionary<Vector3Int, FarmPlot> GetCurrentPlots()
+    {
+        var ctx = GetCurrentContext();
+        if (ctx == null) return null;
+        return _plotsByContext.TryGetValue(ctx.ContextId, out var plots) ? plots : null;
+    }
+
+    // ── Farming Operations ──────────────────────────────────────────────────
+
     public bool TillSoil(Vector3Int pos, uint playerId)
     {
-        if (CloudIsland.Current == null) return false;
-        if (!CloudIsland.IsCurrentWalkable(pos)) return false;
-        if (farmPlots.ContainsKey(pos)) return false;
+        var ctx = GetCurrentContext();
+        if (ctx?.SoilTilemap == null) return false;
+        if (!ctx.IsWalkable(pos)) return false;
 
-        CloudIsland.Current.SoilTilemap?.SetTile(pos, tilledSoilTile);
+        var plots = GetOrCreatePlots(ctx);
+        if (plots.ContainsKey(pos)) return false;
+
+        ctx.SoilTilemap.SetTile(pos, tilledSoilTile);
 
         var plotGO = new GameObject($"FarmPlot_{pos.x}_{pos.y}");
         plotGO.transform.position = pos.TileToWorld();
         var plot = plotGO.AddComponent<FarmPlot>();
-        plot.Initialize(pos, playerId);
-        farmPlots[pos] = plot;
+        plot.Initialize(pos, playerId, ctx.ContextId);
+        plots[pos] = plot;
 
         return true;
     }
 
     public bool PlantSeed(Vector3Int pos, CropDefinition crop, uint playerId)
     {
-        if (!farmPlots.TryGetValue(pos, out var plot)) return false;
+        var plots = GetCurrentPlots();
+        if (plots == null || !plots.TryGetValue(pos, out var plot)) return false;
         if (plot.CurrentStage != CropStage.Seed || plot.PlantedCrop != null) return false;
 
         // Enforce seasonal restrictions (cozy: refuse planting, not dying)
@@ -62,18 +112,22 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
     public bool WaterPlot(Vector3Int pos, uint playerId)
     {
-        if (!farmPlots.TryGetValue(pos, out var plot)) return false;
+        var ctx = GetCurrentContext();
+        if (ctx == null) return false;
+        var plots = GetCurrentPlots();
+        if (plots == null || !plots.TryGetValue(pos, out var plot)) return false;
+
         if (plot.PlantedCrop == null && plot.SoilState == SoilState.Tilled)
         {
             plot.Water();
-            CloudIsland.Current?.SoilTilemap?.SetTile(pos, wateredSoilTile);
+            ctx.SoilTilemap?.SetTile(pos, wateredSoilTile);
             return true;
         }
 
         if (plot.PlantedCrop == null) return false;
 
         plot.Water();
-        CloudIsland.Current?.SoilTilemap?.SetTile(pos, wateredSoilTile);
+        ctx.SoilTilemap?.SetTile(pos, wateredSoilTile);
 
         EventBus.Publish(new CropWateredEvent { Position = pos });
         return true;
@@ -83,7 +137,10 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     {
         outputs = null;
 
-        if (!farmPlots.TryGetValue(pos, out var plot)) return false;
+        var ctx = GetCurrentContext();
+        if (ctx == null) return false;
+        var plots = GetCurrentPlots();
+        if (plots == null || !plots.TryGetValue(pos, out var plot)) return false;
         if (plot.PlantedCrop == null) return false;
         if (plot.CurrentStage != CropStage.Mature) return false;
 
@@ -91,7 +148,6 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
         EventBus.Publish(new CropHarvestedEvent { Crop = plot.PlantedCrop });
 
-        // Reset plot
         if (plot.PlantedCrop.regrowDays > 0)
         {
             plot.ResetForRegrow();
@@ -99,11 +155,13 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         else
         {
             plot.ClearCrop();
-            CloudIsland.Current?.SoilTilemap?.SetTile(pos, tilledSoilTile);
+            ctx.SoilTilemap?.SetTile(pos, tilledSoilTile);
         }
 
         return true;
     }
+
+    // ── Day Cycle ───────────────────────────────────────────────────────────
 
     private void OnDayStarted(DayStartedEvent evt)
     {
@@ -112,63 +170,76 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
 
     public void AdvanceDay()
     {
-        foreach (var kvp in farmPlots)
+        foreach (var (contextId, plots) in _plotsByContext)
         {
-            var plot = kvp.Value;
-            var pos = kvp.Key;
+            _contextRegistry.TryGetValue(contextId, out var ctx);
+            // Context may have been destroyed (scene unload); tile visuals are skipped gracefully
+            var soilTilemap = (ctx as Object) != null ? ctx.SoilTilemap : null;
 
-            // Grow planted, watered crops
-            if (plot.PlantedCrop != null && plot.IsWatered)
+            foreach (var (pos, plot) in plots)
             {
-                plot.Grow();
-                if (plot.CurrentStage != CropStage.Mature)
+                if (plot == null) continue;
+
+                if (plot.PlantedCrop != null && plot.IsWatered)
                 {
-                    EventBus.Publish(new CropGrownEvent
+                    plot.Grow();
+                    if (plot.CurrentStage != CropStage.Mature)
                     {
-                        Crop = plot.PlantedCrop,
-                        NewStage = plot.CurrentStage
-                    });
+                        EventBus.Publish(new CropGrownEvent
+                        {
+                            Crop = plot.PlantedCrop,
+                            NewStage = plot.CurrentStage
+                        });
+                    }
                 }
-            }
 
-            // All watered plots (planted or empty) dry out overnight
-            if (plot.IsWatered)
-            {
-                plot.ResetWatered();
-                CloudIsland.Current?.SoilTilemap?.SetTile(pos, tilledSoilTile);
+                if (plot.IsWatered)
+                {
+                    plot.ResetWatered();
+                    soilTilemap?.SetTile(pos, tilledSoilTile);
+                }
             }
         }
     }
 
+    // ── Queries ─────────────────────────────────────────────────────────────
+
     public FarmPlot GetPlotAt(Vector3Int pos)
     {
-        farmPlots.TryGetValue(pos, out var plot);
-        return plot;
+        var plots = GetCurrentPlots();
+        if (plots != null && plots.TryGetValue(pos, out var plot)) return plot;
+        return null;
     }
 
     public bool HasPlotAt(Vector3Int pos)
     {
-        return farmPlots.ContainsKey(pos);
+        var plots = GetCurrentPlots();
+        return plots != null && plots.ContainsKey(pos);
     }
+
+    // ── Save / Load ─────────────────────────────────────────────────────────
 
     public string SaveState()
     {
         var plotList = new List<FarmPlotSaveData>();
-        foreach (var kvp in farmPlots)
+        foreach (var (contextId, plots) in _plotsByContext)
         {
-            var pos = kvp.Key;
-            var plot = kvp.Value;
-            plotList.Add(new FarmPlotSaveData
+            foreach (var (pos, plot) in plots)
             {
-                posX = pos.x,
-                posY = pos.y,
-                posZ = pos.z,
-                cropName = plot.PlantedCrop != null ? plot.PlantedCrop.cropName : "",
-                growthProgress = plot.GrowthProgress,
-                soilState = (int)plot.SoilState,
-                cropStage = (int)plot.CurrentStage,
-                isWatered = plot.IsWatered
-            });
+                if (plot == null) continue;
+                plotList.Add(new FarmPlotSaveData
+                {
+                    contextId = contextId,
+                    posX = pos.x,
+                    posY = pos.y,
+                    posZ = pos.z,
+                    cropName = plot.PlantedCrop != null ? plot.PlantedCrop.cropName : "",
+                    growthProgress = plot.GrowthProgress,
+                    soilState = (int)plot.SoilState,
+                    cropStage = (int)plot.CurrentStage,
+                    isWatered = plot.IsWatered
+                });
+            }
         }
         return JsonUtility.ToJson(new FarmingSaveData { plots = plotList.ToArray() });
     }
@@ -178,12 +249,12 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         var data = JsonUtility.FromJson<FarmingSaveData>(json);
         if (data?.plots == null) return;
 
-        foreach (var kvp in farmPlots)
+        foreach (var (_, plots) in _plotsByContext)
         {
-            if (kvp.Value != null)
-                Destroy(kvp.Value.gameObject);
+            foreach (var (_, plot) in plots)
+                if (plot != null) Destroy(plot.gameObject);
         }
-        farmPlots.Clear();
+        _plotsByContext.Clear();
 
         var db = GameBootstrapper.Database;
         if (db == null) { Debug.LogError("[FarmingManager] GameDatabase not assigned"); return; }
@@ -191,17 +262,25 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
         foreach (var plotData in data.plots)
         {
             var pos = new Vector3Int(plotData.posX, plotData.posY, plotData.posZ);
+            string ctxId = string.IsNullOrEmpty(plotData.contextId) ? FallbackContextId() : plotData.contextId;
 
-            if (CloudIsland.Current != null)
+            // Resolve context for tile visuals (may be null if not loaded yet)
+            if (_contextRegistry.TryGetValue(ctxId, out var ctx) && ctx?.SoilTilemap != null)
             {
                 var tile = plotData.isWatered ? wateredSoilTile : tilledSoilTile;
-                CloudIsland.Current.SoilTilemap?.SetTile(pos, tile);
+                ctx.SoilTilemap.SetTile(pos, tile);
+            }
+
+            if (!_plotsByContext.TryGetValue(ctxId, out var plots))
+            {
+                plots = new Dictionary<Vector3Int, FarmPlot>();
+                _plotsByContext[ctxId] = plots;
             }
 
             var plotGO = new GameObject($"FarmPlot_{pos.x}_{pos.y}");
             plotGO.transform.position = pos.TileToWorld();
             var plot = plotGO.AddComponent<FarmPlot>();
-            plot.Initialize(pos, 0);
+            plot.Initialize(pos, 0, ctxId);
 
             CropDefinition crop = null;
             if (!string.IsNullOrEmpty(plotData.cropName))
@@ -210,8 +289,14 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
             plot.Restore(crop, plotData.growthProgress, (CropStage)plotData.cropStage,
                 (SoilState)plotData.soilState, plotData.isWatered);
 
-            farmPlots[pos] = plot;
+            plots[pos] = plot;
         }
+    }
+
+    /// <summary>Fallback for save data that predates context-scoped plots.</summary>
+    private static string FallbackContextId()
+    {
+        return CloudIsland.Current != null ? $"cloud:{CloudIsland.Current.CloudId}" : "cloud:unknown";
     }
 
     [System.Serializable]
@@ -223,6 +308,7 @@ public class FarmingManager : Singleton<FarmingManager>, ISaveable
     [System.Serializable]
     private class FarmPlotSaveData
     {
+        public string contextId;
         public int posX;
         public int posY;
         public int posZ;

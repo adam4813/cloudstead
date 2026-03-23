@@ -104,6 +104,11 @@ public class PlayerInteraction : MonoBehaviour
         Debug.Log($"[Eat] Ate {slot.item.itemName}, restored {slot.item.staminaRestore} stamina");
     }
 
+    private LayerMask EffectiveInteractableMask =>
+        InteriorManager.Instance != null
+            ? InteriorManager.Instance.GetInteractableMask(interactableMask)
+            : interactableMask;
+
     private void FindNearestInteractable()
     {
         if (_tileCursor == null) return;
@@ -112,7 +117,7 @@ public class PlayerInteraction : MonoBehaviour
             _tileCursor.HighlightedTile.x + 0.5f,
             _tileCursor.HighlightedTile.y + 0.5f);
 
-        var hits = Physics2D.OverlapCircleAll(tileCenter, 0.4f, interactableMask);
+        var hits = Physics2D.OverlapCircleAll(tileCenter, 0.4f, EffectiveInteractableMask);
 
         IInteractable nearest = null;
         float nearestDist = float.MaxValue;

@@ -58,10 +58,15 @@ public class ToolController : MonoBehaviour
         UseActiveItem(targetTile);
     }
 
+    private LayerMask EffectiveInteractableMask =>
+        InteriorManager.Instance != null
+            ? InteriorManager.Instance.GetInteractableMask(interactableMask)
+            : interactableMask;
+
     private bool TryMouseInteract(Vector3Int tile)
     {
         Vector2 center = new Vector2(tile.x + 0.5f, tile.y + 0.5f);
-        var hits = Physics2D.OverlapCircleAll(center, 0.4f, interactableMask);
+        var hits = Physics2D.OverlapCircleAll(center, 0.4f, EffectiveInteractableMask);
         foreach (var hit in hits)
         {
             var interactable = hit.GetComponent<IInteractable>();
@@ -132,7 +137,7 @@ public class ToolController : MonoBehaviour
     private bool HasInteractableAtTile(Vector3Int tile)
     {
         Vector2 center = new Vector2(tile.x + 0.5f, tile.y + 0.5f);
-        var hits = Physics2D.OverlapCircleAll(center, 0.4f, interactableMask);
+        var hits = Physics2D.OverlapCircleAll(center, 0.4f, EffectiveInteractableMask);
         foreach (var hit in hits)
             if (hit.GetComponent<IInteractable>() != null) return true;
         return false;

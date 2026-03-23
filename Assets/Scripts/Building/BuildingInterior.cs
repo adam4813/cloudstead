@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
 
-public class BuildingInterior : MonoBehaviour
+public class BuildingInterior : MonoBehaviour, IFarmingContext
 {
     [FoldoutGroup("Identity")]
     [SerializeField] private string buildingId;
@@ -12,6 +12,10 @@ public class BuildingInterior : MonoBehaviour
     [FoldoutGroup("Tilemaps")]
     [Tooltip("All interior tilemap layers (floor, walls, decoration). Colliders on these tilemaps enable/disable automatically.")]
     [SerializeField] private Tilemap[] interiorTilemaps;
+
+    [FoldoutGroup("Tilemaps")]
+    [Tooltip("Optional soil tilemap for farming interiors (greenhouses). Leave null for non-farmable buildings.")]
+    [SerializeField] private Tilemap soilTilemap;
 
     [FoldoutGroup("Tilemaps")]
     [Tooltip("Large solid sprite that covers the exterior world when inside. Assign a child SpriteRenderer sized to fill the camera view.")]
@@ -134,4 +138,10 @@ public class BuildingInterior : MonoBehaviour
         }
         return bounds;
     }
+
+    // ── IFarmingContext ─────────────────────────────────────────────────────
+
+    public string ContextId => $"interior:{buildingId}";
+    Tilemap IFarmingContext.SoilTilemap => soilTilemap;
+    bool IFarmingContext.IsWalkable(Vector3Int tilePos) => HasFloorTile(tilePos);
 }

@@ -15,7 +15,7 @@ public class ResourceNodeSpawnConfig
 /// Holds tilemaps, walkability grid, resource configs, and placed-object containers.
 /// Generation is delegated to a sibling CloudGenerator component.
 /// </summary>
-public class CloudIsland : MonoBehaviour, ISaveable
+public class CloudIsland : MonoBehaviour, ISaveable, IFarmingContext
 {
     [Header("Identity")]
     [Tooltip("Optional: link a CloudIslandDefinition SO to share the cloud ID and display name across assets.")]
@@ -61,6 +61,12 @@ public class CloudIsland : MonoBehaviour, ISaveable
     public Vector2Int TileOrigin => new(
         Mathf.RoundToInt(transform.position.x) - Width / 2,
         Mathf.RoundToInt(transform.position.y) - Width / 2);
+
+    // ── IFarmingContext ─────────────────────────────────────────────────────
+
+    public string ContextId => $"cloud:{CloudId}";
+    Tilemap IFarmingContext.SoilTilemap => soilTilemap;
+    bool IFarmingContext.IsWalkable(Vector3Int tilePos) => IsWalkable(tilePos);
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
 

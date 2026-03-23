@@ -11,11 +11,13 @@ public class FarmPlot : MonoBehaviour
     public CropStage CurrentStage { get; private set; } = CropStage.Seed;
     public int GrowthProgress { get; private set; }
     public bool IsWatered { get; private set; }
+    public string ContextId { get; private set; }
 
-    public void Initialize(Vector3Int pos, uint owner)
+    public void Initialize(Vector3Int pos, uint owner, string contextId = null)
     {
         tilePosition = pos;
         ownerId = owner;
+        ContextId = contextId;
         SoilState = SoilState.Tilled;
 
         // Create crop sprite renderer child

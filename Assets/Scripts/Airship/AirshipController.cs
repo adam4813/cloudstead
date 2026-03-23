@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// Controls airship movement and manages player boarding/disembarking.
@@ -17,7 +18,7 @@ using UnityEngine.InputSystem;
 /// unwired in DisembarkPlayer() — no second PlayerInput needed.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class AirshipController : MonoBehaviour, ISaveable
+public class AirshipController : MonoBehaviour, ISaveable, IFarmingContext
 {
     [Header("Identity")]
     [SerializeField] private string airshipId = "player";
@@ -37,6 +38,12 @@ public class AirshipController : MonoBehaviour, ISaveable
     [Header("Boarding")]
     [SerializeField] private Transform helmPosition; // default from prefab
     [SerializeField] private Transform disembarkOffset;
+
+    [Header("Farming")]
+    [Tooltip("Optional soil tilemap for deck flowerbeds. Leave null if no farming on this airship.")]
+    [SerializeField] private Tilemap soilTilemap;
+    [Tooltip("Floor tilemap used for walkability checks (typically from AirshipBuildMode).")]
+    [SerializeField] private Tilemap floorTilemap;
 
     private Transform _helmOverride;
 
@@ -244,6 +251,19 @@ public class AirshipController : MonoBehaviour, ISaveable
                 : (Vector2)transform.position;
             DisembarkPlayer(spawnPos, false, null);
         }
+    }
+
+    // ── IFarmingContext ──────────────────────────────────────────────────────
+
+    public string ContextId => $"airship:{airshipId}";
+    Tilemap IFarmingContext.SoilTilemap => soilTilemap;
+
+    bool IFarmingContext.IsWalkable(Vector3Int tilePos)
+    {
+        if (floorTilemap == null) return false;
+        Vector3 worldPos = new Vector3(tilePos.x + 0.5f, tilePos.y + 0.5f, 0f);
+        Vector3Int cellPos = floorTilemap.WorldToCell(worldPos);
+        return floorTilemap.HasTile(cellPos);
     }
 
     #region ISaveable
